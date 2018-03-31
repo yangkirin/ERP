@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.baseData.dao.MtrCutDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.baseData.entity.MtrCutEntity" id="mtrCutMap">
+        <result property="id" column="ID"/>
+        <result property="mtrId" column="MTR_ID"/>
+        <result property="cut" column="CUT"/>
+        <result property="workHours" column="WORK_HOURS"/>
+        <result property="netRate" column="NET_RATE"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.baseData.entity.MtrCutEntity">
+		select * from mtr_cut where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.baseData.entity.MtrCutEntity">
+		select * from mtr_cut
+		<where>
+			<if test="mtrId != null and mtrId.trim() != '' and mtrId != 0">
+				and MTR_ID = #{mtrId}
+			</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from mtr_cut 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.baseData.entity.MtrCutEntity">
+		insert into mtr_cut
+		(
+			`ID`, 
+			`MTR_ID`, 
+			`CUT`, 
+			`WORK_HOURS`, 
+			`NET_RATE`, 
+			`STATUS`
+		)
+		values
+		(
+			#{id}, 
+			#{mtrId}, 
+			#{cut}, 
+			#{workHours}, 
+			#{netRate}, 
+			#{status}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.baseData.entity.MtrCutEntity">
+		update mtr_cut 
+		<set>
+			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
+			<if test="cut != null">`CUT` = #{cut}, </if>
+			<if test="workHours != null">`WORK_HOURS` = #{workHours}, </if>
+			<if test="netRate != null">`NET_RATE` = #{netRate}, </if>
+			<if test="status != null">`STATUS` = #{status}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from mtr_cut where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from mtr_cut where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

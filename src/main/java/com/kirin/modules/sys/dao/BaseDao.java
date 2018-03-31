@@ -17,6 +17,8 @@ public interface BaseDao<T> {
 	void save(T t);
 	
 	void save(Map<String, Object> map);
+
+	Long saveId(T t);
 	
 	void saveBatch(List<T> list);
 	

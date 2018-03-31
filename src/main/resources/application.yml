@@ -4,20 +4,16 @@ server:
         uri-encoding: UTF-8
         max-threads: 1000
         min-spare-threads: 30
-    port: 8080
+    port: 8090
     connection-timeout: 5000
     context-path: /erp
 
 spring:
     devtools:
-        restart:
-            #热部署生效
-          enabled: true
-            #设置重启的目录
-            #additional-paths: src/main/java
-            #classpath目录下的WEB-INF文件夹内容修改不重启
-          #exclude: WEB-INF/**
-          trigger-file: .trigger
+      restart:
+        enabled: true
+    thymeleaf:
+      cache: false
     # 环境 dev|test|pro
     profiles:
         active: dev

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.purchase.dao.SuppierMtrDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.purchase.entity.SuppierMtrEntity" id="suppierMtrMap">
+        <result property="id" column="ID"/>
+        <result property="suppierId" column="suppier_id"/>
+        <result property="mtrId" column="mtr_id"/>
+        <result property="purchaseNo" column="purchase_no"/>
+        <result property="price" column="price"/>
+        <result property="status" column="status"/>
+        <result property="lastEditUser" column="last_edit_user"/>
+        <result property="lastEditDate" column="last_edit_date"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		select * from tb_suppier_mtr where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		select sm.*,s.suppier_name as suppierIdName,m.mtr_name as mtrIdName,m.MTR_PY as mtrPy
+		from tb_suppier_mtr sm,mtr_data m,tb_supplier_info s
+		where sm.suppier_id=s.id and sm.mtr_id=m.id
+		<if test="suppierId != null and suppierId != 0">
+			and sm.suppier_id = #{suppierId}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by sm.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by sm.ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_suppier_mtr 
+	</select>
+
+	<select id="querySupplierByMtrId" resultType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		select sm.*,s.suppier_name as suppierIdName,m.mtr_name as mtrIdName,s.suppier_code as suppierCode,m.mtr_py as mtrPy from tb_suppier_mtr sm,mtr_data m,tb_supplier_info s
+		where sm.suppier_id=s.id and sm.mtr_id=m.id
+		<if test="mtrId != null and mtrId != 0">
+			and sm.mtr_id = ${mtrId}
+		</if>
+		<if test="supplierId != null and supplierId != 0">
+			and sm.suppier_id = ${supplierId}
+		</if>
+	</select>
+
+	<select id="queryByIdAndPy" resultType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		select sm.*,s.suppier_name as suppierIdName,CONCAT(m.mtr_name,' ',sm.mtr_extend_desc) as mtrIdName,s.suppier_code as suppierCode,m.mtr_py as mtrPy from tb_suppier_mtr sm,mtr_data m,tb_supplier_info s
+		where sm.suppier_id=s.id and sm.mtr_id=m.id
+		<if test="mtrId != null and mtrId != 0">
+			and sm.mtr_id = ${mtrId}
+		</if>
+		<if test="supplierId != null and supplierId != 0">
+			and sm.suppier_id = ${supplierId}
+		</if>
+		<if test="searchWord != null and searchWord.trim() != ''">
+			and (m.mtr_name like concat('%',#{searchWord},'%') OR m.MTR_PY like concat('%',#{searchWord},'%'))
+		</if>
+	</select>
+
+	<insert id="save" parameterType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		insert into tb_suppier_mtr
+		(
+			`ID`, 
+			`suppier_id`, 
+			`mtr_id`, 
+			`mtr_extend_id`,
+			`mtr_extend_desc`,
+			`purchase_no`,
+			`price`, 
+			`status`, 
+			`last_edit_user`, 
+			`last_edit_date`,
+			`create_date`,
+			`create_user`
+		)
+		values
+		(
+			#{id}, 
+			#{suppierId}, 
+			#{mtrId}, 
+			#{mtrExtendId},
+			#{mtrExtendDesc},
+			#{purchaseNo},
+			#{price}, 
+			#{status}, 
+			#{lastEditUser}, 
+			#{lastEditDate},
+			#{createDate},
+			#{createUser}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
+		update tb_suppier_mtr 
+		<set>
+			<if test="suppierId != null">`suppier_id` = #{suppierId}, </if>
+			<if test="mtrId != null">`mtr_id` = #{mtrId}, </if>
+			<if test="mtrExtendId != null">`mtr_extend_id` = #{mtrExtendId}, </if>
+			<if test="mtrExtendDesc != null">`mtr_extend_desc` = #{mtrExtendDesc}, </if>
+			<if test="purchaseNo != null">`purchase_no` = #{purchaseNo}, </if>
+			<if test="price != null">`price` = #{price}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="lastEditUser != null">`last_edit_user` = #{lastEditUser}, </if>
+			<if test="lastEditDate != null">`last_edit_date` = #{lastEditDate},</if>
+			<if test="createDate != null">`create_date` = #{createDate},</if>
+			<if test="createUser != null">`create_user` = #{createUser}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_suppier_mtr where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_suppier_mtr where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

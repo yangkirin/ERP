@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.purchase.dao.OrderDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.purchase.entity.OrderDetailEntity" id="orderDetailMap">
+        <result property="id" column="ID"/>
+        <result property="orderId" column="ORDER_ID"/>
+        <result property="mtrId" column="MTR_ID"/>
+        <result property="mtrCode" column="MTR_CODE"/>
+        <result property="mtrName" column="MTR_NAME"/>
+        <result property="mtrTypeId" column="MTR_TYPE_ID"/>
+        <result property="mtrTypeName" column="MTR_TYPE_NAME"/>
+        <result property="mtrUnit" column="MTR_UNIT"/>
+        <result property="mtrRate" column="MTR_RATE"/>
+        <result property="warehoseId" column="WAREHOSE_ID"/>
+        <result property="warehoseName" column="WAREHOSE_NAME"/>
+        <result property="wgtUnit1" column="WGT_UNIT1"/>
+        <result property="wgtUnit2" column="WGT_UNIT2"/>
+        <result property="purchaseNo" column="PURCHASE_NO"/>
+        <result property="amount" column="AMOUNT"/>
+        <result property="price" column="PRICE"/>
+        <result property="costTypeId" column="COST_TYPE_ID"/>
+		<result property="costTypeName" column="COST_TYPE_NAME"/>
+		<result property="inCount" column="IN_COUNT"/>
+		<result property="inWgt" column="IN_WGT"/>
+		<result property="inPrice" column="IN_PRICE"/>
+	</resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.purchase.entity.OrderDetailEntity">
+		select od.*,(select o.ORDER_NO from TB_ORDER_INFO o where o.id=od.ORDER_ID)as orderNo from tb_order_detail od where od.ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.purchase.entity.OrderDetailEntity">
+		select od.* from tb_order_detail od
+		<where>
+			<if test="orderId != null and orderId != 0">
+				od.ORDER_ID = ${orderId}
+			</if>
+		</where>
+        <choose>
+
+			<when test="sidx != null and sidx.trim() != ''">
+                order by od.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by od.ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_order_detail 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.purchase.entity.OrderDetailEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_order_detail
+		(
+			`ORDER_ID`, 
+			`MTR_ID`, 
+			`MTR_CODE`, 
+			`MTR_NAME`, 
+			`MTR_TYPE_ID`, 
+			`MTR_TYPE_NAME`,
+			`MTR_UNIT`, 
+			`MTR_RATE`, 
+			`WAREHOSE_ID`, 
+			`WAREHOSE_NAME`, 
+			`WGT_UNIT1`, 
+			`WGT_UNIT2`, 
+			`PURCHASE_NO`,
+			`AMOUNT`,
+			`PRICE`,
+			`COST_TYPE_ID`, 
+			`COST_TYPE_NAME`,
+			`IN_COUNT`,
+			`IN_WGT`,
+			`IN_PRICE`,
+			`CREATE_USER`,
+			`CREATE_DATE`,
+			`UPDATE_USER`,
+			`UPDATE_DATE`
+		)
+		values
+		(
+			#{orderId}, 
+			#{mtrId}, 
+			#{mtrCode}, 
+			#{mtrName}, 
+			#{mtrTypeId}, 
+			#{mtrTypeName},
+			#{mtrUnit}, 
+			#{mtrRate}, 
+			#{warehoseId}, 
+			#{warehoseName}, 
+			#{wgtUnit1}, 
+			#{wgtUnit2}, 
+			#{purchaseNo},
+			#{amount},
+			#{price},
+			#{costTypeId}, 
+			#{costTypeName},
+			#{inCount},
+			#{inWgt},
+			#{inPrice},
+			#{createUser},
+			#{createDate},
+			#{updateUser},
+			#{updateDate}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.purchase.entity.OrderDetailEntity">
+		update tb_order_detail 
+		<set>
+			<if test="orderId != null">`ORDER_ID` = #{orderId}, </if>
+			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
+			<if test="mtrCode != null">`MTR_CODE` = #{mtrCode}, </if>
+			<if test="mtrName != null">`MTR_NAME` = #{mtrName}, </if>
+			<if test="mtrTypeId != null">`MTR_TYPE_ID` = #{mtrTypeId}, </if>
+			<if test="mtrTypeName != null">`MTR_TYPE_NAME` = #{mtrTypeName}, </if>
+			<if test="mtrUnit != null">`MTR_UNIT` = #{mtrUnit}, </if>
+			<if test="mtrRate != null">`MTR_RATE` = #{mtrRate}, </if>
+			<if test="warehoseId != null">`WAREHOSE_ID` = #{warehoseId}, </if>
+			<if test="warehoseName != null">`WAREHOSE_NAME` = #{warehoseName}, </if>
+			<if test="wgtUnit1 != null">`WGT_UNIT1` = #{wgtUnit1}, </if>
+			<if test="wgtUnit2 != null">`WGT_UNIT2` = #{wgtUnit2}, </if>
+			<if test="purchaseNo != null">`PURCHASE_NO` = #{purchaseNo}, </if>
+			<if test="amount != null">`AMOUNT` = #{amount}, </if>
+			<if test="price != null">`PRICE` = #{price}, </if>
+			<if test="costTypeId != null">`COST_TYPE_ID` = #{costTypeId}, </if>
+			<if test="costTypeName != null">`COST_TYPE_NAME` = #{costTypeName},</if>
+			<if test="inCount != null">`IN_COUNT` = #{inCount},</if>
+			<if test="inWgt != null">`IN_WGT` = #{inWgt},</if>
+			<if test="inPrice != null">`IN_PRICE` = #{inPrice},</if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser},</if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate},</if>
+			<if test="updateUser != null">`UPDATE_USER` = #{updateUser},</if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_order_detail where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_order_detail where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

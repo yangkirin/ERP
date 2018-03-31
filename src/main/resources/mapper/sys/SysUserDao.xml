@@ -63,7 +63,8 @@
 	<insert id="save" parameterType="com.kirin.modules.sys.entity.SysUserEntity" useGeneratedKeys="true" keyProperty="userId">
 		insert into sys_user
 		(
-			`user_id`, 
+			`user_id`,
+			`nickname`,
 			`username`, 
 			`password`,
 			`salt`,
@@ -75,8 +76,9 @@
 		)
 		values
 		(
-			#{userId}, 
-			#{username}, 
+			#{userId},
+			#{nickname},
+			#{username},
 			#{password},
 			#{salt},
 			#{email}, 
@@ -91,6 +93,7 @@
 		update sys_user 
 		<set> 
 			<if test="username != null">`username` = #{username}, </if>
+			<if test="nickname != null">`nickname` = #{nickname}, </if>
 			<if test="password != null">`password` = #{password}, </if>
 			<if test="email != null">`email` = #{email}, </if>
 			<if test="mobile != null">`mobile` = #{mobile}, </if>

@@ -3,6 +3,7 @@ package com.kirin.modules.sys.dao;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.kirin.modules.sys.entity.SysUserEntity;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Map;
  * @email sunlightcs@gmail.com
  * @date 2016年9月18日 上午9:34:11
  */
+@Repository
 @Mapper
 public interface SysUserDao extends BaseDao<SysUserEntity> {
 	
