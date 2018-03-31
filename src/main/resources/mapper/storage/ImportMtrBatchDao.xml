@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.storage.dao.ImportMtrBatchDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.storage.entity.ImportMtrBatchEntity" id="importMtrBatchMap">
+        <result property="id" column="ID"/>
+        <result property="importId" column="IMPORT_ID"/>
+        <result property="importDetailId" column="IMPORT_DETAIL_ID"/>
+        <result property="mtrId" column="MTR_ID"/>
+        <result property="orderUnitId" column="ORDER_UNIT_ID"/>
+        <result property="orderUnitName" column="ORDER_UNIT_NAME"/>
+        <result property="orderUnitRate" column="ORDER_UNIT_RATE"/>
+        <result property="inUnitId" column="IN_UNIT_ID"/>
+        <result property="inUnitName" column="IN_UNIT_NAME"/>
+        <result property="inUnitRate" column="IN_UNIT_RATE"/>
+        <result property="inPrice" column="IN_PRICE"/>
+        <result property="inCount" column="IN_COUNT"/>
+        <result property="inTotlaPrice" column="IN_TOTLA_PRICE"/>
+        <result property="batchNo" column="BATCH_NO"/>
+        <result property="productionDate" column="PRODUCTION_DATE"/>
+        <result property="effectiveDate" column="EFFECTIVE_DATE"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.storage.entity.ImportMtrBatchEntity">
+		select * from tb_import_mtr_batch where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.ImportMtrBatchEntity">
+		select * from tb_import_mtr_batch
+		<where>
+			<if test="importDetailId != null">
+				and IMPORT_DETAIL_ID = #{importDetailId}
+			</if>
+			<if test="mtrId != null">
+				and MTR_ID = #{mtrId}
+			</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_import_mtr_batch 
+	</select>
+
+	<select id="queryByAttr" resultType="com.kirin.modules.storage.entity.ImportMtrBatchEntity">
+		select * from tb_import_mtr_batch
+		<where>
+			<if test="mtrId != null">
+				and MTR_ID = #{mtrId}
+			</if>
+			<if test="batchNo != null">
+				and BATCH_NO = #{batchNo}
+			</if>
+		</where>
+	</select>
+
+	<insert id="save" parameterType="com.kirin.modules.storage.entity.ImportMtrBatchEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_import_mtr_batch
+		(
+			`IMPORT_ID`, 
+			`IMPORT_DETAIL_ID`, 
+			`MTR_ID`, 
+			`MTR_NAME`,
+			`MTR_NO`,
+			`EXTEND_ID`,
+			`ORDER_UNIT_ID`,
+			`ORDER_UNIT_NAME`, 
+			`ORDER_UNIT_RATE`, 
+			`ORDER_PRICE`,
+			`ORDER_COUNT`,
+			`IN_UNIT_ID`,
+			`IN_UNIT_NAME`, 
+			`IN_UNIT_RATE`, 
+			`IN_PRICE`, 
+			`IN_COUNT`, 
+			`IN_UNIT1_COUNT`,
+			`WGT_UNIT1`,
+			`IN_WGT`,
+			`IN_TOTLA_PRICE`,
+			`BATCH_NO`, 
+			`PRODUCTION_DATE`, 
+			`EFFECTIVE_DATE`, 
+			`STATUS`
+		)
+		values
+		(
+			#{importId}, 
+			#{importDetailId}, 
+			#{mtrId}, 
+			#{mtrName},
+			#{mtrNo},
+			#{extendId},
+			#{orderUnitId},
+			#{orderUnitName}, 
+			#{orderUnitRate}, 
+			#{orderPrice},
+			#{orderCount},
+			#{inUnitId},
+			#{inUnitName}, 
+			#{inUnitRate}, 
+			#{inPrice}, 
+			#{inCount}, 
+			#{inUnit1Count},
+			#{wgtUnit1},
+			#{inWgt},
+			#{inTotlaPrice},
+			#{batchNo}, 
+			#{productionDate}, 
+			#{effectiveDate}, 
+			#{status}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.storage.entity.ImportMtrBatchEntity">
+		update tb_import_mtr_batch 
+		<set>
+			<if test="importId != null">`IMPORT_ID` = #{importId}, </if>
+			<if test="importDetailId != null">`IMPORT_DETAIL_ID` = #{importDetailId}, </if>
+			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
+			<if test="mtrName != null">`MTR_NAME` = #{mtrName}, </if>
+			<if test="mtrNo != null">`MTR_NO` = #{mtrNo}, </if>
+			<if test="extendId != null">`EXTEND_ID` = #{extendId}, </if>
+			<if test="orderUnitId != null">`ORDER_UNIT_ID` = #{orderUnitId}, </if>
+			<if test="orderUnitName != null">`ORDER_UNIT_NAME` = #{orderUnitName}, </if>
+			<if test="orderUnitRate != null">`ORDER_UNIT_RATE` = #{orderUnitRate}, </if>
+			<if test="orderPrice != null">`ORDER_PRICE` = #{orderPrice}, </if>
+			<if test="orderCount != null">`ORDER_COUNT` = #{orderCount}, </if>
+			<if test="inUnitId != null">`IN_UNIT_ID` = #{inUnitId}, </if>
+			<if test="inUnitName != null">`IN_UNIT_NAME` = #{inUnitName}, </if>
+			<if test="inUnitRate != null">`IN_UNIT_RATE` = #{inUnitRate}, </if>
+			<if test="inPrice != null">`IN_PRICE` = #{inPrice}, </if>
+			<if test="inCount != null">`IN_COUNT` = #{inCount}, </if>
+			<if test="inUnit1Count != null">`IN_UNIT1_COUNT` = #{inUnit1Count}, </if>
+			<if test="wgtUnit1 != null">`WGT_UNIT1` = #{wgtUnit1}, </if>
+			<if test="inWgt != null">`IN_WGT` = #{inWgt}, </if>
+			<if test="inTotlaPrice != null">`IN_TOTLA_PRICE` = #{inTotlaPrice}, </if>
+			<if test="batchNo != null">`BATCH_NO` = #{batchNo}, </if>
+			<if test="productionDate != null">`PRODUCTION_DATE` = #{productionDate}, </if>
+			<if test="effectiveDate != null">`EFFECTIVE_DATE` = #{effectiveDate}, </if>
+			<if test="status != null">`STATUS` = #{status}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_import_mtr_batch where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_import_mtr_batch where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

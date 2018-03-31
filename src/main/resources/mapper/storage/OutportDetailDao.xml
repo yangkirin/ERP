@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.storage.dao.OutportDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.storage.entity.OutportDetailEntity" id="outportDetailMap">
+        <result property="id" column="ID"/>
+        <result property="outportNo" column="OUTPORT_NO"/>
+        <result property="orderId" column="ORDER_ID"/>
+        <result property="customerId" column="CUSTOMER_ID"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="customerNo" column="CUSTOMER_NO"/>
+        <result property="prdId" column="PRD_ID"/>
+        <result property="prdNo" column="PRD_NO"/>
+        <result property="prdTypeName" column="PRD_TYPE_NAME"/>
+        <result property="prdName" column="PRD_NAME"/>
+        <result property="mtrId" column="MTR_ID"/>
+        <result property="mtrNo" column="MTR_NO"/>
+        <result property="mtrName" column="MTR_NAME"/>
+        <result property="mtrTypeName" column="MTR_TYPE_NAME"/>
+        <result property="orderCount" column="ORDER_COUNT"/>
+        <result property="outCount" column="OUT_COUNT"/>
+        <result property="bomGrossWgt" column="BOM_GROSS_WGT"/>
+        <result property="outUnit" column="OUT_UNIT"/>
+        <result property="outDate" column="OUT_DATE"/>
+        <result property="status" column="STATUS"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="batchNo" column="BATCH_NO"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		select * from tb_outport_detail where ID = #{value}
+	</select>
+
+	<select id="queryListByMtrId" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		select * from tb_outport_detail
+		<where>
+			<if test="mtrId != null">
+				MTR_ID = #{mtrId}
+			</if>
+		</where>
+	</select>
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		select * from tb_outport_detail
+		<where>
+			<if test="orderId != null">
+				ORDER_ID = #{orderId}
+			</if>
+			<if test="mtrId != null">
+				MTR_ID = #{mtrId}
+			</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_outport_detail 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.storage.entity.OutportDetailEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_outport_detail
+		(
+			`OUTPORT_NO`, 
+			`ORDER_ID`, 
+			`CUSTOMER_ID`,
+			`CUSTOMER_NAME`,
+			`CUSTOMER_NO`,
+			`PRD_ID`, 
+			`PRD_NO`, 
+			`PRD_TYPE_NAME`, 
+			`PRD_NAME`, 
+			`MTR_ID`, 
+			`MTR_NO`, 
+			`MTR_NAME`, 
+			`MTR_TYPE_NAME`, 
+			`ORDER_COUNT`, 
+			`OUT_COUNT`, 
+			`BOM_GROSS_WGT`,
+			`OUT_UNIT`,
+			`OUT_DATE`,
+			`STATUS`, 
+			`CREATE_USER`,
+			`BATCH_NO`
+		)
+		values
+		(
+			#{outportNo}, 
+			#{orderId}, 
+			#{customerId},
+			#{customerName},
+			#{customerNo},
+			#{prdId}, 
+			#{prdNo}, 
+			#{prdTypeName}, 
+			#{prdName}, 
+			#{mtrId}, 
+			#{mtrNo}, 
+			#{mtrName}, 
+			#{mtrTypeName}, 
+			#{orderCount}, 
+			#{outCount}, 
+			#{bomGrossWgt},
+			#{outUnit},
+			#{outDate},
+			#{status}, 
+			#{createUser},
+			#{batchNo}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		update tb_outport_detail 
+		<set>
+			<if test="outportNo != null">`OUTPORT_NO` = #{outportNo}, </if>
+			<if test="orderId != null">`ORDER_ID` = #{orderId}, </if>
+			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>
+			<if test="customerName != null">`CUSTOMER_NAME` = #{customerName}, </if>
+			<if test="customerNo != null">`CUSTOMER_NO` = #{customerNo}, </if>
+			<if test="prdId != null">`PRD_ID` = #{prdId}, </if>
+			<if test="prdNo != null">`PRD_NO` = #{prdNo}, </if>
+			<if test="prdTypeName != null">`PRD_TYPE_NAME` = #{prdTypeName}, </if>
+			<if test="prdName != null">`PRD_NAME` = #{prdName}, </if>
+			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
+			<if test="mtrNo != null">`MTR_NO` = #{mtrNo}, </if>
+			<if test="mtrName != null">`MTR_NAME` = #{mtrName}, </if>
+			<if test="mtrTypeName != null">`MTR_TYPE_NAME` = #{mtrTypeName}, </if>
+			<if test="orderCount != null">`ORDER_COUNT` = #{orderCount}, </if>
+			<if test="outCount != null">`OUT_COUNT` = #{outCount}, </if>
+			<if test="bomGrossWgt != null">`BOM_GROSS_WGT` = #{bomGrossWgt}, </if>
+			<if test="outUnit != null">`OUT_UNIT` = #{outUnit}, </if>
+			<if test="outDate != null">`OUT_DATE` = #{outDate}, </if>
+			<if test="status != null">`STATUS` = #{status}, </if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser}</if>
+			<if test="batchNo != null">`BATCH_NO` = #{batchNo}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_outport_detail where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_outport_detail where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryMtrByPrdId" resultType="map">
+		select p.id as prdId,p.PRD_CODE as prdCode,p.PRD_NAME as prdName,
+		(select t.TYPE_NAME from tb_type_info t where t.id=p.TYPE_ID) as prdTypeName,
+		m.id as mtrId,m.MTR_CODE as mtrCode,m.MTR_NAME as mtrName,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.TYPE_ID) as mtrTypeName,
+		m.TAKE_STN_ID,(select t.TYPE_NAME from tb_type_info t where t.id=m.TAKE_STN_ID) as takeStnName,
+		m.WAREHOUSE_ID,(select t.TYPE_NAME from tb_type_info t where t.id=m.WAREHOUSE_ID) as wareHouseName,
+		bd.gross_wgt as mtrGrossWgt,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as outUnit
+		from bom_info bi,bom_detail bd,prd_data p,mtr_data m
+		where bd.mtr_id=m.id and bi.id=bd.bom_id and bi.prd_id and bi.prd_id=p.id
+		and p.id=${prdId}
+		<if test="wareHouseId != null and wareHouseId != 0">
+			and m.WAREHOUSE_ID=${wareHouseId}
+		</if>
+		<if test="takeStnId != null and wareHouseId != 0">
+			and m.TAKE_STN_ID=${takeStnId}
+		</if>
+	</select>
+
+</mapper>

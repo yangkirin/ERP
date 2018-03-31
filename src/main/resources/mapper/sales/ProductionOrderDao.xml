@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.sales.dao.ProductionOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.sales.entity.ProductionOrderEntity" id="productionOrderMap">
+        <result property="id" column="ID"/>
+        <result property="productionNo" column="PRODUCTION_NO"/>
+        <result property="planId" column="PLAN_ID"/>
+        <result property="planNo" column="PLAN_NO"/>
+        <result property="orderTypeId" column="ORDER_TYPE_ID"/>
+        <result property="orderTypeName" column="ORDER_TYPE_NAME"/>
+        <result property="customerId" column="CUSTOMER_ID"/>
+        <result property="customerNo" column="CUSTOMER_NO"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="placeId" column="PLACE_ID"/>
+        <result property="placeName" column="PLACE_NAME"/>
+        <result property="remakr" column="REMAKR"/>
+        <result property="status" column="STATUS"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="createDate" column="CREATE_DATE"/>
+		<result property="prdCost" column="PRD_COST"/>
+		<result property="prdIncome" column="PRD_INCOME"/>
+		<result property="discountIncome" column="DISCOUNT_INCOME"/>
+		<result property="prdMount" column="PRD_MOUNT"/>
+		<result property="costRate" column="COST_RATE"/>
+		<result property="discountCostRate" column="DISCOUNT_COST_RATE"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="updateUser" column="UPDATE_USER"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
+		select * from tb_production_order where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
+		select * from tb_production_order
+		<where>
+			<if test="planId != null">
+				and PLAN_ID=#{planId}
+			</if>
+			<if test="orderTypeId != null">
+				and ORDER_TYPE_ID=#{orderTypeId}
+			</if>
+			<if test="customerId != null">
+				and CUSTOMER_ID=#{customerId}
+			</if>
+			<if test="createDate != null">
+				and CREATE_DATE like CONCAT ('%',#{createDate},'%')
+			</if>
+			<if test="productionNo != null and productionNo.trim() != ''">
+				and PRODUCTION_NO=#{productionNo}
+			</if>
+
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_production_order 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.sales.entity.ProductionOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_production_order
+		(
+			`PRODUCTION_NO`, 
+			`PLAN_ID`, 
+			`PLAN_NO`, 
+			`ORDER_TYPE_ID`, 
+			`ORDER_TYPE_NAME`, 
+			`CUSTOMER_ID`, 
+			`CUSTOMER_NO`, 
+			`CUSTOMER_NAME`, 
+			`PLACE_ID`, 
+			`PLACE_NAME`, 
+			`REMAKR`, 
+			`STATUS`, 
+			`CREATE_USER`, 
+			`CREATE_DATE`,
+			`PRD_COST`,
+			`PRD_INCOME`,
+			`DISCOUNT_INCOME`,
+			`PRD_MOUNT`,
+			`COST_RATE`,
+			`DISCOUNT_COST_RATE`,
+			`UPDATE_DATE`,
+			`UPDATE_USER`
+		)
+		values
+		(
+			#{productionNo}, 
+			#{planId}, 
+			#{planNo}, 
+			#{orderTypeId}, 
+			#{orderTypeName}, 
+			#{customerId}, 
+			#{customerNo}, 
+			#{customerName}, 
+			#{placeId}, 
+			#{placeName}, 
+			#{remakr}, 
+			#{status}, 
+			#{createUser}, 
+			#{createDate},
+			#{prdCost},
+			#{prdIncome},
+			#{discountIncome},
+			#{prdMount},
+			#{costRate},
+			#{discountCostRate},
+			#{updateDate},
+			#{updateUser}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.sales.entity.ProductionOrderEntity">
+		update tb_production_order 
+		<set>
+			<if test="productionNo != null">`PRODUCTION_NO` = #{productionNo}, </if>
+			<if test="planId != null">`PLAN_ID` = #{planId}, </if>
+			<if test="planNo != null">`PLAN_NO` = #{planNo}, </if>
+			<if test="orderTypeId != null">`ORDER_TYPE_ID` = #{orderTypeId}, </if>
+			<if test="orderTypeName != null">`ORDER_TYPE_NAME` = #{orderTypeName}, </if>
+			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>
+			<if test="customerNo != null">`CUSTOMER_NO` = #{customerNo}, </if>
+			<if test="customerName != null">`CUSTOMER_NAME` = #{customerName}, </if>
+			<if test="placeId != null">`PLACE_ID` = #{placeId}, </if>
+			<if test="placeName != null">`PLACE_NAME` = #{placeName}, </if>
+			<if test="remakr != null">`REMAKR` = #{remakr}, </if>
+			<if test="status != null">`STATUS` = #{status}, </if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser}, </if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate}, </if>
+			<if test="prdCost != null">`PRD_COST` = #{prdCost}, </if>
+			<if test="prdIncome != null">`PRD_INCOME` = #{prdIncome}, </if>
+			<if test="discountIncome != null">`DISCOUNT_INCOME` = #{discountIncome}, </if>
+			<if test="prdMount != null">`PRD_MOUNT` = #{prdMount}, </if>
+			<if test="costRate != null">`COST_RATE` = #{costRate}, </if>
+			<if test="discountCostRate != null">`DISCOUNT_COST_RATE` = #{discountCostRate}, </if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate}, </if>
+			<if test="updateUser != null">`UPDATE_USER` = #{updateUser}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_production_order where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_production_order where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

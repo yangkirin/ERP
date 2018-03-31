@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title>生产计划</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<a v-if="hasPermission('sales:productionplan:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<!--<a v-if="hasPermission('sales:productionplan:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
+			<a v-if="hasPermission('sales:productionplan:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="showForm" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal" style="width: 100%;">
+			<div class="form-group">
+				<div class="col-sm-1 control-label">类型</div>
+				<div class="col-sm-2">
+					<!--<input type="text" class="form-control" v-model="productionOrder.orderTypeName" placeholder="类型" id="type" @input="getSelectDataType()" data-provide="typeahead" autocomplete="off"/>-->
+					<select class="form-control" @change="selectVal('orderTypeId')" v-model="productionOrder.orderTypeId" placeholder="类型" readonly="readonly">
+						<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+				<div class="col-sm-1 control-label">客户</div>
+				<div class="col-sm-2">
+					<!--<input type="text" class="form-control" v-model="productionOrder.customerName" placeholder="客户" id="customer" @input="getSelectDataCustomer()" data-provide="typeahead" autocomplete="off"/>-->
+					<select class="form-control" @change="selectVal('customerId')" v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">
+						<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+				<div class="col-sm-1 control-label">售点</div>
+				<div class="col-sm-2">
+					<!--<input type="text" class="form-control" v-model="productionOrder.placeName" placeholder="售点" id="place" @input="getSelectDataPlace()" data-provide="typeahead" autocomplete="off"/>-->
+					<select class="form-control" @change="selectVal('placeId')" v-model="productionOrder.placeId" placeholder="售点" readonly="readonly">
+						<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-1 control-label">编号</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.planNo" placeholder="计划编号"/>
+			    </div>
+			   	<div class="col-sm-1 control-label">备注</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.remark" placeholder="备注"/>
+			    </div>
+				<div class="col-sm-1 control-label">状态</div>
+				<div class="col-sm-2">
+					<select class="form-control" v-model="productionPlan.status" placeholder="请选择状态">
+						<option value="1">启用</option>
+						<option value="0">禁用</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-1 control-label">成本</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.prdCost" placeholder="成本"/>
+			    </div>
+			   	<div class="col-sm-1 control-label">收入</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.prdIncome" placeholder="收入"/>
+			    </div>
+			   	<div class="col-sm-1 control-label">折后收入</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.discountIncome" placeholder="折后收入"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-1 control-label">产品总数</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.prdMount" placeholder="产品总数"/>
+			    </div>
+			   	<div class="col-sm-1 control-label">成本率</div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="productionPlan.costRate" placeholder="成本率"/>
+			    </div>
+				<div class="col-sm-1 control-label">折扣成本比</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control" v-model="productionPlan.discountCostRate" placeholder="折扣成本比"/>
+				</div>
+				<div class="col-sm-1 control-label"></div>
+				<div class="col-sm-2">
+						<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>
+						&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+				</div>
+			</div>
+				<!--			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>-->
+		</form>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12 col-md-12">
+					<table id="jqGridPRD"></table>
+					<div id="jqGridPagerPRD"></div>
+				</div>
+			</div>
+			<!--<div class="row">-->
+				<!--<div class="form-group">-->
+					<!--<div class="col-sm-2 control-label"></div>-->
+					<!--<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>-->
+					<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>-->
+				<!--</div>-->
+			<!--</div>-->
+		</div>
+	</div>
+
+	<div id="addLayer" style="display: none;">
+		<div class="panel-heading"></div>
+		<form class="form-horizontal" style="width: 100%;">
+			<div class="form-group">
+				<div class="col-sm-3 control-label">选择产品</div>
+				<div class="col-sm-9">
+						<input type="text" class="form-control" v-model="selectData.prdName" placeholder="请选择" id="prd" @input="getSelectDataPrd()" data-provide="typeahead" autocomplete="off"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-3 control-label">需求量</div>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" v-model="selectData.amount" placeholder="需求量" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-3 control-label">定价</div>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" v-model="selectData.price1" id="selectPrice1" placeholder="定价" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-3 control-label">售价</div>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" v-model="selectData.price2" id="selectPrice2" placeholder="售价" />
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="../../js/modules/sales/productionplan.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <title>报表打印</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+    <link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+    <!--<link rel="stylesheet" href="../../css/bootstrap-table.min.css">-->
+    <link rel="stylesheet" href="../../css/main.css">
+    <script src="../../libs/jquery.min.js"></script>
+    <script src="../../plugins/layer/layer.js"></script>
+    <script src="../../libs/bootstrap.min.js"></script>
+    <script src="../../libs/vue.min.js"></script>
+    <script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+    <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+    <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+    <script src="../../plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="../../plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="../../js/common.js"></script>
+
+    <script language="javascript" src="../../plugins/LodopFuncs.js"></script>
+    <object  id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+        <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0></embed>
+    </object>
+</head>
+<body>
+<div id="rrapp">
+
+    asdsadasdsadsadsadadwadwadwa
+    dwadwadwada
+
+    <input type="button" text="DA因" onclick="printTest">打印</div>
+
+</div>
+<script>
+    function printTest(){
+        alert('dayin');
+        var LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INIT("打印任务名");               //首先一个初始化语句
+        LODOP.ADD_PRINT_TEXT(0,0,100,20,"文本内容一");//然后多个ADD语句及SET语句
+        LODOP.PRINT();
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<a v-if="hasPermission('baseData:bominfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<a v-if="hasPermission('baseData:bominfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<a v-if="hasPermission('baseData:bominfo:detailConfig')" class="btn btn-primary" @click="detailConfig"><i class="fa fa-trash-o"></i>&nbsp;原料配置</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="addForm" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+				<div class="col-sm-2 control-label">产品</div>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" v-model="bomInfo.prdIdName" id="addPrdIdName" placeholder="请选择关联的产品" @input="getFieldData2" data-provide="typeahead" autocomplete="off"/>
+				</div>
+			</div>
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">配方名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bomInfo.bomName" id="addBomName" placeholder="配方名称" @input="getPinying('add')"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">拼音码</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bomInfo.bomPy" id="addBomPy" placeholder="拼音码"/>
+			    </div>
+			</div>
+
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">状态</div>
+			   	<div class="col-sm-10">
+			      <!--<input type="text" class="form-control" v-model="bomInfo.status" placeholder="状态"/>-->
+					<select class="form-control" v-model="bomInfo.status" placeholder="请选择状态">
+						<option value="1">启用</option>
+						<option value="0">禁用</option>
+					</select>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">备注</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bomInfo.remark" placeholder="备注"/>
+			    </div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+
+	<!-- 配方原料信息 -->
+	<div v-show="showDetailList">
+		<div class="grid-btn">
+			<a  class="btn btn-primary" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
+			<a  class="btn btn-primary" @click="editMtr"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑原料</a>
+			<a  class="btn btn-primary" @click="delMtr"><i class="fa fa-trash-o"></i>&nbsp;删除原料</a>
+			<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+
+		</div>
+		<div style="width: 100%;">
+			<table id="bomDetailGrid" ></table>
+			<div id="bomDetailGridPager"></div>
+		</div>
+	</div>
+
+	<!-- 原料&半成品多Tab Form -->
+	<div id="addLayer" style="display: none;">
+		<ul class="nav nav-tabs" role="tablist" id="myTab">
+			<li role="presentation" class="active">
+				<a href="#mtrTab" role="tab" data-toggle="tab">原料</a>
+			</li>
+			<li role="presentation">
+				<a href="#prdTab" role="tab" data-toggle="tab">半成品</a>
+			</li>
+		</ul>
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="mtrTab">
+				<form class="form-horizontal" style="width: 100%;">
+
+					<div class="form-group">
+						<div class="col-sm-2 control-label">原料名称</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" id="mtrName" v-model="bomDetail.mtrIdName" placeholder="原料名称"  @input="getFieldDataMTR" data-provide="typeahead" autocomplete="off"/>
+						</div>
+						<div class="col-sm-2 control-label">原料类别</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.typeIdName" placeholder="请选择原料类别" id="add_mtr_typeId" @click="typeInfoTree('add_mtr_typeId')"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">规格</div>
+						<div class="col-sm-4">
+							<select class="form-control" id="addMtrSelectExtend" v-model="bomDetail.mtrExtendId" placeholder="规格">
+								<option v-for="option in mtrExtendArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">原料编号</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.mtrCode" placeholder="编号" readonly="readonly"/>
+						</div>
+					</div>
+					<div class="form-group">
+
+						<div class="col-sm-2 control-label">净重</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.netWgt" id="add_mtr_netWgt" placeholder="净重" @input="countWgt"/>
+						</div>
+						<div class="col-sm-2 control-label">领料站点</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" v-model="bomDetail.takeStnIdName" id="mtr_takeStnName" placeholder="领料站点" @click="typeInfoTree('add_mtr_takeStnId')"/>-->
+							<select class="form-control" v-model="bomDetail.takeStnId" placeholder="领料站点" readonly="readonly">
+								<option v-for="option in takestnArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">净得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.netRate" placeholder="净得率" @input="changeRate"/>
+						</div>
+						<div class="col-sm-2 control-label">毛重</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.grossWgt" placeholder="毛重" readonly="readonly"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">熟得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.modiRate" placeholder="熟得率" @input="changeRate"/>
+						</div>
+						<div class="col-sm-2 control-label">熟重</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetail.modiWgt" placeholder="熟重" readonly="readonly"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">备注</div>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" v-model="bomDetail.remark" placeholder="备注"/>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="prdTab">
+				<form class="form-horizontal" style="width: 100%;">
+					<div class="form-group">
+						<div class="col-sm-2 control-label">名称</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" id="prdName" v-model="bomDetailPrd.mtrIdName" placeholder="名称"  @input="getFieldDataPRD" data-provide="typeahead" autocomplete="off"/>
+						</div>
+						<div class="col-sm-2 control-label">编号</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetailPrd.mtrCode" id="add_mtr_mtrCode" placeholder="编号" readonly="readonly"/>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-2 control-label">净重</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetailPrd.netWgt" @input="countPrdWgt" placeholder="净重"/>
+						</div>
+						<div class="col-sm-2 control-label">熟得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetailPrd.modiRate" @input="countPrdWgt" placeholder="熟得率"/>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-2 control-label">熟重</div>
+						<div class="col-sm-4"><!-- 熟重=净重*熟得率 -->
+							<input type="text" class="form-control" v-model="bomDetailPrd.modiWgt" id="add_prd_modiWgt" placeholder="熟重=净重*熟得率"/>
+						</div>
+
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">备注</div>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" v-model="bomDetailPrd.remark" placeholder="备注"/>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+
+
+</div>
+
+<div id="typeInfoLayer" style="display: none;padding:10px;">
+	<ul id="typeInfoTree" class="ztree"></ul>
+</div>
+
+
+<script src="../../js/modules/baseData/bominfo.js"></script>
+</body>
+</html>

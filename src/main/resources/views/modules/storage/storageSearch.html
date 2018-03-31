@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title>库存查询</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../plugins/datetimepicker/bootstrap-datetimepicker.min.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../js/common.js"></script>
+
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+
+		<form class="form-horizontal" style="width: 100%;">
+			<div class="form-group">
+				<div class="col-sm-1 control-label">查询类型</div>
+				<div class="col-sm-2">
+					<select class="form-control" id="selType" v-model="search.type" placeholder="请选择查询类型">
+						<option value="1">原料库存</option>
+						<option value="0">成品&半成品库存</option>
+					</select>
+				</div>
+				<div class="col-sm-1 control-label">查询单位</div>
+				<div class="col-sm-2">
+					<select class="form-control" id="selOrgId" v-model="search.orgId" placeholder="请选择要查询的仓库或车间">
+						<option v-for="option in orgArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+				<div class="col-sm-1 control-label">名称</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control" v-model="search.name" placeholder="名称" id="searchName" @input="getFieldData" data-provide="typeahead" autocomplete="off"/>
+				</div>
+				<div class="col-sm-3">
+					<div class="grid-btn">
+						<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>
+						<!--<a  class="btn btn-primary" @click="clean"><i class="fa fa-search"></i>&nbsp;重置</a>-->
+					</div>
+				</div>
+
+			</div>
+			<div class="form-group">
+				<div class="col-sm-1 control-label">入库日期</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control form_datetime" id="inStartDate" v-model="search.inStartDate" placeholder="入库日期" readonly="readonly"/>
+				</div>
+				<div class="col-sm-1 control-label">至</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control form_datetime" id="inEndDate" v-model="search.inEndDate" placeholder="截止入库日期" readonly="readonly"/>
+				</div>
+				<div class="col-sm-1 control-label">批次号</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control form_datetime" v-model="search.batchNo" placeholder="批次号"/>
+				</div>
+				<div class="col-sm-3">
+					<div class="grid-btn">
+						<!--<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>-->
+						<a  class="btn btn-primary" @click="clean"><i class="fa fa-search"></i>&nbsp;重置</a>
+					</div>
+				</div>
+			</div>
+
+			<!--<div class="form-group">-->
+				<!--<div class="col-sm-12">-->
+					<!--<div class="grid-btn">-->
+						<!--&lt;!&ndash;<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a  class="btn btn-info" id="confirm_storg" @click="confirm('storg')"><i class="fa fa-check"></i>&nbsp;确认入库</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a v-if="hasPermission('purchase:orderinfo:delete')" class="btn btn-primary" id="printImport" @click="print('import')"><i class="fa fa-print"></i>&nbsp;打印入库单</a>&ndash;&gt;-->
+					<!--</div>-->
+				<!--</div>-->
+			<!--</div>-->
+		</form>
+
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+
+</div>
+
+<script src="../../js/modules/storage/storageSearch.js"></script>
+</body>
+</html>
