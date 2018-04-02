@@ -124,7 +124,7 @@ $(function () {
             { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
             { label: '原料类型', name: 'mtrTypeName', index: 'MTR_TYPE_NAME', width: 80 },
             { label: '需求数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 },
-            { label: '领料数量', name: 'outCount', index: 'OUT_COUNT', width: 80 },
+            { label: '已领数量', name: 'outCount', index: 'OUT_COUNT', width: 80 },
             { label: '出库日期', name: 'outDate', index: 'OUT_DATE', width: 80 ,hidden:true },
             { label: '状态', name: 'status', index: 'STATUS', width: 80,hidden:true },
             { label: '操作人', name: 'createUser', index: 'CREATE_USER', width: 80 ,hidden:true}
@@ -187,19 +187,32 @@ var vm = new Vue({
         customerArr:{},
         batchArr:{},
         mtrdata:{},
-        detail:{}
+        detail:{},
+        mtrInfo:{}
 	},
 	methods: {
 		search: function () {
 			vm.reload();
 		},
         addMtr: function(){
-            var id = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
-            if(id == null){
+            var rowId = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
+            if(rowId == null){
                 alert('请选择原料！');
                 return ;
             }
+            var rowData = $('#jqGridMtr').jqGrid("getRowData",rowId);
+            // if(rowData.outCount == rowData.orderCount){
+            //     alert('需求量已满足，是否继续领用！');
+            // }
 
+            //所选原料信息
+            $.get(baseURL + "baseData/mtrdata/info/"+rowData.mtrId, function(r){
+                vm.mtrInfo = r.mtrData;
+            });
+            vm.selectData.orderCount = rowData.orderCount;
+            $('#orderCount').val(rowData.orderCount);
+
+            //根据所选原料查询所有在库批号信息
             vm.batchArr = vm.initMtrBatch();
 
 			vm.showList = false;
@@ -267,9 +280,11 @@ var vm = new Vue({
             vm.getSelectDataMtr();
             var rowId = $('#jqGrid').jqGrid("getGridParam", "selrow");
             if(type == 'add'){
+                //客户订单信息
                 $.get(baseURL + "sales/productionorder/info/"+rowId, function(r){
                     vm.productionOrder = r.productionOrder;
                 });
+                console.log(vm.productionOrder);
             }else if(type == 'edit'){
                 var mtrRowId = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
                 $.get(baseURL + "storage/outportdetail/info/"+mtrRowId, function(r){
@@ -289,21 +304,31 @@ var vm = new Vue({
                 type: 1,
                 skin: 'layui-layer-molv',
                 title: vm.title,
-                area: ['300px', '280px'],
+                area: ['550px', '430px'],
                 shadeClose: false,
                 content: jQuery("#addLayer"),
                 btn: ['提交', '取消'],
                 btn1: function (event) {
+                    alert('新增批号确认');
+                    console.log(vm.productionOrder);
+                    console.log(vm.mtrInfo);
+                    console.log(vm.selectData);
+                    //vm.productionOrder：id,productionNo,customerId,customerName,customerNo
+                    //vm.mtrInfo:id,mtrCode,mtrName,typeName
+                    //vm.selectData:orderCount,outAmount,batchNo
                     if(type=='add'){
-                        vm.outportDetail.outportNo = 'L'+vm.productionOrder.productionNo;
                         vm.outportDetail.orderId = vm.productionOrder.id;
-                        vm.outportDetail.mtrId = vm.selectData.mtrId;
-                        vm.outportDetail.mtrNo = vm.selectData.mtrCode;
-                        vm.outportDetail.mtrName = vm.selectData.mtrName;
-                        vm.outportDetail.mtrTypeName = vm.selectData.typeName;
-                        vm.outportDetail.orderCount = $('#orderCount').val();
-                        vm.outportDetail.outCount = $('#outCount').val();
-                        vm.outportDetail.outUnit = vm.selectData.miniUnitName;
+                        vm.outportDetail.customerId = vm.productionOrder.customerId;
+                        vm.outportDetail.customerName = vm.productionOrder.customerName;
+                        vm.outportDetail.customerNo = vm.productionOrder.customerNo;
+
+                        vm.outportDetail.mtrId = vm.mtrInfo.id;
+                        vm.outportDetail.mtrNo = vm.mtrInfo.mtrCode;
+                        vm.outportDetail.mtrName = vm.mtrInfo.mtrName;
+                        vm.outportDetail.mtrTypeName = vm.mtrInfo.typeName;
+
+                        vm.outportDetail.orderCount = vm.selectData.orderCount;
+                        vm.outportDetail.outCount = vm.selectData.realCount;
                         vm.outportDetail.batchNo = vm.selectData.batchNo;
 
                         $.ajax({
@@ -326,30 +351,33 @@ var vm = new Vue({
                             }
                         });
                     }else{
-                        vm.outportDetail.orderCount = $('#orderCount').val();
-                        vm.outportDetail.outCount = $('#outCount').val();
-                        $.ajax({
-                            type: "POST",
-                            async:false,
-                            url: baseURL + "storage/outportdetail/update",
-                            contentType: "application/json",
-                            data: JSON.stringify(vm.outportDetail),
-                            success: function(r){
-                                if(r.code == 0){
-                                    alert('操作成功', function(index){
-                                        $("#jqGridMtr").jqGrid('setGridParam',{
-                                            datatype:'json',
-                                            postData:{'orderId': rowId},
-                                        }).trigger("reloadGrid");
-                                    });
-                                }else{
-                                    alert(r.msg);
-                                }
-                            }
-                        });
+                        // vm.outportDetail.orderCount = $('#orderCount').val();
+                        // vm.outportDetail.outCount = $('#outCount').val();
+                        // $.ajax({
+                        //     type: "POST",
+                        //     async:false,
+                        //     url: baseURL + "storage/outportdetail/update",
+                        //     contentType: "application/json",
+                        //     data: JSON.stringify(vm.outportDetail),
+                        //     success: function(r){
+                        //         if(r.code == 0){
+                        //             alert('操作成功', function(index){
+                        //                 $("#jqGridMtr").jqGrid('setGridParam',{
+                        //                     datatype:'json',
+                        //                     postData:{'orderId': rowId},
+                        //                 }).trigger("reloadGrid");
+                        //             });
+                        //         }else{
+                        //             alert(r.msg);
+                        //         }
+                        //     }
+                        // });
                     }
                     layer.close(num);
                     vm.outportDetail = {};
+                    vm.mtrInfo = {};
+                    vm.selectData = {};
+                    vm.selectArr = {};
                 },
                 btn2: function (event) {
                     vm.outportDetail = {};
@@ -512,7 +540,13 @@ var vm = new Vue({
                 data: {mtrId:rowData.mtrId,batchNo:vm.selectData.batchNo},
                 success: function(r){
                     vm.selectData.inventory = r.currentCount;
-                    $('#inventory').val(r.currentCount);
+                    $('#inventory').val(r.currentCount+'【'+vm.mtrInfo.purchaseUnitName+'】');
+
+                    //最小单位库存计算
+                    //最小单位库存量=库存量*采购转换率*最小转换率
+                    var miniInventory = Number(Number(r.currentCount)*Number(vm.mtrInfo.purchaseRate)*Number(vm.mtrInfo.miniRate),2);
+                    vm.selectData.inventoryMiniUnit = miniInventory;
+                    $('#inventoryMiniUnit').val(miniInventory+'【'+vm.mtrInfo.miniUnitName+'】');
                 }
             });
         },
@@ -532,6 +566,19 @@ var vm = new Vue({
                 }
             });
             return dataArr;
+        },
+        textChange:function(){
+            var inputCount = $('#outCount').val();
+
+            // 实际出库量=领料量/最小转换率/采购转换率
+            // 剩余库存量=库存量-实际出库量
+            var realCount = Number(Number(inputCount)/Number(vm.mtrInfo.miniRate)/Number(vm.mtrInfo.purchaseRate),2);
+            vm.selectData.realCount = realCount;
+            var residueCount = vm.selectData.inventory-realCount;
+            vm.selectData.residueCount = residueCount;
+
+            $('#realCount').val(realCount);
+            $('#residueCount').val(residueCount);
         }
 	}
 });

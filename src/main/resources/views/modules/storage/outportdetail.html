@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
 <title>出库记录信息</title>
 <meta charset="UTF-8">
@@ -117,25 +117,89 @@
 		<div class="panel-heading"></div>
 		<form class="form-horizontal" style="width: 100%;">
 			<div class="form-group">
-				<div class="col-sm-3 control-label">选择批号</div>
-				<div class="col-sm-9">
+				<div class="col-sm-2 control-label">原料名称</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="mtrName" v-model="mtrInfo.mtrName" placeholder="原料名称" readonly="readonly"/>
+				</div>
+				<div class="col-sm-2 control-label">原料编号</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="mtrCode" v-model="mtrInfo.mtrCode" placeholder="原料编号" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">采购单位</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="purchaseUnitName" v-model="mtrInfo.purchaseUnitName" placeholder="采购单位" readonly="readonly"/>
+				</div>
+				<div class="col-sm-2 control-label">采购转换率</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="purchaseRate" v-model="mtrInfo.purchaseRate" placeholder="采购转换率" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">最小单位</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="miniUnitName" v-model="mtrInfo.miniUnitName" placeholder="最小单位" readonly="readonly"/>
+				</div>
+				<div class="col-sm-2 control-label">最小转换率</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="miniRate" v-model="mtrInfo.miniRate" placeholder="最小转换率" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">配方单位</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="formulaUnitName" v-model="mtrInfo.formulaUnitName" placeholder="配方单位" readonly="readonly"/>
+				</div>
+				<div class="col-sm-2 control-label">需求量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="orderCount" v-model="selectData.orderCount" placeholder="需求量" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+
+				<div class="col-sm-2 control-label">采购库存量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="inventory" v-model="selectData.inventory" placeholder="采购库存量" readonly="readonly"/>
+				</div>
+				<div class="col-sm-2 control-label">最小单位库存</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="inventoryMiniUnit" v-model="selectData.inventoryMiniUnit" placeholder="最小单位库存" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">选择批号</div>
+				<div class="col-sm-4">
 					<!--<input type="text" class="form-control" v-model="selectData.mtrName" placeholder="请选择" id="selectMtr" @input="getSelectDataMtr()" data-provide="typeahead" autocomplete="off"/>-->
 					<select class="form-control" v-model="selectData.batchNo" @change="selectBatchVal()" readonly="readonly">
 						<option v-for="option in batchArr" v-bind:value="option.value">{{option.text}}
 					</select>
 				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-3 control-label">库存量</div>
-				<div class="col-sm-9">
-					<input type="text" class="form-control" id="inventory" v-model="selectData.inventory" placeholder="库存量" />
+				<div class="col-sm-2 control-label">实际出库量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="realCount" v-model="selectData.realCount" placeholder="实际出库量" readonly="readonly"/>
 				</div>
 			</div>
 			<div class="form-group">
-				<div class="col-sm-3 control-label">领料量</div>
-				<div class="col-sm-9">
-					<input type="text" class="form-control" id="outCount" v-model="selectData.outAmount" placeholder="领料量" />
+				<div class="col-sm-2 control-label">领料量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" @input="textChange"  id="outCount" v-model="selectData.outAmount" placeholder="领料量" />
 				</div>
+				<div class="col-sm-2 control-label">剩余库存量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" id="residueCount" v-model="selectData.residueCount" placeholder="剩余库存量" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-12 control-label" style="text-align: left">
+					需求量：根据BOM清单里配方单位进行转换生成<br/>
+					库存量：根据采购单位进行库存管理的数值<br/>
+					<label style="color: red">
+						实际出库量=领料量/最小转换率/采购转换率
+						剩余库存量=库存量-实际出库量
+					</label>
+				</div>
+
 			</div>
 		</form>
 	</div>

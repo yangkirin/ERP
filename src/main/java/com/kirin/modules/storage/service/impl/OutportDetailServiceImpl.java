@@ -1,8 +1,11 @@
 package com.kirin.modules.storage.service.impl;
 
+import com.kirin.modules.baseData.entity.MtrDataEntity;
+import com.kirin.modules.baseData.service.MtrDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -60,5 +63,23 @@ public class OutportDetailServiceImpl implements OutportDetailService {
 	@Override
 	public List<OutportDetailEntity> queryListByMtrId(Long mtrId){
 		return outportDetailDao.queryListByMtrId(mtrId);
+	}
+
+	@Autowired
+	MtrDataService mtrDataService;
+
+	@Override
+	public BigDecimal getOutboundCount(Long mtrId, Long orderId){
+		BigDecimal haveOutboundCount = new BigDecimal(0);
+		MtrDataEntity mtrDataEntity = mtrDataService.queryObject(mtrId);
+
+		List<OutportDetailEntity> outportDetailEntityList = outportDetailDao.getOutportDetail(mtrId,orderId);
+		if(outportDetailEntityList != null && outportDetailEntityList.size() > 0){
+			for (OutportDetailEntity object:outportDetailEntityList) {
+				BigDecimal outCount = object.getOutCount() != null ? object.getOutCount() : new BigDecimal(0);
+				haveOutboundCount = haveOutboundCount.add(outCount);
+			}
+		}
+		return haveOutboundCount;
 	}
 }

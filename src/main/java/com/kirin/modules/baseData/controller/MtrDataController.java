@@ -80,6 +80,8 @@ public class MtrDataController extends AbstractController {
 		BigDecimal price = new BigDecimal(new Double(mtrData.getPrice()).doubleValue()).setScale(2,BigDecimal.ROUND_HALF_UP);
 		mtrData.setPrice(price.toString());
 
+
+
 		mtrDataService.save(mtrData);
 		
 		return R.ok();

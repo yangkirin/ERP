@@ -41,6 +41,17 @@
 			</if>
 		</where>
 	</select>
+	<select id="getOutportDetail" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		select * from tb_outport_detail
+		<where>
+			<if test="mtrId != null">
+				and MTR_ID = #{mtrId}
+			</if>
+			<if test="orderId != null">
+				and ORDER_ID = #{orderId}
+			</if>
+		</where>
+	</select>
 	<select id="queryList" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
 		select * from tb_outport_detail
 		<where>

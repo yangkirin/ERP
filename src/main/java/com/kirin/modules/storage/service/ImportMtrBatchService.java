@@ -2,6 +2,7 @@ package com.kirin.modules.storage.service;
 
 import com.kirin.modules.storage.entity.ImportMtrBatchEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -29,4 +30,6 @@ public interface ImportMtrBatchService {
 	void deleteBatch(Long[] ids);
 
 	List<ImportMtrBatchEntity> queryByAttr(Long mtrId, String batchNo);
+
+
 }

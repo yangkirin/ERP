@@ -1,5 +1,7 @@
 package com.kirin.common.utils;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.*;
 
 public class CommonUtils {
@@ -82,7 +84,20 @@ public class CommonUtils {
         return newList;
     }
 
+    public static String createBillNo(String startCode){
+        String billNo = DateUtils.format(new Date(),"yyyyMMddHHmmss");
+        if(StringUtils.isNotBlank(startCode)){
+            billNo = startCode+billNo;
+        }
+        return billNo;
+    }
+
     public static void main(String args[]){
+        System.out.println(createBillNo("LL"));
+    }
+
+
+    public static void main2(String args[]){
         List<Map> list = new ArrayList<>();
         for(int i=1;i<=10;i++){
             Map map = new HashMap();

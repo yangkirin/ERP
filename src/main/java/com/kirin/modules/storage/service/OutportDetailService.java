@@ -2,6 +2,7 @@ package com.kirin.modules.storage.service;
 
 import com.kirin.modules.storage.entity.OutportDetailEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -31,4 +32,12 @@ public interface OutportDetailService {
 	List<Map> queryMtrByPrdId(Long prdId,Long takeStnId,Long wareHouseId);
 
 	List<OutportDetailEntity> queryListByMtrId(Long mtrId);
+
+	/**
+	 * 根据订单Id计算此订单下该原料已出库数量
+	 * @param mtrId
+	 * @param orderId
+	 * @return
+	 */
+	BigDecimal getOutboundCount(Long mtrId, Long orderId);
 }

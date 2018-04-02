@@ -185,7 +185,7 @@ public class ImportMtrBatchController {
 
 	/**
 	 * 实时计算原料当前库存
-	 * 可用库存=入库
+	 * 可用库存=入库-出库
 	 */
 	@RequestMapping("/getCurrentCount")
 	public R countInventory(@RequestParam("mtrId")Long mtrId,@RequestParam("batchNo")String batchNo){
@@ -212,6 +212,8 @@ public class ImportMtrBatchController {
 		currentCount = inCount.subtract(outCount);
 		return R.ok().put("currentCount",currentCount);
 	}
+
+
 
 	public static void main(String[] args){
 		String a = "2018012200";

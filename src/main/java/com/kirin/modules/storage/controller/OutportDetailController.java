@@ -6,8 +6,10 @@ import java.util.*;
 import com.kirin.common.utils.*;
 import com.kirin.modules.baseData.entity.BomDetailEntity;
 import com.kirin.modules.baseData.entity.BomInfoEntity;
+import com.kirin.modules.baseData.entity.MtrDataEntity;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
+import com.kirin.modules.baseData.service.MtrDataService;
 import com.kirin.modules.sales.entity.ProductionOrderDetailEntity;
 import com.kirin.modules.sales.entity.ProductionOrderEntity;
 import com.kirin.modules.sales.service.ProductionOrderDetailService;
@@ -78,6 +80,8 @@ public class OutportDetailController extends AbstractController {
 
 		outportDetail.setCreateUser(sysUserEntity.getUsername());
 		outportDetail.setOutDate(new Date());
+
+		outportDetail.setOutportNo(CommonUtils.createBillNo("LLCK"));
 
 		outportDetailService.save(outportDetail);
 		
@@ -203,8 +207,8 @@ public class OutportDetailController extends AbstractController {
 		return returnList;
 	}
 
-
-
+	@Autowired
+	MtrDataService mtrDataService;
 
 	@RequestMapping("/findOutMtrByOrderId")
 	public R findOutMtrByOrderId(@RequestParam(value="orderId")Long orderId,@RequestParam(value="takeStnId",required = false)Long takeStnId,@RequestParam(value="wearhouseId",required = false)Long wearhouseId){
@@ -257,6 +261,20 @@ public class OutportDetailController extends AbstractController {
 		}else{
 			returnList.addAll(mapList);
 		}
+
+		//计算此订单各原料已出库的数量
+		for (int i=0;i < returnList.size(); i++) {
+			Map temp = returnList.get(i);
+			Long mtrId = Long.valueOf(temp.get("mtrId").toString());
+			BigDecimal haveOutboundCount = outportDetailService.getOutboundCount(mtrId,orderId);
+			//转换为配方单位用量
+			MtrDataEntity mtrData = mtrDataService.queryObject(mtrId);
+			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getMiniRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
+			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getPurchaseRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
+
+			temp.put("outCount",haveOutboundCount);
+		}
+
 
 //		for (Map mapTemp:mapList) {
 //			if(returnList.size()<=0){

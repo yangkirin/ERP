@@ -22,4 +22,12 @@ public interface OutportDetailDao extends BaseDao<OutportDetailEntity> {
 	public List<Map> queryMtrByPrdId(@Param("prdId")Long prdId,@Param("takeStnId")Long takeStnId,@Param("wareHouseId")Long wareHouseId);
 
 	public List<OutportDetailEntity> queryListByMtrId(@Param("mtrId")Long mtrId);
+
+	/**
+	 * 根据订单Id计算此订单下该原料已出库数量
+	 * @param mtrId
+	 * @param orderId
+	 * @return
+	 */
+	public List<OutportDetailEntity> getOutportDetail(@Param("mtrId") Long mtrId,@Param("orderId")Long orderId);
 }
