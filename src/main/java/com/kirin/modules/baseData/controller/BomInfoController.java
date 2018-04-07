@@ -85,6 +85,11 @@ public class BomInfoController extends AbstractController {
 		bomInfo.setCreateUser(sysUserEntity.getUsername());
 		bomInfo.setCreateDate(new Date());
 
+//		判断配方是否重复（一个产品只能关联一个配方）
+		BomInfoEntity entity = bomInfoService.queryObjectByPrdId(bomInfo.getPrdId());
+		if(entity != null) {
+			return R.error("一个产品只能关联一个配方");
+		}
 
 		bomInfoService.save(bomInfo);
 		

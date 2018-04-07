@@ -437,6 +437,8 @@ var vm = new Vue({
             });
         },
 		add: function(){//新增配方
+            // 新增配方时，需要将配方名称编辑框设置为可编辑状态
+            $('#addPrdIdName').attr('readonly', false);
 			vm.showList = false;
 			vm.addForm = true;
 			vm.title = "新增";
@@ -451,6 +453,8 @@ var vm = new Vue({
             if(id == null){
                 return ;
             }
+            // 为确保一个产品只和一个配料关联，在修改配方时，不允许修改产品名称
+            $('#addPrdIdName').attr('readonly', true);
             vm.showList = false;
             vm.addForm = true;
             vm.showDetailList = false;

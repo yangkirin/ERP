@@ -159,7 +159,7 @@ var vm = new Vue({
 				if(roleId != null){
 					vm.getRole(roleId);
 				}
-				
+				console.log('222443333');
 				//展开一级节点
 				var nodes = ztree.getNodes();
 				if (nodes.length>0) {
