@@ -16,5 +16,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Repository
 @Mapper
 public interface PrdDataDao extends BaseDao<PrdDataEntity> {
-	
+	int queryByPrdName(String prdName);
 }

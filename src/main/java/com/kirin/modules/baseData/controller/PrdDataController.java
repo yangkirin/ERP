@@ -119,6 +119,11 @@ public class PrdDataController extends AbstractController {
 	public R save(@RequestBody PrdDataEntity prdData){
 		SysUserEntity sysUserEntity =  getUser();
 
+		// 验证产品名称是否重复，如果名称重复，不能使用
+		if (prdDataService.queryByPrdName(prdData.getPrdName()) > 0) {
+			return R.error("产品的名称不能重复");
+		}
+
 		prdData.setCreateUser(sysUserEntity.getUsername());
 		prdData.setCreateDate(new Date());
 

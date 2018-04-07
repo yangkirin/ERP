@@ -51,5 +51,10 @@ public class PrdDataServiceImpl implements PrdDataService {
 	public void deleteBatch(Long[] ids){
 		prdDataDao.deleteBatch(ids);
 	}
-	
+
+	@Override
+	public int queryByPrdName(String prdName) {
+		return prdDataDao.queryByPrdName(prdName);
+	}
+
 }

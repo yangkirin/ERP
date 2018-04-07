@@ -27,4 +27,6 @@ public interface PrdDataService {
 	void delete(Long id);
 	
 	void deleteBatch(Long[] ids);
+
+    int queryByPrdName(String prdName);
 }

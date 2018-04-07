@@ -82,6 +82,10 @@
  	<select id="queryTotal" resultType="int">
 		select count(*) from prd_data 
 	</select>
+
+	<select id="queryByPrdName" resultType="int">
+		select count(*) from prd_data p where p.prd_name like "%${value}%"
+	</select>
 	 
 	<insert id="save" parameterType="com.kirin.modules.baseData.entity.PrdDataEntity" useGeneratedKeys="true" keyProperty="id">
 		insert into prd_data
