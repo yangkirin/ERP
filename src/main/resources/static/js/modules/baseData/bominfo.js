@@ -480,6 +480,20 @@ var vm = new Vue({
                 }
             });
         },
+        search:function(){
+            console.log(vm.orderInfo);
+            var postData = {
+                bomName: $('#search').val(),
+                bomPy: $('#search').val()
+                // prdIdName: $('#search').val()
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:postData,
+                page:page
+            }).trigger("reloadGrid");
+            // vm.reload();
+        },
 
 
         //原料配置
