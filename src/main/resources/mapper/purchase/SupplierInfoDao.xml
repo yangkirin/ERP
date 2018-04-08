@@ -27,6 +27,20 @@
 
 	<select id="queryList" resultType="com.kirin.modules.purchase.entity.SupplierInfoEntity">
 		select * from tb_supplier_info
+		<where>
+			<if test="suppierCode != null">
+				or suppier_code like "%${suppierCode}%"
+			</if>
+			<if test="suppierName != null">
+				or suppier_name like "%${suppierName}%"
+			</if>
+			<if test="suppierShortName != null">
+				or suppier_short_name like "%${suppierShortName}%"
+			</if>
+			<if test="suppierPy != null">
+				or suppier_py like "%${suppierPy}%"
+			</if>
+		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
                 order by ${sidx} ${order}

@@ -488,6 +488,21 @@ var vm = new Vue({
                 }
             });
             return dataArr;
+        },
+        search:function(){
+            console.log(vm.orderInfo);
+            var postData = {
+                suppierCode: $('#search').val(),
+                suppierName: $('#search').val(),
+                suppierShortName: $('#search').val(),
+                suppierPy: $('#search').val()
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:postData,
+                page:page
+            }).trigger("reloadGrid");
+            // vm.reload();
         }
 	}
 });
