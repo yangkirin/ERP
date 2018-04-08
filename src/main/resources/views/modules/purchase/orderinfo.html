@@ -31,7 +31,17 @@
 			<a v-if="hasPermission('purchase:orderinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
 			<a v-if="hasPermission('purchase:orderinfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
 			<a v-if="hasPermission('purchase:orderinfo:delete')" class="btn btn-primary" id="print_order_btn" @click="print('order')"><i class="fa fa-print"></i>&nbsp;打印订单</a>
-			
+		</div>
+		<div class="row">
+			<div class="col-sm-2" style="padding-left: 0">
+				<input type="text" class="form-control form_datetime" id="exceptionDate" v-model="orderInfo.exceptionDate" placeholder="期望到货日期" readonly="readonly"/>
+			</div>
+			<div class="col-sm-2">
+				<input type="text" placeholder="订单编号/供应商" id="search" class="form-control">
+			</div>
+			<div class="col-sm-1">
+				<button class="btn btn-primary" type="button" @click="search">查询</button>
+			</div>
 		</div>
 	    <table id="jqGrid"></table>
 	    <div id="jqGridPager"></div>

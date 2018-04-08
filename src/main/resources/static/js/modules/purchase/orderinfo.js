@@ -255,8 +255,8 @@ $(function () {
         minView:2,
         todayBtn:true,
         todayHighlight:true,
-        weekStart:1,
-        startDate:new Date(currentDate)
+        weekStart:1
+        // startDate:new Date(currentDate)
     });
 
     $('.form_datetime').datetimepicker().on('changeDate', function(ev){
@@ -266,6 +266,22 @@ $(function () {
             //
             // }
         });
+
+    $("#exceptionDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:'zh-CN',
+        autoclose:true,
+        minView:2,
+        todayBtn:true,
+        todayHighlight:true,
+        weekStart:1,
+        // endDate:new Date(currentDate)
+    });
+
+    $('#exceptionDate').datetimepicker().on('changeDate', function(ev){
+        var newDate = dateFtt('yyyy-MM-dd',ev.date);
+        vm.orderInfo.exceptionDate = newDate;
+    });
 });
 
 var lastSelection;
@@ -909,6 +925,21 @@ var vm = new Vue({
                     }
                 }
             });
-        }
+        },
+        search:function(){
+            console.log(vm.orderInfo);
+            var postData = {
+                exceptionDate: $('#exceptionDate').val(),
+                orderNo: $('#search').val(),
+                supplierName: $('#search').val()
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:postData,
+                page:page
+            }).trigger("reloadGrid");
+            // vm.reload();
+        },
+
 	}
 });

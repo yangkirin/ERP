@@ -21,22 +21,35 @@
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.purchase.entity.OrderInfoEntity">
-		select oi.*,(select si.suppier_name from tb_supplier_info si where si.id = oi.SUPPLIER_ID) as supplierName,
+		select oe.* from (select oi.*,(select si.suppier_name from tb_supplier_info si where si.id = oi.SUPPLIER_ID) as supplierName,
 		(select pp.PROCUREMENT_NO from TB_PROCUREMENT_PLAN pp where pp.id = oi.PROCUREMENT_ID) as procurementNo,
 		(select cast(sum(od.price*od.AMOUNT) AS DECIMAL (19, 2)) from TB_ORDER_DETAIL od where od.ORDER_ID=oi.id) as orderSumPrice,
 		(select cast(sum(imd.IN_PRICE*imd.IN_COUNT) AS DECIMAL (19, 2)) from tb_import i,tb_import_detail imd where i.id=imd.IMPORT_ID and i.ORDER_ID=oi.id) as inSumPrice
-		from tb_order_info oi
+		from tb_order_info oi) as oe
 		<where>
 			<if test="status != null and status != ''">
-				oi.STATUS=${status}
+				and oe.STATUS=${status}
+			</if>
+			<if test="exceptionDate != null">
+				and oe.EXCEPTION_DATE = #{exceptionDate}
+			</if>
+			<if	test="orderNo != null or supplierName != null">
+				and (
+				<if test="orderNo != null">
+					ORDER_NO like "%${orderNo}%"
+				</if>
+				<if test="supplierName != null">
+					or supplierName like "%${supplierName}%"
+				</if>
+				)
 			</if>
 		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
-                order by oi.${sidx} ${order}
+                order by oe.${sidx} ${order}
             </when>
 			<otherwise>
-                order by oi.ID desc
+                order by oe.ID desc
 			</otherwise>
         </choose>
 		<if test="offset != null and limit != null">
