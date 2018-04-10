@@ -143,6 +143,9 @@ public class PrdDataController extends AbstractController {
 		PrdDataEntity oldPrdData = prdDataService.queryObject(prdData.getId());
 		String prdName = "";
 		//如果只变更是否半成品，则只需对产品名称的*号进行增减
+		if(oldPrdData.getSemiFinished() == null){
+			oldPrdData.setSemiFinished(prdData.getSemiFinished());
+		}
 		if(!oldPrdData.getSemiFinished().equals(prdData.getSemiFinished()) && oldPrdData.getPrdName().equals(prdData.getPrdName())){
 			prdName = prdData.getPrdName();
 			if(prdData.getSemiFinished().equals("1")){

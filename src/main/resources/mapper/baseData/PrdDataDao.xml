@@ -36,9 +36,9 @@
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.PDC_STN) as pdcStnName,
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.ORDER_TYPE) as orderTypeName,
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.COOK_TYPE) as cookTypeName,
-		(SELECT sum(b.gross_wgt) FROM BOM_DATA b where b.prd_id = p.id) as sumGrossWgt,
-		(SELECT sum(b.net_wgt) FROM BOM_DATA b where b.prd_id = p.id) as sumNetWgt,
-		(SELECT sum(b.modi_wgt) FROM BOM_DATA b where b.prd_id = p.id) as sumCookedWgt,
+		(SELECT sum(b.gross_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumGrossWgt,
+		(SELECT sum(b.net_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumNetWgt,
+		(SELECT sum(b.modi_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumCookedWgt,
 		(select bi.cost from bom_info bi where bi.prd_id=p.id) as cost
 		from prd_data p where p.id = #{value}
 	</select>
