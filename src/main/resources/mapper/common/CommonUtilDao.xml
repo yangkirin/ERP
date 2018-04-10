@@ -53,4 +53,15 @@
 		</where>
 	</select>
 
+	<!-- 根据指定的表明以及查询条件，查询数据是否存在 -->
+	<select id="searchData" resultType="map">
+		SELECT * FROM ${tableName}
+		<where>
+			<if test="searchWord != null and searchWord.trim() != ''">
+				<foreach collection="searchFeild" index="index" item="field" open="(" separator="and" close=")">
+					${field}=${searchWord}
+				</foreach>
+			</if>
+		</where>
+	</select>
 </mapper>

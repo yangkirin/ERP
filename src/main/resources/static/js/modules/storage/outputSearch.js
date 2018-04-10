@@ -160,6 +160,10 @@ var vm = new Vue({
         },
         outSearch:function(){
             alert('查询开始');
+            //校验查询条件
+            //1.出库单号以及订单号是否存在
+
+
         },
         clean:function(){
 
