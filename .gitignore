@@ -42,8 +42,8 @@ hs_err_pid*
 # .springBeans
 /.springBeans
 
-# erp.xml
-/erp.xml
+# erp.iml
+/erp.iml
 
 # Dockerfile
 /Dockerfile
