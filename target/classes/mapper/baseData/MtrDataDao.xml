@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.baseData.dao.MtrDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.baseData.entity.MtrDataEntity" id="mtrDataMap">
+        <result property="id" column="id"/>
+        <result property="mtrCode" column="MTR_CODE"/>
+        <result property="mtrName" column="MTR_NAME"/>
+        <result property="mtrPy" column="MTR_PY"/>
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="cutId" column="CUT_ID"/>
+        <result property="purchaseUnit" column="PURCHASE_UNIT"/>
+        <result property="purchaseRate" column="PURCHASE_RATE"/>
+        <result property="miniUnit" column="MINI_UNIT"/>
+        <result property="miniRate" column="MINI_RATE"/>
+        <result property="formulaUnit" column="FORMULA_UNIT"/>
+        <result property="modiRate1" column="MODI_RATE1"/>
+        <result property="modiRate2" column="MODI_RATE2"/>
+        <result property="warehouseId" column="WAREHOUSE_ID"/>
+        <result property="takeStnId" column="TAKE_STN_ID"/>
+        <result property="wgtUnit1" column="WGT_UNIT1"/>
+        <result property="wgtUnit2" column="WGT_UNIT2"/>
+        <result property="price" column="PRICE"/>
+        <result property="fixup" column="FIXUP"/>
+        <result property="purcycle" column="PURCYCLE"/>
+        <result property="costType" column="COST_TYPE"/>
+        <result property="taxRate" column="TAX_RATE"/>
+        <result property="remark" column="REMARK"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="createDate" column="CREATE_DATE"/>
+		<result property="status" column="STATUS"/>
+
+		<result property="extendId" column="EXTEND_ID"/>
+		<result property="brand" column="BRAND"/>
+	</resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.baseData.entity.MtrDataEntity">
+		select m.*,
+		if((select t.PARENT_ID from tb_type_info t where t.id=m.type_id)!=0,((select CONCAT((select t1.type_name from tb_type_info t1 where t.PARENT_ID=t1.id),'*',t.TYPE_NAME) as type_name from tb_type_info t where t.id=m.type_Id)),(select t.TYPE_NAME from tb_type_info t where t.id=m.TYPE_ID)) as typeName
+		,(select t.type_name from tb_type_info t where t.id=m.PURCHASE_UNIT) as purchaseUnitName
+		,(select t.type_name from tb_type_info t where t.id=m.MINI_UNIT) as miniUnitName
+		,(select t.type_name from tb_type_info t where t.id=m.FORMULA_UNIT) as formulaUnitName
+		,(select t.type_name from tb_type_info t where t.id=m.WAREHOUSE_ID) as warehouseName
+		,(select t.type_name from tb_type_info t where t.id=m.TAKE_STN_ID) as takeStnName
+		,(select t.type_name from tb_type_info t where t.id=m.COST_TYPE) as costTypeName
+		,(select t.CUT from mtr_cut t where t.id=m.CUT_ID) as cutName
+		,(select e.SPEC from TB_MTR_EXTEND e where e.id=m.EXTEND_ID) as spec
+		,(select e.BRAND from TB_MTR_EXTEND e where e.id=m.EXTEND_ID) as brand
+		from mtr_data m where m.id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.baseData.entity.MtrDataEntity">
+		select m.*,(select t.type_name FROM tb_type_info t where t.id=m.type_id) as typeName from mtr_data m
+		<where>
+			<if test="typeId != null and typeId.trim() != '' and typeId.trim() != 0">
+				and m.type_id = #{typeId} or m.TYPE_ID in(select t.id from tb_type_info t where t.parent_Id=#{typeId})
+			</if>
+			<if test="mtrCode != null and mtrCode.trim() != ''">
+				and m.MTR_CODE like concat('%',#{mtrCode},'%')
+			</if>
+			<if test="mtrName != null and mtrName.trim() != ''">
+				and (m.MTR_NAME like concat('%',#{mtrName},'%') OR m.MTR_PY like concat('%',#{mtrName},'%'))
+			</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by m.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by m.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from mtr_data 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.baseData.entity.MtrDataEntity">
+		insert into mtr_data
+		(
+			`id`, 
+			`MTR_CODE`, 
+			`MTR_NAME`, 
+			`MTR_PY`, 
+			`TYPE_ID`, 
+			`CUT_ID`,
+			`PURCHASE_UNIT`,
+			`PURCHASE_RATE`, 
+			`MINI_UNIT`, 
+			`MINI_RATE`, 
+			`FORMULA_UNIT`, 
+			`MODI_RATE1`, 
+			`MODI_RATE2`, 
+			`WAREHOUSE_ID`, 
+			`TAKE_STN_ID`, 
+			`WGT_UNIT1`, 
+			`WGT_UNIT2`, 
+			`PRICE`, 
+			`FIXUP`, 
+			`PURCYCLE`, 
+			`COST_TYPE`, 
+			`TAX_RATE`, 
+			`REMARK`, 
+			`CREATE_USER`, 
+			`CREATE_DATE`,
+			`STATUS`,
+			`EXTEND_ID`,
+			`UPDATE_USER`,
+			`UPDATE_DATE`,
+			`EXTEND_CODE`
+		)
+		values
+		(
+			#{id}, 
+			#{mtrCode}, 
+			#{mtrName}, 
+			#{mtrPy}, 
+			#{typeId}, 
+			#{cutId},
+			#{purchaseUnit},
+			#{purchaseRate}, 
+			#{miniUnit}, 
+			#{miniRate}, 
+			#{formulaUnit}, 
+			#{modiRate1}, 
+			#{modiRate2}, 
+			#{warehouseId}, 
+			#{takeStnId}, 
+			#{wgtUnit1}, 
+			#{wgtUnit2}, 
+			#{price}, 
+			#{fixup}, 
+			#{purcycle}, 
+			#{costType}, 
+			#{taxRate}, 
+			#{remark}, 
+			#{createUser}, 
+			#{createDate},
+			#{status},
+			#{extendId},
+			#{updateUser},
+			#{updateDate},
+			#{extendCode}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.baseData.entity.MtrDataEntity">
+		update mtr_data 
+		<set>
+			<if test="mtrCode != null">`MTR_CODE` = #{mtrCode}, </if>
+			<if test="mtrName != null">`MTR_NAME` = #{mtrName}, </if>
+			<if test="mtrPy != null">`MTR_PY` = #{mtrPy}, </if>
+			<if test="typeId != null">`TYPE_ID` = #{typeId}, </if>
+			<if test="cutId != null">`CUT_ID` = #{cutId}, </if>
+			<if test="purchaseUnit != null">`PURCHASE_UNIT` = #{purchaseUnit}, </if>
+			<if test="purchaseRate != null">`PURCHASE_RATE` = #{purchaseRate}, </if>
+			<if test="miniUnit != null">`MINI_UNIT` = #{miniUnit}, </if>
+			<if test="miniRate != null">`MINI_RATE` = #{miniRate}, </if>
+			<if test="formulaUnit != null">`FORMULA_UNIT` = #{formulaUnit}, </if>
+			<if test="modiRate1 != null">`MODI_RATE1` = #{modiRate1}, </if>
+			<if test="modiRate2 != null">`MODI_RATE2` = #{modiRate2}, </if>
+			<if test="warehouseId != null">`WAREHOUSE_ID` = #{warehouseId}, </if>
+			<if test="takeStnId != null">`TAKE_STN_ID` = #{takeStnId}, </if>
+			<if test="wgtUnit1 != null">`WGT_UNIT1` = #{wgtUnit1}, </if>
+			<if test="wgtUnit2 != null">`WGT_UNIT2` = #{wgtUnit2}, </if>
+			<if test="price != null">`PRICE` = #{price}, </if>
+			<if test="fixup != null">`FIXUP` = #{fixup}, </if>
+			<if test="purcycle != null">`PURCYCLE` = #{purcycle}, </if>
+			<if test="costType != null">`COST_TYPE` = #{costType}, </if>
+			<if test="taxRate != null">`TAX_RATE` = #{taxRate}, </if>
+			<if test="remark != null">`REMARK` = #{remark}, </if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser}, </if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate},</if>
+			<if test="status != null">`STATUS` = #{status},</if>
+			<if test="extendId != null">`EXTEND_ID` = #{extendId},</if>
+			<if test="updateUser != null">`UPDATE_USER` = #{updateUser},</if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate},</if>
+			<if test="extendCode != null">`EXTEND_CODE` = #{extendCode}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from mtr_data where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from mtr_data where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

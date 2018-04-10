@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title>类型信息表</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+	<link rel="stylesheet" href="../../css/bootstrap-table.min.css">
+	<link rel="stylesheet" href="../../css/main.css">
+	<link rel="stylesheet" href="../../plugins/treegrid/jquery.treegrid.css">
+
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+	<script src="../../libs/bootstrap-table.min.js"></script>
+	<script src="../../plugins/treegrid/jquery.treegrid.min.js"></script>
+	<script src="../../plugins/treegrid/jquery.treegrid.bootstrap3.js"></script>
+	<script src="../../plugins/treegrid/jquery.treegrid.extension.js"></script>
+	<script src="../../plugins/treegrid/tree.table.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<!--<div class="form-group col-sm-2">-->
+				<!--<input type="text" class="form-control" v-model="q.searchWord" @keyup.enter="search" placeholder="名称／编码">-->
+			<!--</div>-->
+			<!--<a class="btn btn-default" @click="search">查询</a>-->
+			<a v-if="hasPermission('baseData:typeinfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<a v-if="hasPermission('baseData:typeinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<a v-if="hasPermission('baseData:typeinfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+		</div>
+	    <!--<table id="jqGrid"></table>-->
+	    <!--<div id="jqGridPager"></div>-->
+
+		<table id="typeTable" data-mobile-responsive="true" data-click-to-select="true">
+			<thead>
+			<tr>
+				<th data-field="selectItem" data-checkbox="true"></th>
+			</tr>
+			</thead>
+		</table>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+				<div class="col-sm-2 control-label">上级分类</div>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" style="cursor:pointer;" v-model="typeInfo.parentName" @click="typeInfoTree" readonly="readonly" placeholder="一级分类"/>
+				</div>
+			</div>
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">类型编码</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="typeInfo.typeCode" id="typeCode" placeholder="类型编码" readonly="readonly"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">类型名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="typeInfo.typeName" placeholder="类型名称" @input="getPinying"/>
+			    </div>
+			</div>
+
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">拼音码</div>
+			   	<div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="typeInfo.typePy" id="typePy"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">状态</div>
+			   	<div class="col-sm-10">
+			      <!--<input type="text" class="form-control" v-model="typeInfo.status" placeholder="状态"/>-->
+					<!--<input class="form-check-input" type="radio" name="status" v-model="typeInfo.status" value="1">-->
+					<!--启用-->
+					<!--<input class="form-check-input" type="radio" name="status" v-model="typeInfo.status" value="0">-->
+					<!--禁用-->
+
+					<select class="form-control" v-model="typeInfo.status" placeholder="请选择状态">
+						<option value="1">启用</option>
+						<option value="0">禁用</option>
+					</select>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- 选择上级 -->
+<div id="typeInfoLayer" style="display: none;padding:10px;">
+	<ul id="typeInfoTree" class="ztree"></ul>
+</div>
+
+<script src="../../js/modules/baseData/typeinfo.js"></script>
+</body>
+</html>

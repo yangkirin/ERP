@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.baseData.dao.BomInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.baseData.entity.BomInfoEntity" id="bomInfoMap">
+        <result property="id" column="id"/>
+        <result property="bomName" column="bom_name"/>
+        <result property="bomPy" column="bom_py"/>
+        <result property="prdId" column="prd_id"/>
+        <result property="status" column="status"/>
+        <result property="cost" column="cost"/>
+        <result property="remark" column="remark"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createDate" column="create_date"/>
+		<!--<result property="prdIdName" column="prd_name"/>-->
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
+		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName from bom_info b where b.id = #{value}
+	</select>
+
+	<select id="queryObjectByPrdId" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
+		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName from bom_info b where b.prd_id = #{prdId}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
+		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName,
+		(select p.SEMI_FINISHED FROM prd_data p WHERE p.id=b.prd_id) as semiFinished
+		from bom_info b where 1=1
+		<if test="bomName != null">
+			and b.bom_name like "%${bomName}%"
+		</if>
+		<if test="bomPy != null">
+			or b.bom_py like "%${bomPy}%"
+		</if>
+		<!--<if test="prdIdName != null">-->
+			<!--or prdIdName like "%${prd_name}%"-->
+		<!--</if>-->
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by b.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by b.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from bom_info 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.baseData.entity.BomInfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into bom_info
+		(
+			`bom_name`, 
+			`bom_py`,
+			`prd_id`, 
+			`status`, 
+			`cost`,
+			`remark`,
+			`create_user`, 
+			`create_date`
+		)
+		values
+		(
+			#{bomName}, 
+			#{bomPy},
+			#{prdId}, 
+			#{status}, 
+			#{cost},
+			#{remark},
+			#{createUser}, 
+			#{createDate}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.baseData.entity.BomInfoEntity">
+		update bom_info 
+		<set>
+			<if test="bomName != null">`bom_name` = #{bomName}, </if>
+			<if test="bomPy != null">`bom_py` = #{bomPy}, </if>
+			<if test="prdId != null">`prd_id` = #{prdId}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="cost != null">`cost` = #{cost}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="createUser != null">`create_user` = #{createUser}, </if>
+			<if test="createDate != null">`create_date` = #{createDate},</if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate},</if>
+			<if test="updateUser != null">`UPDATE_USER` = #{updateUser}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from bom_info where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from bom_info where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

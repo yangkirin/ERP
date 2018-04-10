@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title>原料基础数据表</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<!--<div class="grid-btn">-->
+			<!--<a v-if="hasPermission('baseData:mtrdata:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>-->
+			<!--<a v-if="hasPermission('baseData:mtrdata:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
+			<!--<a v-if="hasPermission('baseData:mtrdata:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>-->
+		<!--</div>-->
+		<div class="row">
+			<div class="col-xs-4">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<form class="form-horizontal" style="width: 100%">
+							<div class="form-group form-group-sm">
+								<div class="col-sm-3 control-label">分类</div>
+								<div class="col-sm-6">
+									<input type="text" class="form-control" style="cursor:pointer;" v-model="q.typeName" @click="typeInfoTree('search')" readonly="readonly" placeholder="一级分类"/>
+								</div>
+							</div>
+							<div class="form-group form-group-sm">
+								<div class="col-sm-3 control-label">编码</div>
+								<div class="col-sm-6">
+									<input type="text" class="form-control input-sm" v-model="q.mtrCode" placeholder="编码"/>
+								</div>
+							</div>
+							<div class="form-group form-group-sm">
+								<div class="col-sm-3 control-label">名称</div>
+								<div class="col-sm-6">
+									<input type="text" class="form-control input-sm" id="searchName"  v-model="q.mtrName" placeholder="名称/拼音码" @input="getFieldData" data-provide="typeahead" autocomplete="off"/>
+								</div>
+								<input type="button" class="btn btn-primary input-sm" @click="query" value="查询"/>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<table id="jqGrid"></table>
+					</div>
+				</div>
+
+				<!--<div id="jqGridPager"></div>-->
+			</div>
+			<div class="col-xs-8">
+				<div class="grid-btn">
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrdata:add')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrcut:add')" class="btn btn-primary" @click="addCutNew" id="addCut_btn"><i class="fa fa-plus"></i>&nbsp;新增形状</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrextend:save')" class="btn btn-primary" @click="addExtend" id="addExtend_btn"><i class="fa fa-plus"></i>&nbsp;品牌&规格</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrdata:update')" class="btn btn-primary" @click="saveOrUpdate"><i class="fa fa-pencil-square-o"></i>&nbsp;保存更改</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrdata:delete')" class="btn btn-danger" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除原料</a>
+				</div>
+				<form class="form-horizontal" style="width: 100%;">
+					<div class="form-group">
+						<div class="col-sm-2 control-label">类别</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.typeName" @click="typeInfoTree('editTypeName')" readonly="readonly" placeholder="类别"/>
+						</div>
+						<div class="col-xs-2 control-label">原料名称</div>
+						<div class="col-xs-4">
+							<input type="text" class="form-control" v-model="mtrData.mtrName" placeholder="原料名称"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-xs-2 control-label">原料编号</div>
+						<div class="col-xs-4">
+							<input type="text" class="form-control" v-model="mtrData.mtrCode" placeholder="原料编号" readonly="readonly"/>
+						</div>
+						<div class="col-xs-2 control-label">拼音码</div>
+						<div class="col-xs-4">
+							<input type="text" class="form-control" v-model="mtrData.mtrPy" placeholder="拼音码" readonly="readonly"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-xs-2 control-label">采购单位</div>
+						<div class="col-xs-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.purchaseUnitName" @click="typeInfoTree('editPurchaseUnitName')" readonly="readonly" placeholder="采购单位"/>-->
+							<select class="form-control" v-model="mtrData.purchaseUnit" placeholder="采购单位" readonly="readonly">
+								<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-xs-2 control-label">采购转换率</div>
+						<div class="col-xs-4">
+							<input type="text" class="form-control" v-model="mtrData.purchaseRate" placeholder="采购转换率"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">最小单位</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.miniUnitName" @click="typeInfoTree('editMiniUnitName')" readonly="readonly" placeholder="最小单位"/>-->
+							<select class="form-control" v-model="mtrData.miniUnit" placeholder="最小单位" readonly="readonly">
+								<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+
+						<div class="col-sm-2 control-label">最小转换率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.miniRate" placeholder="最小单位转换率"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">配方单位</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.formulaUnitName" @click="typeInfoTree('editFormulaUnitName')" readonly="readonly" placeholder="配方单位"/>-->
+							<select class="form-control" v-model="mtrData.formulaUnit" placeholder="配方单位" readonly="readonly">
+								<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">采购单价</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.price" placeholder="采购单价"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">所属仓库</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.warehouseName" @click="typeInfoTree('editWarehouseName')" readonly="readonly" placeholder="所属仓库"/>-->
+							<select class="form-control" v-model="mtrData.warehouseId" placeholder="所属仓库" readonly="readonly">
+								<option v-for="option in warehouseArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">净菜得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.modiRate1" placeholder="净菜得率"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">领料站点</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.takeStnName" @click="typeInfoTree('editTakeStnName')" readonly="readonly" placeholder="领料站点"/>-->
+							<select class="form-control" v-model="mtrData.takeStnId" placeholder="领料站点" readonly="readonly">
+								<option v-for="option in takestnArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">熟菜得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.modiRate2" placeholder="熟菜得率"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">成本分类</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.costTypeName" @click="typeInfoTree('editCostTypeName')" readonly="readonly" placeholder="成本分类"/>-->
+							<select class="form-control" v-model="mtrData.costType" placeholder="成本分类" readonly="readonly">
+								<option v-for="option in costArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">税率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.taxRate" placeholder="税率"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">固定采购</div>
+						<div class="col-sm-4">
+							<select class="form-control" v-model="mtrData.fixup" placeholder="请选择是否固定采购">
+								<option value="1">是</option>
+								<option value="0">否</option>
+							</select>
+						</div>
+						<div class="col-sm-2 control-label">采购周期</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.purcycle" placeholder="采购周期"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">单件重量</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.wgtUnit1" placeholder="单件重量"/>
+						</div>
+						<div class="col-sm-2 control-label">单筐重量</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.wgtUnit2" placeholder="单筐重量"/>
+						</div>
+					</div>
+					<!--<div class="form-group">-->
+						<!--<div class="col-sm-2 control-label">规格</div>-->
+						<!--<div class="col-sm-4">-->
+							<!--<input type="text" class="form-control" v-model="mtrData.spec" placeholder="规格"/>-->
+						<!--</div>-->
+						<!--<div class="col-sm-2 control-label">品牌</div>-->
+						<!--<div class="col-sm-4">-->
+							<!--<input type="text" class="form-control" v-model="mtrData.brand" placeholder="品牌"/>-->
+						<!--</div>-->
+					<!--</div>-->
+					<div class="form-group">
+						<!--<div class="col-sm-2 control-label">切割形状</div>-->
+						<!--<div class="col-sm-4">-->
+							<!--<select class="form-control" v-model="mtrData.cutId" placeholder="切割形状">-->
+								<!--<option v-for="option in cutArr" v-bind:value="option.value">{{option.text}}-->
+							<!--</select>-->
+						<!--</div>-->
+						<div class="col-sm-2 control-label">状态</div>
+						<div class="col-sm-4">
+							<select class="form-control" v-model="mtrData.status" placeholder="请选择状态">
+								<option value="1">启用</option>
+								<option value="0">禁用</option>
+							</select>
+						</div>
+					<!--</div>-->
+					<!--<div class="form-group">-->
+						<div class="col-sm-2 control-label">对外编码</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="mtrData.extendCode" placeholder="对外编码"/>
+						</div>
+						<!--<div class="col-sm-2 control-label">规格&品牌</div>-->
+						<!--<div class="col-sm-4">-->
+							<!--<select class="form-control" v-model="mtrData.extendId">-->
+								<!--<option v-for="option in extendArr" v-bind:value="option.value">{{option.text}}-->
+							<!--</select>-->
+						<!--</div>-->
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">备注</div>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" v-model="mtrData.remark" placeholder="备注"/>
+						</div>
+					</div>
+				</form>
+				<!-- 切割形状 -->
+				<!--<div class="panel panel-default">-->
+					<!--<div class="panel-body">-->
+					<div v-show="showCut">
+						<table id="cutGrid"></table>
+						<div id="cutGridPager"></div>
+					</div>
+						<br>
+						<!--<input type="button" class="btn btn-primary" value="新增形状"/>-->
+						<!--&nbsp;&nbsp;-->
+						<!--<input type="button" class="btn btn-primary" value="删除原料"/>-->
+						<!--&nbsp;&nbsp;-->
+						<!--<input type="button" class="btn btn-primary" @click="add" value="新增原料"/>-->
+						<!--<input type="button" class="btn btn-primary" @click="addCutNew" value="新增形状"/>-->
+						<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="saveOrUpdate" value="保存更改"/>-->
+						<!--&nbsp;&nbsp;<input v-if="hasPermission('baseData:mtrdata:delete')" type="button" class="btn btn-warning" @click="del" value="删除原料"/>-->
+						<!--&nbsp;&nbsp;<a v-if="hasPermission('baseData:mtrdata:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除原料</a>-->
+					<!--</div>-->
+				<!--</div>-->
+			</div>
+		</div>
+    </div>
+    
+    <div id="addLayer" style="display: none;">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal" style="width: 100%;">
+											<div class="form-group">
+				<div class="col-sm-2 control-label"><label style="color: red">*</label>原料分类</div>
+				<div class="col-sm-3">
+					<!--<input type="text" class="form-control" v-model="mtrData.typeId" placeholder="类别"/>-->
+					<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.typeName" id="addMtrDataType" @click="typeInfoTree('add')" readonly="readonly" placeholder="一级分类"/>
+				</div>
+			   	<div class="col-sm-3 control-label"><label style="color: red">*</label>原料名称</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" v-model="addMtrData.mtrName" placeholder="原料名称" @input="getPinying('add')"/>
+			    </div>
+			</div>
+									<div class="form-group">
+				<div class="col-sm-2 control-label">原料编号</div>
+				<div class="col-sm-3">
+					<input type="text" class="form-control" id="mtrCode" v-model="addMtrData.mtrCode" placeholder="原料编号"/>
+				</div>
+			   	<div class="col-sm-3 control-label">拼音码</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" id="mtrPy" v-model="addMtrData.mtrPy" placeholder="拼音码"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"><label style="color: red">*</label>采购单位</div>
+			   	<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.purchaseUnitName" @click="typeInfoTree('purchaseUnit')" readonly="readonly" placeholder="采购单位"/>-->
+					<select class="form-control" v-model="addMtrData.purchaseUnit" placeholder="采购单位">
+						<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+			   	<div class="col-sm-3 control-label"><label style="color: red">*</label>采购单位转换率</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" v-model="addMtrData.purchaseRate" placeholder="采购单位转换率"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label"><label style="color: red">*</label>最小单位</div>
+			   	<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.miniUnitName" @click="typeInfoTree('miniUnit')" readonly="readonly" placeholder="最小单位"/>-->
+					<select class="form-control" v-model="addMtrData.miniUnit" placeholder="最小单位">
+						<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+					</select>
+			    </div>
+			   	<div class="col-sm-3 control-label"><label style="color: red">*</label>最小单位转换率</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" v-model="addMtrData.miniRate" placeholder="最小单位转换率"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label"><label style="color: red">*</label>配方单位</div>
+			   	<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.formulaUnitName" @click="typeInfoTree('formulaUnit')" readonly="readonly" placeholder="配方单位"/>-->
+					<select class="form-control" v-model="addMtrData.formulaUnit" placeholder="配方单位">
+						<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+			   	<div class="col-sm-3 control-label"><label style="color: red">*</label>净菜得率</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" v-model="addMtrData.modiRate1" placeholder="净菜得率"/>
+			    </div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label"><label style="color: red">*</label>所属仓库</div>
+				<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.warehouseId" @click="typeInfoTree('warehouseId')" readonly="readonly" placeholder="所属仓库"/>-->
+					<select class="form-control" v-model="addMtrData.warehouseId" placeholder="所属仓库">
+						<option v-for="option in warehouseArr" v-bind:value="option.value">{{option.text}}
+					</select>
+
+				</div>
+			   	<div class="col-sm-3 control-label"><label style="color: red">*</label>熟菜得率</div>
+			   	<div class="col-sm-4">
+			      <input type="text" class="form-control" v-model="addMtrData.modiRate2" placeholder="熟菜得率"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label"><label style="color: red">*</label>领料站点</div>
+			   	<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.takeStnName" @click="typeInfoTree('takeStnId')" readonly="readonly" placeholder="领料站点"/>-->
+					<select class="form-control" v-model="addMtrData.takeStnId" placeholder="领料站点">
+						<option v-for="option in takestnArr" v-bind:value="option.value">{{option.text}}
+					</select>
+			    </div>
+				<div class="col-sm-3 control-label"><label style="color: red">*</label>固定采购</div>
+				<div class="col-sm-4">
+					<select class="form-control" v-model="addMtrData.fixup" placeholder="请选择是否固定采购">
+						<option value="1">是</option>
+						<option value="0">否</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label"><label style="color: red">*</label>成本分类</div>
+				<div class="col-sm-3">
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.costTypeName" @click="typeInfoTree('costType')" readonly="readonly" placeholder="成本分类"/>-->
+					<select class="form-control" v-model="addMtrData.costType" placeholder="成本分类">
+						<option v-for="option in costArr" v-bind:value="option.value">{{option.text}}
+					</select>
+				</div>
+				<div class="col-sm-3 control-label">采购周期</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" v-model="addMtrData.purcycle" placeholder="采购周期"/>
+				</div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">税率</div>
+			   	<div class="col-sm-3">
+			      <input type="text" class="form-control" v-model="addMtrData.taxRate" placeholder="税率"/>
+			    </div>
+				<div class="col-sm-3 control-label">单件重量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" v-model="addMtrData.wgtUnit1" placeholder="单件重量"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">单筐重量</div>
+				<div class="col-sm-3">
+					<input type="text" class="form-control" v-model="addMtrData.wgtUnit2" placeholder="单筐重量"/>
+				</div>
+				<div class="col-sm-3 control-label">采购单价</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" v-model="addMtrData.price" placeholder="采购单价"/>
+				</div>
+			</div>
+			<!--<div class="form-group">-->
+				<!--<div class="col-sm-2 control-label">规格</div>-->
+				<!--<div class="col-sm-3">-->
+					<!--<input type="text" class="form-control" v-model="addMtrData.spec" placeholder="规格"/>-->
+				<!--</div>-->
+				<!--<div class="col-sm-3 control-label">品牌</div>-->
+				<!--<div class="col-sm-4">-->
+					<!--<input type="text" class="form-control" v-model="addMtrData.brand" placeholder="品牌"/>-->
+				<!--</div>-->
+			<!--</div>-->
+			<!--<div class="form-group">-->
+
+			   	<!--<div class="col-sm-2 control-label">备注</div>-->
+			   	<!--<div class="col-sm-4">-->
+			      <!--<input type="text" class="form-control" v-model="addMtrData.remark" placeholder="备注"/>-->
+			    <!--</div>-->
+				<!--<div class="col-sm-3 control-label">状态</div>-->
+				<!--<div class="col-sm-4">-->
+					<!--<input class="form-check-input" type="radio" name="status" v-model="addMtrData.status" value="1">-->
+					<!--启用-->
+					<!--<input class="form-check-input" type="radio" name="status" v-model="addMtrData.status" value="0">-->
+					<!--禁用-->
+				<!--</div>-->
+			<!--</div>-->
+
+		</form>
+	</div>
+
+	<div id="cutInfoLayer" style="display: none;padding:10px;">
+		<form class="form-horizontal" style="width: 100%;">
+			<div class="form-group">
+				<div class="col-sm-4 control-label">加工形状</div>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" v-model="mtrCut.cut" placeholder="加工形状"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-4 control-label">加工工时</div>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" v-model="mtrCut.workHours" placeholder="加工工时"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-4 control-label">净得率</div>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" v-model="mtrCut.netRate" placeholder="净得率"/>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<div id="extendLayer" style="display: none;padding:10px;">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<form class="form-horizontal" style="width: 100%;">
+							<div class="form-group">
+								<div class="col-sm-1 control-label">单位</div>
+								<div class="col-sm-3">
+									<!--<input type="text" class="form-control" v-model="mtrExtend.unitId" placeholder="单位"/>-->
+									<select class="form-control" v-model="mtrExtend.unitId" placeholder="单位" readonly="readonly">
+										<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
+									</select>
+								</div>
+								<div class="col-sm-1 control-label">转换率</div>
+								<div class="col-sm-3">
+									<input type="text" class="form-control" v-model="mtrExtend.unitRate" placeholder="转换率"/>
+								</div>
+								<div class="col-sm-1 control-label">价格</div>
+								<div class="col-sm-3">
+									<input type="text" class="form-control" v-model="mtrExtend.price" placeholder="价格"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-1 control-label">规格</div>
+								<div class="col-sm-3">
+									<input type="text" class="form-control" v-model="mtrExtend.spec" placeholder="规格"/>
+								</div>
+								<div class="col-sm-1 control-label">品牌</div>
+								<div class="col-sm-3">
+									<input type="text" class="form-control" v-model="mtrExtend.brand" placeholder="品牌"/>
+								</div>
+								<div class="col-sm-1 control-label">状态</div>
+								<div class="col-sm-3">
+									<!--<input type="text" class="form-control" v-model="mtrExtend.status" placeholder="状态"/>-->
+									<select class="form-control" v-model="mtrExtend.status" placeholder="请选择状态">
+										<option value="1">启用</option>
+										<option value="0">禁用</option>
+									</select>
+								</div>
+								<!--<div class="col-sm-2 control-label">备注</div>-->
+								<!--<div class="col-sm-4">-->
+									<!--<input type="text" class="form-control" v-model="mtrExtend.remark" placeholder="备注"/>-->
+								<!--</div>-->
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<table id="jqGridExtend"></table>
+						<div id="jqGridExtendPager"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="typeInfoLayer" style="display: none;padding:10px;">
+	<ul id="typeInfoTree" class="ztree"></ul>
+</div>
+
+<script src="../../js/modules/baseData/mtrdata.js"></script>
+</body>
+</html>

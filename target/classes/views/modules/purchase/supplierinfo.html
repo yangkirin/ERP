@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+<title>供应商信息表</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showInfo">
+		<div v-show="showList">
+			<div class="row">
+				<div class="grid-btn col-sm-3">
+					<a v-if="hasPermission('purchase:supplierinfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+					<a v-if="hasPermission('purchase:supplierinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+					<a v-if="hasPermission('purchase:supplierinfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+				</div>
+				<div class="input-group input-group-sm col-sm-2">
+					<input type="text" placeholder="名称/拼音码/代码" id="search" class="form-control">
+					<span class="input-group-btn">
+				<button class="btn btn-primary" type="button" @click="search">查询</button>
+				</span>
+				</div>
+			</div>
+			<table id="jqGrid"></table>
+			<div id="jqGridPager"></div>
+		</div>
+
+		<div v-show="!showList" class="panel panel-default">
+			<div class="panel-heading">{{title}}</div>
+			<form class="form-horizontal" style="width: 100%;">
+												<div class="form-group">
+					<div class="col-sm-2 control-label">供应商名称</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.suppierName" placeholder="供应商名称" @input="getPinying('supplierPy')"/>
+					</div>
+				<!--</div>-->
+										<!--<div class="form-group">-->
+					<div class="col-sm-2 control-label">供应商代码</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.suppierCode" placeholder="供应商代码"/>
+					</div>
+				</div>
+										<div class="form-group">
+					<div class="col-sm-2 control-label">供应商简称</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.suppierShortName" placeholder="供应商简称"/>
+					</div>
+				<!--</div>-->
+										<!--<div class="form-group">-->
+					<div class="col-sm-2 control-label">拼音码</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.suppierPy" id="supplierPy" placeholder="拼音码"/>
+					</div>
+				</div>
+										<div class="form-group">
+					<div class="col-sm-2 control-label">联系人</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.linkMan" placeholder="联系人"/>
+					</div>
+				<!--</div>-->
+										<!--<div class="form-group">-->
+					<div class="col-sm-2 control-label">联系电话</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.linkPhone" placeholder="联系电话"/>
+					</div>
+				</div>
+										<div class="form-group">
+					<div class="col-sm-2 control-label">固定电话</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.linkTell" placeholder="固定电话"/>
+					</div>
+				<!--</div>-->
+										<!--<div class="form-group">-->
+					<div class="col-sm-2 control-label">地址</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.address" placeholder="地址"/>
+					</div>
+				</div>
+										<div class="form-group">
+					<div class="col-sm-2 control-label">税率</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.taxRate" placeholder="税率"/>
+					</div>
+				<!--</div>-->
+										<!--<div class="form-group">-->
+					<div class="col-sm-2 control-label">账期</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.paymentDays" placeholder="账期"/>
+					</div>
+				</div>
+										<div class="form-group">
+					<div class="col-sm-2 control-label">状态</div>
+					<div class="col-sm-4">
+					  <!--<input type="text" class="form-control" v-model="supplierInfo.status" placeholder="状态"/>-->
+						<select class="form-control" v-model="supplierInfo.status" placeholder="请选择状态">
+							<option value="1">启用</option>
+							<option value="0">禁用</option>
+						</select>
+					</div>
+					<div class="col-sm-2 control-label">备注</div>
+					<div class="col-sm-4">
+					  <input type="text" class="form-control" v-model="supplierInfo.remark" placeholder="备注"/>
+					</div>
+				</div>
+								<div class="form-group">
+					<div class="col-sm-2 control-label"></div>
+					<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+					&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadInfo" value="返回"/>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div v-show="!showInfo">
+		<div v-show="showListMtr">
+			<div class="grid-btn">
+				<a class="btn btn-primary" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
+				<a class="btn btn-primary" @click="updateMtr"><i class="fa fa-pencil-square-o"></i>&nbsp;修改原料</a>
+				<a class="btn btn-primary" @click="delMtr"><i class="fa fa-trash-o"></i>&nbsp;删除原料</a>
+				<a class="btn btn-primary" @click="reloadInfo"><i class="fa fa-trash-o"></i>&nbsp;返回</a>
+			</div>
+			<table id="jqGridMtr" style="width: 100%;"></table>
+			<div id="jqGridPagerMtr"></div>
+		</div>
+		<div v-show="!showListMtr" class="panel panel-default">
+			<div class="panel-heading">{{titleMtr}}</div>
+			<form class="form-horizontal" style="width: 100%;">
+				<div class="form-group">
+					<div class="col-xs-2 control-label">原料名称</div>
+					<div class="col-xs-4">
+						<input type="text" class="form-control" v-model="mtrData.mtrName" placeholder="原料名称" id="mtrName" @input="getFieldData" data-provide="typeahead" autocomplete="off"/>
+					</div>
+					<div class="col-sm-2 control-label">类别</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.typeName" id="typeName" @click="typeInfoTree('typeName')" readonly="readonly" placeholder="类别"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-xs-2 control-label">采购编号</div>
+					<div class="col-xs-4">
+						<input type="text" class="form-control" v-model="mtrData.mtrCode" placeholder="采购编号"/>
+					</div>
+					<div class="col-xs-2 control-label">采购单位</div>
+					<div class="col-xs-4">
+						<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.purchaseUnitName" id="purchaseUnitName" @click="typeInfoTree('purchaseUnitName')" readonly="readonly" placeholder="采购单位"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label">采购规格</div>
+					<div class="col-sm-4">
+						<select class="form-control" id="mtrSelectExtend" v-model="mtrData.extendId" placeholder="规格">
+							<option v-for="option in mtrExtendArr" v-bind:value="option.value">{{option.text}}
+						</select>
+					</div>
+					<div class="col-xs-2 control-label">采购转换率</div>
+					<div class="col-xs-4">
+						<input type="text" class="form-control" v-model="mtrData.purchaseRate" placeholder="采购转换率" readonly="readonly"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-2 control-label">采购单价</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" v-model="mtrData.price" placeholder="采购单价"/>
+					</div>
+					<div class="col-sm-2 control-label">税率</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" v-model="mtrData.taxRate" placeholder="税率" readonly="readonly"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label">采购周期</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" v-model="mtrData.purcycle" placeholder="采购周期" readonly="readonly"/>
+					</div>
+					<div class="col-sm-2 control-label">单件重量</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" v-model="mtrData.wgtUnit1" placeholder="单件重量" readonly="readonly"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label">状态</div>
+					<div class="col-sm-4">
+						<select class="form-control" v-model="mtrData.status" placeholder="请选择状态">
+							<option value="1">启用</option>
+							<option value="0">禁用</option>
+						</select>
+					</div>
+					<div class="col-sm-2 control-label">单筐重量</div>
+					<div class="col-sm-4">
+						<input type="text" class="form-control" v-model="mtrData.wgtUnit2" placeholder="单筐重量" readonly="readonly"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-4 control-label"></div>
+					<input type="button" class="btn btn-primary" @click="saveOrUpdateMtr" value="确定"/>
+					&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadMtrConfig" value="返回"/>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="typeInfoLayer" style="display: none;padding:10px;">
+	<ul id="typeInfoTree" class="ztree"></ul>
+</div>
+
+<script src="../../js/modules/purchase/supplierinfo.js"></script>
+</body>
+</html>

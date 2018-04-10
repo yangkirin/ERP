@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.baseData.dao.BomDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.baseData.entity.BomDetailEntity" id="bomDetailMap">
+        <result property="id" column="id"/>
+        <result property="bomId" column="bom_id"/>
+        <result property="mtrId" column="mtr_id"/>
+        <result property="mtrCutId" column="mtr_cut_id"/>
+        <result property="grossWgt" column="gross_wgt"/>
+        <result property="netWgt" column="net_wgt"/>
+        <result property="netRate" column="net_rate"/>
+        <result property="modiWgt" column="modi_wgt"/>
+        <result property="modiRate" column="modi_rate"/>
+        <result property="semiFinished" column="semi_finished"/>
+        <result property="price" column="price"/>
+        <result property="cost" column="cost"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.baseData.entity.BomDetailEntity">
+		select d.*,
+		if(m.TYPE_ID!=0,((select CONCAT((select t1.type_name from tb_type_info t1 where t.PARENT_ID=t1.id),'*',t.TYPE_NAME) as type_name from tb_type_info t where t.id=m.type_Id)),(select t.TYPE_NAME from tb_type_info t where t.id=m.TYPE_ID)) as typeName
+		,(SELECT t.id FROM tb_type_info t,mtr_data md where t.id=md.type_id and md.id=d.mtr_id) as typeId
+		,(SELECT t.type_name FROM tb_type_info t,mtr_data md where t.id=md.take_stn_id and md.id=d.mtr_id) as takeStnIdName
+		,(SELECT t.mtr_name FROM mtr_data t where t.id=d.mtr_id) as mtrIdName
+		,(SELECT t.mtr_code FROM mtr_data t where t.id=d.mtr_id) as mtrCode
+		,(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id) as mtrCutIdName
+		 from bom_detail d where d.id = #{value}
+	</select>
+
+	<select id="queryDetailObject" resultType="com.kirin.modules.baseData.entity.BomDetailEntity">
+		select bd.*,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('')) as typeId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('')) as typeIdName,
+		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
+		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
+		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		from BOM_DETAIL bd where bd.id=#{id};
+	</select>
+
+
+	<select id="queryList" resultType="com.kirin.modules.baseData.entity.BomDetailEntity">
+		select bd.*,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('')) as typeId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('半成品')) as typeIdName,
+		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
+		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
+		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		from bom_detail bd
+		<where>
+			<if test="bomInfoId != null">
+				and bd.bom_id = #{bomInfoId}
+			</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by bd.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by bd.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryListByPrdId" resultType="com.kirin.modules.baseData.entity.BomDetailEntity">
+		select bd.*,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('')) as typeId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('半成品')) as typeIdName,
+		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
+		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
+		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		from bom_detail bd,BOM_INFO bi WHERE bd.bom_id=bi.id
+		<if test="prdId != null">
+			and bi.prd_id = #{prdId}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by bd.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by bd.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from bom_detail 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.baseData.entity.BomDetailEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into bom_detail
+		(
+			`bom_id`, 
+			`mtr_id`, 
+			`mtr_extend_id`,
+			`mtr_extend_desc`,
+			`mtr_cut_id`,
+			`gross_wgt`, 
+			`net_wgt`, 
+			`net_rate`, 
+			`modi_wgt`, 
+			`modi_rate`, 
+			`price`,
+			`semi_finished`,
+			`cost`,
+			`cost_rate`,
+			`CREATE_USER`,
+			`CREATE_DATE`,
+			`UPDATE_DATE`,
+			`UPDATE_USER`
+		)
+		values
+		(
+			#{bomId}, 
+			#{mtrId}, 
+			#{mtrExtendId},
+			#{mtrExtendDesc},
+			#{mtrCutId},
+			#{grossWgt}, 
+			#{netWgt}, 
+			#{netRate}, 
+			#{modiWgt}, 
+			#{modiRate},
+			#{price},
+			#{semiFinished},
+			#{cost},
+			#{costRate},
+			#{createUser},
+			#{createDate},
+			#{updateDate},
+			#{updateUser}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.baseData.entity.BomDetailEntity">
+		update bom_detail 
+		<set>
+			<if test="bomId != null">`bom_id` = #{bomId}, </if>
+			<if test="mtrId != null">`mtr_id` = #{mtrId}, </if>
+			<if test="mtrExtendId != null">`mtr_extend_id` = #{mtrExtendId}, </if>
+			<if test="mtrExtendDesc != null">`mtr_extend_desc` = #{mtrExtendDesc}, </if>
+			<if test="mtrCutId != null">`mtr_cut_id` = #{mtrCutId}, </if>
+			<if test="grossWgt != null">`gross_wgt` = #{grossWgt}, </if>
+			<if test="netWgt != null">`net_wgt` = #{netWgt}, </if>
+			<if test="netRate != null">`net_rate` = #{netRate}, </if>
+			<if test="modiWgt != null">`modi_wgt` = #{modiWgt}, </if>
+			<if test="modiRate != null">`modi_rate` = #{modiRate}, </if>
+			<if test="price != null">`price` = #{price}, </if>
+			<if test="semiFinished != null">`semi_finished` = #{semiFinished},</if>
+			<if test="cost != null">`cost` = #{cost},</if>
+			<if test="costRate != null">`cost_rate` = #{costRate},</if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser}, </if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate}, </if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate},</if>
+			<if test="updateUser != null">`UPDATE_USER` = #{updateUser}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from bom_detail where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from bom_detail where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>
