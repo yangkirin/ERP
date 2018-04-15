@@ -362,6 +362,21 @@ var vm = new Vue({
                 }
             });
             return no;
+        },
+        search:function(){
+            console.log(vm.orderInfo);
+            var postData = {
+                customerName: $('#search').val(),
+                customerCode: $('#search').val(),
+                customerPy: $('#search').val(),
+                customerShortName: $('#search').val()
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:postData,
+                page:page
+            }).trigger("reloadGrid");
+            // vm.reload();
         }
 	}
 });

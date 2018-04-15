@@ -23,6 +23,20 @@
 
 	<select id="queryList" resultType="com.kirin.modules.sales.entity.CustomerInfoEntity">
 		select * from tb_customer_info
+		<where>
+			<if test="customerName != null">
+				or CUSTOMER_NAME like '%${customerName}%'
+			</if>
+			<if test="customerCode != null">
+				or  CUSTOMER_CODE like '%${customerCode}%'
+			</if>
+			<if test="customerPy != null">
+				or CUSTOMER_PY like '%${customerPy}%'
+			</if>
+			<if test="customerShortName != null">
+				or CUSTOMER_SHORT_NAME like '%${customerShortName}%'
+			</if>
+		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
                 order by ${sidx} ${order}
