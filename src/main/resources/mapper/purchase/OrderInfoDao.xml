@@ -30,7 +30,7 @@
 			<if test="status != null and status != ''">
 				and oe.STATUS=${status}
 			</if>
-			<if test="exceptionDate != null">
+			<if test="exceptionDate != null and exceptionDate.trim != ''">
 				and oe.EXCEPTION_DATE = #{exceptionDate}
 			</if>
 			<if	test="orderNo != null or supplierName != null">

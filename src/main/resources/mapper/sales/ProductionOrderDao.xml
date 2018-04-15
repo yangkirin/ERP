@@ -49,10 +49,30 @@
 			<if test="createDate != null">
 				and CREATE_DATE like CONCAT ('%',#{createDate},'%')
 			</if>
-			<if test="productionNo != null and productionNo.trim() != ''">
-				and PRODUCTION_NO=#{productionNo}
-			</if>
+			<!--<if test="productionNo != null and productionNo.trim() != ''">-->
+				<!--and PRODUCTION_NO=#{productionNo}-->
+			<!--</if>-->
+			<if test="productionNo != null or orderTypeName != null or customerNo != null
+			or customerName != null or placeName != null">
+				and (
+				<if test="productionNo != null">
+					PRODUCTION_NO like '%${productionNo}%'
+				</if>
+				<if test="orderTypeName != null">
+					or ORDER_TYPE_NAME like '%${orderTypeName}%'
+				</if>
+				<if test="customerNo != null">
+					or CUSTOMER_NO like '%${customerNo}%'
+				</if>
+				<if test="customerName != null">
+					or CUSTOMER_NAME like '%${customerName}%'
+				</if>
+				<if test="placeName != null">
+					or PLACE_NAME like '%${placeName}%'
+				</if>
+				)
 
+			</if>
 		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">

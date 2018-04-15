@@ -24,11 +24,18 @@
 <body>
 <div id="rrapp" v-cloak>
 	<div v-show="showList">
-		<div class="grid-btn">
-			<a v-if="hasPermission('sales:productionorder:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
-			<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
-			<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
-
+		<div class="row">
+			<div class="grid-btn col-lg-3">
+				<a v-if="hasPermission('sales:productionorder:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+				<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+				<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</div>
+			<div class="input-group input-group-sm col-sm-2">
+				<input type="text" placeholder="编号/名称/类型" id="search" class="form-control">
+				<span class="input-group-btn">
+				<button class="btn btn-primary" type="button" @click="search">查询</button>
+				</span>
+			</div>
 		</div>
 	    <table id="jqGrid"></table>
 	    <div id="jqGridPager"></div>

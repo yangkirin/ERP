@@ -708,7 +708,23 @@ var vm = new Vue({
 				}
 			}
 			return j;
-		}
+		},
+        search:function(){
+            console.log(vm.orderInfo);
+            var postData = {
+                productionNo: $('#search').val(),
+                orderTypeName: $('#search').val(),
+                customerNo: $('#search').val(),
+                customerName: $('#search').val(),
+                placeName: $('#search').val()
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:postData,
+                page:page
+            }).trigger("reloadGrid");
+            // vm.reload();
+        }
 	}
 });
 vm.orderTypeArr = vm.initTypeInfoArr(40);
