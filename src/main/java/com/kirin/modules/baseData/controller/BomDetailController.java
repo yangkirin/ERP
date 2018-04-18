@@ -266,7 +266,7 @@ public class BomDetailController extends AbstractController {
 			BigDecimal newCost2 = new BigDecimal(0);
 			newCost2 = bomDetailPrice.multiply(new BigDecimal(bomDetail.getGrossWgt())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
 
-			bomDetail.setCost(newCost2);
+			bomDetail.setCost(detailCost);
 		}
 
 		//成本率=(成本／产品售价)*100%
