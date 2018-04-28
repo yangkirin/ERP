@@ -268,9 +268,9 @@ public class OutportDetailController extends AbstractController {
 			Long mtrId = Long.valueOf(temp.get("mtrId").toString());
 			BigDecimal haveOutboundCount = outportDetailService.getOutboundCount(mtrId,orderId);
 			//转换为配方单位用量
-			MtrDataEntity mtrData = mtrDataService.queryObject(mtrId);
-			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getMiniRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
-			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getPurchaseRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
+//			MtrDataEntity mtrData = mtrDataService.queryObject(mtrId);
+//			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getMiniRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
+//			haveOutboundCount = haveOutboundCount.multiply(new BigDecimal(mtrData.getPurchaseRate())).setScale(BigDecimal.ROUND_HALF_DOWN,4);
 
 			temp.put("outCount",haveOutboundCount);
 		}

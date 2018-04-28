@@ -52,4 +52,23 @@ public class CommonUtilServiceImpl implements CommonUtilService{
     public List<Map> getDataToCommbox(String tableName,String search,String returnField){
         return commonUtilDao.getDataToCommbox(tableName,search,returnField);
     }
+
+    @Override
+    public List<Map> inventorySearch(){
+        return commonUtilDao.inventorySearch();
+    }
+
+    @Override
+    public List<Map> batchInventorySearch(Long mtrId){
+        return commonUtilDao.batchInventorySearch(mtrId);
+    }
+
+    @Override
+    public List<Map> outStoreSearch(){
+        return commonUtilDao.outStoreSearch();
+    }
+
+    public List<Map> outStoreDetailSearch(Long outputId){
+        return commonUtilDao.outStoreDetailSearch(outputId);
+    }
 }

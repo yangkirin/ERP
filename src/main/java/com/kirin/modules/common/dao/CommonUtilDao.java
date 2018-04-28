@@ -22,4 +22,12 @@ public interface CommonUtilDao extends BaseDao<Object> {
     public String getTableNewNo(@Param("tableName")String tableName,@Param("noField")String noField);
 
     List<Map> getDataToCommbox(@Param("tableName")String tableName,@Param("search")String search,@Param("returnField")String returnField);
+
+    List<Map> inventorySearch();
+
+    List<Map> batchInventorySearch(@Param("mtrId")Long mtrId);
+
+    List<Map> outStoreSearch();
+
+    List<Map> outStoreDetailSearch(@Param("outputId")Long outputId);
 }

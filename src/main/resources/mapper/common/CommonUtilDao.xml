@@ -64,4 +64,40 @@
 			</if>
 		</where>
 	</select>
+
+	<select id="inventorySearch" resultType="map">
+		select m.id,m.MTR_CODE,m.MTR_NAME,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.PURCHASE_UNIT) as PURCHASE_UNIT,
+		m.PURCHASE_RATE,m.MINI_RATE,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as MINI_UNIT,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.FORMULA_UNIT) as FORMULA_UNIT,
+		(select sum(im.IN_COUNT) from tb_import_detail im where m.id=im.mtr_id) as IN_COUNT,
+		(select sum(od.OUT_COUNT) from tb_outport_detail od where m.id=od.mtr_id) as OUT_COUNT,
+		((select sum(im.IN_COUNT) from tb_import_detail im where m.id=im.mtr_id)-(select sum(od.OUT_COUNT) from tb_outport_detail od where m.id=od.mtr_id)) as STORE_COUNT
+		from mtr_data m ORDER BY in_count desc;
+	</select>
+
+	<select id="batchInventorySearch" resultType="map">
+		select tib.ID,tib.BATCH_NO,tib.PRODUCTION_DATE,tib.EFFECTIVE_DATE,tib.MTR_ID,tib.MTR_NAME,tib.IN_COUNT,tib.IN_UNIT_NAME,tib.IN_UNIT_RATE,tib.ORDER_PRICE,tib.IN_TOTLA_PRICE
+		from tb_import_detail ti,tb_import_mtr_batch tib
+		where ti.MTR_ID=tib.MTR_ID and tib.MTR_ID=${mtrId} group by tib.BATCH_NO ;
+	</select>
+
+	<select id="outStoreSearch" resultType="map">
+		select od.ID,od.OUTPORT_NO,od.ORDER_ID,o.PRODUCTION_NO,o.ORDER_TYPE_NAME,o.PLACE_NAME,od.CUSTOMER_NO,od.CUSTOMER_NAME,od.OUT_DATE,od.CREATE_USER
+		from tb_production_order o,tb_outport_detail od
+		where od.ORDER_ID=o.ID
+		GROUP BY od.OUTPORT_NO;
+	</select>
+
+	<select id="outStoreDetailSearch" resultType="map">
+		select od.ID,od.MTR_ID,m.MTR_CODE,m.MTR_NAME,od.MTR_TYPE_NAME,tib.BATCH_NO,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.PURCHASE_UNIT) as PURCHASE_UNIT_NAME,
+		m.PURCHASE_RATE,
+		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as MINI_UNIT_NAME,
+		m.MINI_RATE,od.ORDER_COUNT,od.OUT_COUNT,tib.PRODUCTION_DATE,tib.EFFECTIVE_DATE
+		from tb_outport_detail od,mtr_data m,tb_import_mtr_batch tib
+		where od.mtr_id=m.id and od.MTR_ID=tib.MTR_ID and od.ID=${outputId} GROUP BY od.OUTPORT_NO;
+
+	</select>
 </mapper>

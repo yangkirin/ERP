@@ -1,27 +1,28 @@
 $(function () {
     $("#jqGrid").jqGrid({
-        // url: baseURL + 'storage/import/list',
+        url: baseURL + 'storage/search/inventorySearch',
         datatype: "json",
         colModel: [			
 			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-			{ label: '名称', name: 'importNo', index: 'IMPORT_NO', width: 80 },
-			{ label: '所属单位', name: 'orderId', index: 'ORDER_ID', width: 80 },
-            { label: '库存数量', name: 'orderNo', index: 'ORDER_NO', width: 100},
-            { label: '库存单位', name: 'exceptionDate', index: 'ORDER_NO', width: 80,formatter:'date',
-                formatoptions:{newformat:'Y-m-d'},unformat:function(value, options, row){
-                    var dateTemp = new Date(value);
-                    return dateTemp;
-            }},
-			{ label: '重量', name: 'supplierId', index: 'SUPPLIER_ID', width: 80 ,hidden:true}
+			{ label: '名称', name: 'MTR_NAME', index: 'MTR_NAME', width: 160 },
+			{ label: '原料编码', name: 'MTR_CODE', index: 'MTR_CODE', width: 80 },
+            { label: '采购单位', name: 'PURCHASE_UNIT', index: 'PURCHASE_UNIT', width: 60},
+            { label: '采购转换率', name: 'PURCHASE_RATE', index: 'PURCHASE_RATE', width: 60},
+            { label: '最小单位', name: 'MINI_UNIT', index: 'MINI_UNIT', width: 60},
+            { label: '最小转换率', name: 'MINI_RATE', index: 'MINI_RATE', width: 60},
+            { label: '配方单位', name: 'FORMULA_UNIT', index: 'FORMULA_UNIT', width: 80},
+            { label: '入库数量', name: 'IN_COUNT', index: 'IN_COUNT', width: 80},
+            { label: '出库数量', name: 'OUT_COUNT', index: 'OUT_COUNT', width: 80},
+            { label: '库存数量', name: 'STORE_COUNT', index: 'STORE_COUNT', width: 80}
         ],
 		viewrecords: true,
         height: 385,
-        rowNum: 10,
-		rowList : [10,30,50],
+        rowNum: 999999,
+		rowList : [500,1000,2000],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: true,
+        multiselect: false,
         pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -30,8 +31,8 @@ $(function () {
             records: "page.totalCount"
         },
         prmNames : {
-            page:"page", 
-            rows:"limit", 
+            page:"page",
+            rows:"limit",
             order: "order"
         },
         gridComplete:function(){
@@ -41,7 +42,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
-            var url = baseURL + 'storage/importdetail/list?importId='+row_id;
+            var url = baseURL + 'storage/search/batchInventorySearch?mtrId='+row_id;
             createSubGrid(subgrid_id,row_id,url);
         },
         onSelectRow:function(id){
@@ -58,23 +59,19 @@ $(function () {
             url : url,
             datatype : "json",
             colModel : [
-                { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-                { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80 ,hidden:true},
-                { label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80,hidden:true },
-                { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 80 },
-                { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
-                { label: '入库单位', name: 'inUnit', index: 'IN_UNIT', width: 80 },
-                { label: '入库转换率', name: 'inRate', index: 'IN_RATE', width: 80 ,formatter : "number"},
-                { label: '采购数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 ,formatter : "number"},
-                { label: '采购单价', name: 'orderPrice', index: 'ORDER_PRICE', width: 80 ,formatter : "number"},
-                { label: '采购金额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 80 ,formatter : "number"},
-                { label: '入库单价', name: 'inPrice', index: 'IN_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库金额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 80,formatter : "number" },
-                { label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 80 ,formatter : "number"},
-                { label: '入库日期', name: 'inDate', index: 'IN_DATE', width: 80 }
+                { label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
+                { label: '批次号', name: 'BATCH_NO', index: 'BATCH_NO', width: 80 },
+                { label: '原料名称', name: 'MTR_NAME', index: 'MTR_NAME', width: 140},
+                { label: '生产日期', name: 'PRODUCTION_DATE', index: 'PRODUCTION_DATE', width: 120},
+                { label: '失效日期', name: 'EFFECTIVE_DATE', index: 'EFFECTIVE_DATE', width: 120 },
+                { label: '原料ID', name: 'MTR_ID', index: 'MTR_ID', width: 80 ,hidden:true },
+                { label: '入库数量', name: 'IN_COUNT', index: 'IN_COUNT', width: 60 ,formatter : "number" },
+                { label: '入库单位', name: 'IN_UNIT_NAME', index: 'IN_UNIT_NAME', width: 60 },
+                { label: '入库转换率', name: 'IN_UNIT_RATE', index: 'IN_UNIT_RATE', width: 60 },
+                { label: '采购单价', name: 'ORDER_PRICE', index: 'ORDER_PRICE', width: 60 ,formatter : "number"},
+                { label: '入库金额', name: 'IN_TOTLA_PRICE', index: 'IN_TOTLA_PRICE', width: 60 ,formatter : "number"}
             ],
-            rowNum : 20,
+            rowNum : 9999999,
             height : '100%',
             rowList : [10,30,50],
             rownumbers: true,

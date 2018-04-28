@@ -323,7 +323,7 @@ var vm = new Vue({
             prdId:null,
             prdIdName:null
         },
-
+        editBomName:'',
         editBomInfo:{
             prdId:null,
             prdIdName:null
@@ -507,6 +507,9 @@ var vm = new Vue({
             vm.showList = false;
             vm.addForm = false;
             vm.showDetailList = true;
+            var rowData = $("#jqGrid").jqGrid('getRowData',id);
+            vm.editBomName = rowData.bomName;
+
             vm.getFieldDataMTR();
             vm.getFieldDataPRD();
             // vm.initCutArr();

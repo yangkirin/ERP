@@ -1,27 +1,28 @@
 $(function () {
     $("#jqGrid").jqGrid({
-        // url: baseURL + 'storage/import/list',
+        url: baseURL + 'storage/search/outStoreSearch',
         datatype: "json",
         colModel: [			
 			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-			{ label: '出库单号', name: 'outportNo', index: 'OUTPORT_NO', width: 80 },
-			{ label: '订单编号', name: 'orderNo', index: 'ORDER_NO', width: 80 },
-			{ label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
-			{ label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 80 },
-			{ label: '原料类型', name: 'mtrTypeName', index: 'MTR_TYPE_NAME', width: 80 },
-			{ label: '需求数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 },
-			{ label: '出库数量', name: 'outCount', index: 'OUT_COUNT', width: 80 },
-            { label: '出库日期', name: 'outDate', index: 'OUT_DATE', width: 100}
+			{ label: '出库单号', name: 'OUTPORT_NO', index: 'OUTPORT_NO', width: 120 },
+			{ label: '销售订单ID', name: 'ORDER_ID', index: 'ORDER_ID', width: 80 ,hidden:true},
+			{ label: '销售单编号', name: 'PRODUCTION_NO', index: 'PRODUCTION_NO', width: 120 },
+			{ label: '订单类型', name: 'ORDER_TYPE_NAME', index: 'ORDER_TYPE_NAME', width: 80 },
+			{ label: '售点', name: 'PLACE_NAME', index: 'PLACE_NAME', width: 120 },
+			{ label: '客户编号', name: 'CUSTOMER_NO', index: 'CUSTOMER_NO', width: 80 },
+			{ label: '客户名称', name: 'CUSTOMER_NAME', index: 'CUSTOMER_NAME', width: 160 },
+            { label: '出库日期', name: 'OUT_DATE', index: 'OUT_DATE', width: 100},
+            { label: '操作人', name: 'CREATE_USER', index: 'CREATE_USER', width: 80 }
         ],
 		viewrecords: true,
         height: 385,
-        rowNum: 10,
+        rowNum: 9999999,
 		rowList : [10,30,50],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
-        pager: "#jqGridPager",
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -40,7 +41,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
-            var url = baseURL + 'storage/importdetail/list?importId='+row_id;
+            var url = baseURL + 'storage/search/outStoreDetailSearch?outputId='+row_id;
             createSubGrid(subgrid_id,row_id,url);
         },
         onSelectRow:function(id){
@@ -57,21 +58,16 @@ $(function () {
             url : url,
             datatype : "json",
             colModel : [
-                { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-                { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80 ,hidden:true},
-                { label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80,hidden:true },
-                { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 80 },
-                { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
-                { label: '入库单位', name: 'inUnit', index: 'IN_UNIT', width: 80 },
-                { label: '入库转换率', name: 'inRate', index: 'IN_RATE', width: 80 ,formatter : "number"},
-                { label: '采购数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 ,formatter : "number"},
-                { label: '采购单价', name: 'orderPrice', index: 'ORDER_PRICE', width: 80 ,formatter : "number"},
-                { label: '采购金额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 80 ,formatter : "number"},
-                { label: '入库单价', name: 'inPrice', index: 'IN_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库金额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 80,formatter : "number" },
-                { label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 80 ,formatter : "number"},
-                { label: '入库日期', name: 'inDate', index: 'IN_DATE', width: 80 }
+                { label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
+                { label: '原料ID', name: 'MTR_ID', index: 'MTR_ID', width: 80 ,hidden:true},
+                { label: '原料编码', name: 'MTR_CODE', index: 'MTR_CODE', width: 80 },
+                { label: '原料名称', name: 'MTR_NAME', index: 'MTR_NAME', width: 80 },
+                { label: '原料类型名称', name: 'MTR_TYPE_NAME', index: 'MTR_TYPE_NAME', width: 80 },
+                { label: '出库批次号', name: 'BATCH_NO', index: 'BATCH_NO', width: 80 },
+                { label: '需求数量', name: 'ORDER_COUNT', index: 'ORDER_COUNT', width: 80},
+                { label: '出库数量', name: 'OUT_COUNT', index: 'OUT_COUNT', width: 80 ,formatter : "number"},
+                { label: '生产日期', name: 'PRODUCTION_DATE', index: 'PRODUCTION_DATE', width: 80 },
+                { label: '失效日期', name: 'EFFECTIVE_DATE', index: 'EFFECTIVE_DATE', width: 80 }
             ],
             rowNum : 20,
             height : '100%',

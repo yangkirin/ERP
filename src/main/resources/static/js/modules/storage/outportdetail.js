@@ -212,6 +212,9 @@ var vm = new Vue({
             vm.selectData.orderCount = rowData.orderCount;
             $('#orderCount').val(rowData.orderCount);
 
+            vm.selectData.haveOutbound = rowData.outCount;//outCount
+            $('#haveOutbound').val(rowData.outCount);
+
             //根据所选原料查询所有在库批号信息
             vm.batchArr = vm.initMtrBatch();
 
@@ -227,7 +230,9 @@ var vm = new Vue({
 			}
 			vm.showList = false;
             vm.title = "修改";
-            
+
+
+
             vm.getInfo(id);
             vm.showMtr('edit');
 		},
@@ -284,7 +289,7 @@ var vm = new Vue({
                 $.get(baseURL + "sales/productionorder/info/"+rowId, function(r){
                     vm.productionOrder = r.productionOrder;
                 });
-                console.log(vm.productionOrder);
+                // console.log(vm.productionOrder);
             }else if(type == 'edit'){
                 var mtrRowId = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
                 $.get(baseURL + "storage/outportdetail/info/"+mtrRowId, function(r){
@@ -297,22 +302,23 @@ var vm = new Vue({
 
                     vm.outportDetail.orderCount = r.outportDetail.orderCount;
 
-                    console.log(vm.outportDetail);
+                    // console.log(vm.outportDetail);
                 });
+
             }
             var num = layer.open({
                 type: 1,
                 skin: 'layui-layer-molv',
                 title: vm.title,
-                area: ['550px', '430px'],
+                area: ['600px', '480px'],
                 shadeClose: false,
                 content: jQuery("#addLayer"),
                 btn: ['提交', '取消'],
                 btn1: function (event) {
-                    alert('新增批号确认');
-                    console.log(vm.productionOrder);
-                    console.log(vm.mtrInfo);
-                    console.log(vm.selectData);
+                    // alert('新增批号确认');
+                    // console.log(vm.productionOrder);
+                    // console.log(vm.mtrInfo);
+                    // console.log(vm.selectData);
                     //vm.productionOrder：id,productionNo,customerId,customerName,customerNo
                     //vm.mtrInfo:id,mtrCode,mtrName,typeName
                     //vm.selectData:orderCount,outAmount,batchNo
@@ -328,8 +334,11 @@ var vm = new Vue({
                         vm.outportDetail.mtrTypeName = vm.mtrInfo.typeName;
 
                         vm.outportDetail.orderCount = vm.selectData.orderCount;
-                        vm.outportDetail.outCount = vm.selectData.realCount;
+                        // vm.outportDetail.outCount = vm.selectData.realCount;
+                        vm.outportDetail.outCount = vm.selectData.outAmount;
                         vm.outportDetail.batchNo = vm.selectData.batchNo;
+
+
 
                         $.ajax({
                             type: "POST",
@@ -392,6 +401,10 @@ var vm = new Vue({
                 alert('请选择要领料的单据！');
                 return;
             }
+            if(rowData.status == 1){
+                alert('请先确认领料的单据！');
+                return;
+            }
             vm.showDetail = true;
             vm.showList = false;
 
@@ -432,8 +445,8 @@ var vm = new Vue({
                 alert('请选择要领料的单据！');
                 return;
             }
-            if(rowData.status == 0){
-                alert('请先确认单据！');
+            if(rowData.status == 1){
+                alert('请先确认领料的单据！');
                 return;
             }
             vm.showDetail = true;
@@ -572,13 +585,12 @@ var vm = new Vue({
 
             // 实际出库量=领料量/最小转换率/采购转换率
             // 剩余库存量=库存量-实际出库量
-            var realCount = Number(Number(inputCount)/Number(vm.mtrInfo.miniRate)/Number(vm.mtrInfo.purchaseRate),2);
+            var realCount = Number(Number(Number(inputCount)/Number(vm.mtrInfo.miniRate),2)/Number(vm.mtrInfo.purchaseRate),2);
             vm.selectData.realCount = realCount;
-            var residueCount = vm.selectData.inventory-realCount;
-            vm.selectData.residueCount = residueCount;
-
+            var residueCount = Number(vm.selectData.inventory)-realCount;
+            vm.selectData.residueCount = residueCount.toFixed(2);
             $('#realCount').val(realCount);
-            $('#residueCount').val(residueCount);
+            $('#residueCount').val(residueCount.toFixed(2));
         }
 	}
 });

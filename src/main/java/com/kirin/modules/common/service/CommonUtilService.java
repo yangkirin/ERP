@@ -16,4 +16,12 @@ public interface CommonUtilService {
     String getTableNewNo(String tableName,String noField);
 
     List<Map> getDataToCommbox(String tableName,String search,String returnField);
+
+    List<Map> inventorySearch();
+
+    List<Map> batchInventorySearch(Long mtrId);
+
+    List<Map> outStoreSearch();
+
+    List<Map> outStoreDetailSearch(Long outputId);
 }

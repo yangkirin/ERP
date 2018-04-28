@@ -221,6 +221,7 @@ public class BomDetailController extends AbstractController {
 				}else{
 					grossWgt = grossWgt.add(new BigDecimal(1));
 				}
+				bomDetail.setGrossWgt(grossWgt.toString());
 				BigDecimal cost = bomInfo.getCost().multiply(netWgt.divide(grossWgt,2,BigDecimal.ROUND_HALF_DOWN)).setScale(2,BigDecimal.ROUND_HALF_DOWN);
 				bomDetail.setCost(cost);
 			}

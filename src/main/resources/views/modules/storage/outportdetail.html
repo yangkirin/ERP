@@ -42,8 +42,8 @@
 				<div class="col-sm-6">
 					<div class="grid-btn">
 						<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>
-						<a  class="btn btn-primary" @click="createOutport"><i class="fa fa-search"></i>&nbsp;领料</a>
-						<a  class="btn btn-info" id="confirm_storg" @click="addOutport"><i class="fa fa-check"></i>&nbsp;新建领料单</a>
+						<a  class="btn btn-primary" @click="createOutport"><i class="fa fa-check"></i>&nbsp;领料</a>
+						<!--<a  class="btn btn-info" id="confirm_storg" @click="addOutport"><i class="fa fa-check"></i>&nbsp;新建领料单</a>-->
 						<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>
 						<a  class="btn btn-primary" id="printImport" @click="print('outport')"><i class="fa fa-print"></i>&nbsp;打印</a>
 					</div>
@@ -71,8 +71,8 @@
     
     <div v-show="showDetail" class="panel panel-default">
 		<div class="grid-btn">
-			<a  class="btn btn-primary" id="addMtr_btn" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;新增批号</a>
-			<a  class="btn btn-primary" id="editMtr_btn" @click="editMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>
+			<a  class="btn btn-primary" id="addMtr_btn" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;选择批号</a>
+			<!--<a  class="btn btn-primary" id="editMtr_btn" @click="editMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>-->
 			<a  class="btn btn-primary" id="delMtr_btn" @click="deleteMtr"><i class="fa fa-close"></i>&nbsp;删除原料</a>
 			<!--<a  class="btn btn-primary" id="saveMtr_btn" @click="saveOrUpdate"><i class="fa fa-save"></i>&nbsp;保存</a>-->
 
@@ -188,6 +188,12 @@
 				<div class="col-sm-2 control-label">剩余库存量</div>
 				<div class="col-sm-4">
 					<input type="text" class="form-control" id="residueCount" v-model="selectData.residueCount" placeholder="剩余库存量" readonly="readonly"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">已领料量</div>
+				<div class="col-sm-4">
+					<input type="text" class="form-control"  id="haveOutbound" v-model="selectData.haveOutbound" placeholder="已领料量" readonly="readonly"/>
 				</div>
 			</div>
 			<div class="form-group">
