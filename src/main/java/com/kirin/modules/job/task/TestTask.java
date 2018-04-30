@@ -18,7 +18,7 @@ import com.kirin.modules.sys.service.SysUserService;
  * @email sunlightcs@gmail.com
  * @date 2016年11月30日 下午1:34:24
  */
-@Component("testTask")
+//@Component("testTask")
 public class TestTask {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	

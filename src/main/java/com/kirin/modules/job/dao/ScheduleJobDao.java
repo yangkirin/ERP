@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.kirin.modules.job.entity.ScheduleJobEntity;
 import com.kirin.modules.sys.dao.BaseDao;
+import org.springframework.stereotype.Repository;
 
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import java.util.Map;
  * @email sunlightcs@gmail.com
  * @date 2016年12月1日 下午10:29:57
  */
+@Repository
 @Mapper
 public interface ScheduleJobDao extends BaseDao<ScheduleJobEntity> {
 	
