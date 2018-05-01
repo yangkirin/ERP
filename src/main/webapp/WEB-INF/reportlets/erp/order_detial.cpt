@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20170720" releaseVersion="9.0.0">
+<TableDataMap>
+<TableData name="ds1" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="order_id"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[erp]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select * from tb_order_detail where order_id = "${order_id}"]]></Query>
+</TableData>
+</TableDataMap>
+<ReportFitAttr fitStateInPC="1" fitFont="false"/>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[1143000,723900,723900,723900,723900,723900,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[2743200,2743200,1981200,2095500,2286000,2133600,1257300,1905000,1981200,2057400,1562100,1447800,2095500,2362200,2247900,2133600,2133600,1653435,2743200,3206663,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" s="0">
+<O>
+<![CDATA[ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="0" s="0">
+<O>
+<![CDATA[订单ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="0" s="0">
+<O>
+<![CDATA[原料ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="0" s="0">
+<O>
+<![CDATA[原料编码]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="4" r="0" s="0">
+<O>
+<![CDATA[原料名称]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="0" s="0">
+<O>
+<![CDATA[类型名称]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="6" r="0" s="0">
+<O>
+<![CDATA[单位]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="0" s="0">
+<O>
+<![CDATA[转换率]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="0" s="0">
+<O>
+<![CDATA[仓库ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="9" r="0" s="0">
+<O>
+<![CDATA[仓库名称]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="10" r="0" s="0">
+<O>
+<![CDATA[件重]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="11" r="0" s="0">
+<O>
+<![CDATA[盒重]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="12" r="0" s="0">
+<O>
+<![CDATA[采购编码]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="13" r="0" s="0">
+<O>
+<![CDATA[采购数量]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="14" r="0" s="0">
+<O>
+<![CDATA[入库重量]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="15" r="0" s="0">
+<O>
+<![CDATA[入库数量]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="0" s="0">
+<O>
+<![CDATA[入库单价]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="17" r="0" s="0">
+<O>
+<![CDATA[价格]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="18" r="0" s="0">
+<O>
+<![CDATA[成分分类ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="19" r="0" s="0">
+<O>
+<![CDATA[成本分类名称]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="20" r="0" s="0">
+<O>
+<![CDATA[创建用户]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="21" r="0" s="0">
+<O>
+<![CDATA[创建日期]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="22" r="0" s="0">
+<O>
+<![CDATA[更新用户]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="23" r="0" s="0">
+<O>
+<![CDATA[更新日期]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="24" r="0" s="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="0" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="1" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="ORDER_ID"/>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="2" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_ID"/>
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNAME>
+<![CDATA[ORDER_ID]]></CNAME>
+<Compare op="0">
+<O>
+<![CDATA[$order_id]]></O>
+</Compare>
+</Condition>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="3" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_CODE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="4" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="5" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_TYPE_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="6" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_UNIT"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="7" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="MTR_RATE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="8" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="WAREHOSE_ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="9" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="WAREHOSE_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="10" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="WGT_UNIT1"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="11" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="WGT_UNIT2"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="12" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="PURCHASE_NO"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="13" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="AMOUNT"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="14" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="IN_WGT"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="15" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="IN_COUNT"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="16" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="IN_PRICE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="17" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="PRICE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="18" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="COST_TYPE_ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="19" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="COST_TYPE_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="20" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="CREATE_USER"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="21" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="CREATE_DATE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="22" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="UPDATE_USER"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="23" r="1">
+<O t="DSColumn">
+<Attributes dsName="ds1" columnName="UPDATE_DATE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings headerHeight="0" footerHeight="0">
+<PaperSetting orientation="1">
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+</ReportSettings>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<Parameter>
+<Attributes name="order_id"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</ReportParameterAttr>
+<StyleList>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+</StyleList>
+<DesignerVersion DesignerVersion="JAA"/>
+<PreviewType PreviewType="0"/>
+<TemplateID/>
+<TemplateIdAttMark class="com.fr.base.iofileattr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="1970efca-f341-468d-ba67-48a6f189d091"/>
+</TemplateIdAttMark>
+</WorkBook>
