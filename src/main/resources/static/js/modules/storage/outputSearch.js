@@ -3,7 +3,7 @@ $(function () {
         url: baseURL + 'storage/search/outStoreSearch',
         datatype: "json",
         colModel: [			
-			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
+			{ label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
 			{ label: '出库单号', name: 'OUTPORT_NO', index: 'OUTPORT_NO', width: 120 },
 			{ label: '销售订单ID', name: 'ORDER_ID', index: 'ORDER_ID', width: 80 ,hidden:true},
 			{ label: '销售单编号', name: 'PRODUCTION_NO', index: 'PRODUCTION_NO', width: 120 },
@@ -41,7 +41,8 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
-            var url = baseURL + 'storage/search/outStoreDetailSearch?outputId='+row_id;
+            console.log(rowData);
+            var url = baseURL + 'storage/search/outStoreDetailSearch?outputId='+rowData.ID;
             createSubGrid(subgrid_id,row_id,url);
         },
         onSelectRow:function(id){
