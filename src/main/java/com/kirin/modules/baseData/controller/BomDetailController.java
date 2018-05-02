@@ -107,6 +107,8 @@ public class BomDetailController extends AbstractController {
 
 		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomDetail.getBomId());
 
+
+
 		if(bomDetail.getSemiFinished().equals("1")){//半成品
 //			BigDecimal sumCost =  countBomInfoCost(bomDetail.getMtrId());
 //			bomDetail.setCost(sumCost);
@@ -134,6 +136,7 @@ public class BomDetailController extends AbstractController {
 			//半成品的单价
 			PrdDataEntity prdDataEntity = prdDataService.queryObject(bomDetail.getMtrId());
 			bomDetail.setPrice(new BigDecimal(prdDataEntity.getReferencePrice()));
+
 
 		}else{//原料
 			//计算原料的成本
@@ -179,8 +182,16 @@ public class BomDetailController extends AbstractController {
 		}
 		bomDetail.setCostRate(detailCostRate);
 
-		SysUserEntity sysUserEntity =  getUser();
+		//毛重=净重/净得率
+		BigDecimal grossWgt = new BigDecimal(0);
+		BigDecimal newWgt = bomDetail.getNetWgt() == null ? new BigDecimal(0) : new BigDecimal(bomDetail.getNetWgt());
+		BigDecimal newRate = bomDetail.getNetRate() == null||bomDetail.getNetRate().equals("0") ? new BigDecimal(1) : new BigDecimal(bomDetail.getNetRate());
 
+		grossWgt = newWgt.divide(newRate,2,BigDecimal.ROUND_HALF_UP);
+
+		bomDetail.setGrossWgt(grossWgt.toString());
+
+		SysUserEntity sysUserEntity =  getUser();
 		bomDetail.setCreateUser(sysUserEntity.getUsername());
 		bomDetail.setCreateDate(new Date());
 
@@ -279,8 +290,14 @@ public class BomDetailController extends AbstractController {
 		}
 		bomDetail.setCostRate(detailCostRate);
 
-		SysUserEntity sysUserEntity =  getUser();
+		//毛重=净重/净得率
+		BigDecimal grossWgt = new BigDecimal(0);
+		BigDecimal newWgt = bomDetail.getNetWgt() == null ? new BigDecimal(0) : new BigDecimal(bomDetail.getNetWgt());
+		BigDecimal newRate = bomDetail.getNetRate() == null||bomDetail.getNetRate().equals("0") ? new BigDecimal(1) : new BigDecimal(bomDetail.getNetRate());
+		grossWgt = newWgt.divide(newRate,2,BigDecimal.ROUND_HALF_UP);
+		bomDetail.setGrossWgt(grossWgt.toString());
 
+		SysUserEntity sysUserEntity =  getUser();
 		bomDetail.setUpdateUser(sysUserEntity.getUsername());
 		bomDetail.setUpdateDate(new Date());
 
