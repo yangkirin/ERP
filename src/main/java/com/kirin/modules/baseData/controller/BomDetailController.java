@@ -211,6 +211,8 @@ public class BomDetailController extends AbstractController {
 
 		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomDetail.getBomId());
 
+		BigDecimal grossWgt = new BigDecimal(0);
+
 		if(bomDetail.getSemiFinished().equals("1")){//半成品
 //			BigDecimal sumCost =  countBomInfoCost(bomDetail.getMtrId());
 //			bomDetail.setCost(sumCost);
@@ -220,7 +222,7 @@ public class BomDetailController extends AbstractController {
 				bomDetail.setCost(new BigDecimal(0));
 			}else{
 				BigDecimal netWgt = new BigDecimal(bomDetail.getNetWgt() == null ? "0" : bomDetail.getNetWgt().toString());
-				BigDecimal grossWgt = new BigDecimal(0);
+//				BigDecimal grossWgt = new BigDecimal(0);
 				Map<String,Object> queryMap = new HashMap<>();
 				queryMap.put("prdId",bomDetail.getMtrId());
 				List<BomDetailEntity> bomDetailEntities = bomDetailService.queryListByPrdId(queryMap);
@@ -260,25 +262,34 @@ public class BomDetailController extends AbstractController {
 			}
 			bomDetail.setPrice(bomDetailPrice);
 
-			//成本=(配方里原料的单价／原料里配方单位转换率)*配方里原料的毛重
+			//成本=(配方里原料的单价*配方里原料的毛重)/原料里配方单位转换率
 			BigDecimal mtrMiniRate =  new BigDecimal(mtrDataEntity.getMiniRate() == null ? "0" : mtrDataEntity.getMiniRate());
 			BigDecimal bomDetailCost = new BigDecimal(0);
 			if(mtrMiniRate.compareTo(BigDecimal.ZERO)!=0){
 				bomDetailCost = bomDetailPrice.divide(mtrMiniRate,2,BigDecimal.ROUND_HALF_UP);
 			}
-			BigDecimal temp = new BigDecimal(bomDetail.getNetWgt() == null ? "0" : bomDetail.getNetWgt());
-			BigDecimal detailCost = bomDetailCost.multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
+			BigDecimal temp = new BigDecimal(bomDetail.getGrossWgt() == null ? "0" : bomDetail.getGrossWgt());
+//			BigDecimal detailCost = bomDetailCost.multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
+
+			BigDecimal detailCost = bomDetailPrice.multiply(temp).divide(mtrMiniRate).setScale(2,BigDecimal.ROUND_HALF_UP);
 
 			//有效计算
-			BigDecimal newCost = new BigDecimal(0);
-			if(mtrPurchaseRate.compareTo(BigDecimal.ZERO)!=0 && mtrMiniRate.compareTo(BigDecimal.ZERO)!=0 && temp.compareTo(BigDecimal.ZERO)!=0){
-				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_DOWN).divide(mtrMiniRate,10,ROUND_HALF_DOWN).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
-			}
+//			BigDecimal newCost = new BigDecimal(0);
+//			if(mtrPurchaseRate.compareTo(BigDecimal.ZERO)!=0 && mtrMiniRate.compareTo(BigDecimal.ZERO)!=0 && temp.compareTo(BigDecimal.ZERO)!=0){
+//				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_DOWN).divide(mtrMiniRate,10,ROUND_HALF_DOWN).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
+//			}
 			//第三次计算成本 = 单价*毛重
-			BigDecimal newCost2 = new BigDecimal(0);
-			newCost2 = bomDetailPrice.multiply(new BigDecimal(bomDetail.getGrossWgt())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+//			BigDecimal newCost2 = new BigDecimal(0);
+//			newCost2 = bomDetailPrice.multiply(new BigDecimal(bomDetail.getGrossWgt())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
 
 			bomDetail.setCost(detailCost);
+
+			//毛重=净重/净得率
+
+			BigDecimal newWgt = bomDetail.getNetWgt() == null ? new BigDecimal(0) : new BigDecimal(bomDetail.getNetWgt());
+			BigDecimal newRate = bomDetail.getNetRate() == null||bomDetail.getNetRate().equals("0") ? new BigDecimal(1) : new BigDecimal(bomDetail.getNetRate());
+			grossWgt = newWgt.divide(newRate,2,BigDecimal.ROUND_HALF_UP);
+			bomDetail.setGrossWgt(grossWgt.toString());
 		}
 
 		//成本率=(成本／产品售价)*100%
@@ -289,13 +300,6 @@ public class BomDetailController extends AbstractController {
 			detailCostRate = bomDetail.getCost().divide(prdPrice,2,BigDecimal.ROUND_HALF_UP).divide(new BigDecimal(100),2,BigDecimal.ROUND_HALF_UP);
 		}
 		bomDetail.setCostRate(detailCostRate);
-
-		//毛重=净重/净得率
-		BigDecimal grossWgt = new BigDecimal(0);
-		BigDecimal newWgt = bomDetail.getNetWgt() == null ? new BigDecimal(0) : new BigDecimal(bomDetail.getNetWgt());
-		BigDecimal newRate = bomDetail.getNetRate() == null||bomDetail.getNetRate().equals("0") ? new BigDecimal(1) : new BigDecimal(bomDetail.getNetRate());
-		grossWgt = newWgt.divide(newRate,2,BigDecimal.ROUND_HALF_UP);
-		bomDetail.setGrossWgt(grossWgt.toString());
 
 		SysUserEntity sysUserEntity =  getUser();
 		bomDetail.setUpdateUser(sysUserEntity.getUsername());
