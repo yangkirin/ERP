@@ -7,6 +7,7 @@ server:
     port: 8090
     connection-timeout: 5000
     context-path: /erp
+#    servlet-path: /erp
 
 spring:
     devtools:
@@ -26,7 +27,7 @@ spring:
             max-file-size: 100MB
             max-request-size: 100MB
             enabled: true
-    resources: # 指定静态资源的路径?reportlet=GettingSarted.cpt&token=07db9d202a4e665938d01426a441b877
+    resources: # 指定静态资源的路径
         static-locations: classpath:/static/,classpath:/views/
     redis:
         open: false  # 是否开启redis缓存  true开启   false关闭

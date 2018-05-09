@@ -41,20 +41,14 @@
 	</properties>
 
 	<dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<!--<exclusions>-->
-				<!--<exclusion>-->
-					<!--<groupId>org.springframework.boot</groupId>-->
-					<!--<artifactId>spring-boot-starter-tomcat</artifactId>-->
-				<!--</exclusion>-->
-			<!--</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -78,11 +72,6 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.springframework.cloud</groupId>-->
-			<!--<artifactId>spring-cloud-starter-eureka</artifactId>-->
-			<!--<version>1.2.6.RELEASE</version>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
@@ -165,11 +154,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>com.belerweb</groupId>
 			<artifactId>pinyin4j</artifactId>
 			<version>2.5.1</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itext7-core</artifactId>
@@ -183,38 +174,6 @@
 			<artifactId>UserAgentUtils</artifactId>
 			<version>1.2.4</version>
 		</dependency>
-
-		<!-- fr -->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-core</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-report</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-third</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-performance</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-platform</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.fr</groupId>-->
-			<!--<artifactId>fr-chart</artifactId>-->
-			<!--<version>8.3</version>-->
-		<!--</dependency>-->
 
 	</dependencies>
 

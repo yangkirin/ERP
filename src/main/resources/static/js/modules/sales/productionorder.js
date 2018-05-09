@@ -187,10 +187,10 @@ var vm = new Vue({
 			$('#confirm_ok').hide();
 			$('#confirm_back').hide();
 
-            $('#addPrd_btn').attr("disabled",true);
-            $('#editPrd_btn').attr("disabled",true);
-            $('#delPrd_btn').attr("disabled",true);
-            $('#savePrd_btn').attr("disabled",true);
+            // $('#addPrd_btn').attr("disabled",true);
+            // $('#editPrd_btn').attr("disabled",true);
+            // $('#delPrd_btn').attr("disabled",true);
+            // $('#savePrd_btn').attr("disabled",true);
 
             $('#jqGridPRD').jqGrid("clearGridData");
 		},
@@ -277,18 +277,25 @@ var vm = new Vue({
             return no;
         },
         addPrd:function(){
-			vm.showPrdForm('新增');
+            // console.log(vm.productionOrder.orderTypeId);
+            // console.log(vm.productionOrder.customerId);
+            if(vm.checkFormAttr()){
+                vm.showPrdForm('新增');
+            }
 		},
         editPrd:function(){
             var prdRowId = $("#jqGridPRD").jqGrid('getGridParam','selrow');
-            var rowData = $("#jqGridPRD").jqGrid("getRowData",prdRowId);
-            vm.selectData = rowData;
-            vm.showPrdForm('修改');
-
-            $('#addPrd_btn').attr("disabled",true);
-            $('#editPrd_btn').attr("disabled",true);
-            $('#delPrd_btn').attr("disabled",true);
-            $('#savePrd_btn').attr("disabled",true);
+            if(prdRowId){
+                var rowData = $("#jqGridPRD").jqGrid("getRowData",prdRowId);
+                vm.selectData = rowData;
+                vm.showPrdForm('修改');
+            }else{
+                alert('请选择要修改的产品！');
+            }
+            // $('#addPrd_btn').attr("disabled",true);
+            // $('#editPrd_btn').attr("disabled",true);
+            // $('#delPrd_btn').attr("disabled",true);
+            // $('#savePrd_btn').attr("disabled",true);
 		},
 		deletePrd:function(){
             var prdRowId = $("#jqGridPRD").jqGrid('getGridParam','selrow');
@@ -724,6 +731,23 @@ var vm = new Vue({
                 page:page
             }).trigger("reloadGrid");
             // vm.reload();
+        },
+        checkFormAttr:function(){
+            var flag = true;
+            var msg = "";
+            if(vm.productionOrder.orderTypeId == undefined || vm.productionOrder.orderTypeId == ''){
+                msg = '请选择订单类型！';
+                flag = false;
+                alert(msg);
+                return flag;
+            }
+            if(vm.productionOrder.customerId == undefined || vm.productionOrder.customerId == ''){
+                msg = '请选择客户！';
+                flag = false;
+                alert(msg);
+                return flag;
+            }
+            return flag;
         }
 	}
 });
