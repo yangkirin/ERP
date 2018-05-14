@@ -1,8 +1,6 @@
 package com.kirin.modules.common.controller;
 
-import com.kirin.common.utils.PageUtils;
-import com.kirin.common.utils.Query;
-import com.kirin.common.utils.R;
+import com.kirin.common.utils.*;
 import com.kirin.modules.baseData.entity.TypeInfoEntity;
 import com.kirin.modules.baseData.service.TypeInfoService;
 import com.kirin.modules.common.service.CommonUtilService;
@@ -11,11 +9,10 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.kirin.common.utils.PinyinUtil;
 
 @RestController
 @RequestMapping("/common/commonUtil")
@@ -146,20 +143,108 @@ public class CommonUtil {
         return R.ok().put("data",map);
     }
 
+    @RequestMapping("/compBomCount")
+    public R compBomCount(@RequestParam("id") Long id,@RequestParam("type") String type){
+        String count = commonUtilService.compBomCount(id,type);
+        if(count == null || count.equals("")){
+            count = "0";
+        }
+        return R.ok().put("count",count);
+    }
+
+    /**
+     * 创建新的单据号
+     * @param billType:单据类型（0-采购单，1-采购入库单，2-领料出库单，3-客户订单，4-盘点单）
+     * @return
+     */
+    @RequestMapping("/createBillNo")
+    public R createBillNo(@RequestParam("billType") String billType){
+        StringBuffer newBillNo = new StringBuffer("");
+        if(billType == null || billType.equals("")){
+            return R.error("单据类型未知，无法生成单据号！请联系管理员...");
+        }
+        String currentMaxNo = getTableMaxBillNo(billType);
+        String newNo = "0000";
+        String currentDateStr = DateUtils.format(new Date(),"yyyyMMdd");
+        if(currentMaxNo != null && !currentMaxNo.equals("")){
+            Long maxNo = Long.valueOf(currentMaxNo.substring(10));
+            Long seq = Long.valueOf(maxNo)+1;
+            newNo = String.format("%04d",seq);
+        }
+
+        String billCode = "";
+        //根据单据类型来获取对应单据的最新单据号，生成新的单据号
+        //单据号生成规则：单据简称+8位YYYYMMDD+4位顺序号
+        switch(billType){
+            case "0":
+                billCode = "CG";
+                break;
+            case "1":
+                billCode = "RK";
+                break;
+            case "2":
+                billCode = "CK";
+                break;
+            case "3":
+                billCode = "XS";
+                break;
+            case "4":
+                billCode = "PD";
+                break;
+            default:
+                break;
+        }
+        System.out.println(billCode);
+        System.out.println(currentDateStr);
+        System.out.println(newNo);
+        newBillNo.append(billCode);
+        newBillNo.append(currentDateStr);
+        newBillNo.append(newNo.toString());
+
+        return R.ok().put("newBillNo",newBillNo);
+    }
+
+
+    /**
+     *
+     * @param billType:单据类型（0-采购单，1-采购入库单，2-领料出库单，3-客户订单，4-盘点单）
+     * @return
+     */
+    public String getTableMaxBillNo(String billType){
+        String likeDateStr = DateUtils.format(new Date(),"yyyyMMdd");
+        String returnFiled = "";
+        String tableName = "";
+        switch(billType){
+            case "0":
+                returnFiled = "ORDER_NO";
+                tableName = "tb_order_info";
+                break;
+            case "1":
+                returnFiled = "IMPORT_NO";
+                tableName = "tb_import";
+                break;
+            case "2":
+                returnFiled = "OUTPORRT_NO";
+                tableName = "tb_outport_info";
+                break;
+            case "3":
+                returnFiled = "PRODUCTION_NO";
+                tableName = "tb_production_order";
+                break;
+            case "4":
+                returnFiled = "STOCKTAKING_NO";
+                tableName = "tb_stocktaking";
+                break;
+            default:
+                    break;
+        }
+        String currentMaxNo = commonUtilService.getTableMaxNo(returnFiled,tableName,likeDateStr);
+        return currentMaxNo;
+
+    }
 
     public static void main(String[] args){
-        Integer id  = 3234;
-        String str = String.format("%05d",id);
-        str = String.format("01"+"%s",id);
-
-        System.out.println(str);
-
-        String srt_a = "a:b";
-        System.out.println(srt_a.split(":").length);
-        String srt_b = "a";
-        System.out.println(srt_b.split(":").length);
-
-        String s = "201711140000";
-        System.out.println(s.substring(8));
+//        R s = new CommonUtil().createBillNo("0");
+//        System.out.println(s.get("newBillNo"));
     }
 }

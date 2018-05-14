@@ -6,15 +6,7 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.kirin.modules.storage.entity.OutportDetailEntity" id="outportDetailMap">
         <result property="id" column="ID"/>
-        <result property="outportNo" column="OUTPORT_NO"/>
-        <result property="orderId" column="ORDER_ID"/>
-        <result property="customerId" column="CUSTOMER_ID"/>
-        <result property="customerName" column="CUSTOMER_NAME"/>
-        <result property="customerNo" column="CUSTOMER_NO"/>
-        <result property="prdId" column="PRD_ID"/>
-        <result property="prdNo" column="PRD_NO"/>
-        <result property="prdTypeName" column="PRD_TYPE_NAME"/>
-        <result property="prdName" column="PRD_NAME"/>
+        <result property="outportId" column="OUTPORT_ID"/>
         <result property="mtrId" column="MTR_ID"/>
         <result property="mtrNo" column="MTR_NO"/>
         <result property="mtrName" column="MTR_NAME"/>
@@ -47,17 +39,11 @@
 			<if test="mtrId != null">
 				and MTR_ID = #{mtrId}
 			</if>
-			<if test="orderId != null">
-				and ORDER_ID = #{orderId}
-			</if>
 		</where>
 	</select>
 	<select id="queryList" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
 		select * from tb_outport_detail
 		<where>
-			<if test="orderId != null">
-				ORDER_ID = #{orderId}
-			</if>
 			<if test="mtrId != null">
 				MTR_ID = #{mtrId}
 			</if>
@@ -82,16 +68,8 @@
 	<insert id="save" parameterType="com.kirin.modules.storage.entity.OutportDetailEntity" useGeneratedKeys="true" keyProperty="id">
 		insert into tb_outport_detail
 		(
-			`OUTPORT_NO`, 
-			`ORDER_ID`, 
-			`CUSTOMER_ID`,
-			`CUSTOMER_NAME`,
-			`CUSTOMER_NO`,
-			`PRD_ID`, 
-			`PRD_NO`, 
-			`PRD_TYPE_NAME`, 
-			`PRD_NAME`, 
-			`MTR_ID`, 
+			`OUTPORT_ID`,
+			`MTR_ID`,
 			`MTR_NO`, 
 			`MTR_NAME`, 
 			`MTR_TYPE_NAME`, 
@@ -106,16 +84,8 @@
 		)
 		values
 		(
-			#{outportNo}, 
-			#{orderId}, 
-			#{customerId},
-			#{customerName},
-			#{customerNo},
-			#{prdId}, 
-			#{prdNo}, 
-			#{prdTypeName}, 
-			#{prdName}, 
-			#{mtrId}, 
+			#{outportId},
+			#{mtrId},
 			#{mtrNo}, 
 			#{mtrName}, 
 			#{mtrTypeName}, 
@@ -133,15 +103,7 @@
 	<update id="update" parameterType="com.kirin.modules.storage.entity.OutportDetailEntity">
 		update tb_outport_detail 
 		<set>
-			<if test="outportNo != null">`OUTPORT_NO` = #{outportNo}, </if>
-			<if test="orderId != null">`ORDER_ID` = #{orderId}, </if>
-			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>
-			<if test="customerName != null">`CUSTOMER_NAME` = #{customerName}, </if>
-			<if test="customerNo != null">`CUSTOMER_NO` = #{customerNo}, </if>
-			<if test="prdId != null">`PRD_ID` = #{prdId}, </if>
-			<if test="prdNo != null">`PRD_NO` = #{prdNo}, </if>
-			<if test="prdTypeName != null">`PRD_TYPE_NAME` = #{prdTypeName}, </if>
-			<if test="prdName != null">`PRD_NAME` = #{prdName}, </if>
+			<if test="outportId != null">`OUTPORT_ID` = #{outportId}, </if>
 			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
 			<if test="mtrNo != null">`MTR_NO` = #{mtrNo}, </if>
 			<if test="mtrName != null">`MTR_NAME` = #{mtrName}, </if>

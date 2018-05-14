@@ -24,4 +24,8 @@ public interface CommonUtilService {
     List<Map> outStoreSearch();
 
     List<Map> outStoreDetailSearch(Long outputId);
+
+    String compBomCount(Long id,String type);
+
+    String getTableMaxNo(String returnFiled, String tableName,String likeDateStr);
 }

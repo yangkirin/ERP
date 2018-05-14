@@ -9,6 +9,7 @@
         <result property="suppierName" column="suppier_name"/>
         <result property="suppierCode" column="suppier_code"/>
         <result property="suppierShortName" column="suppier_short_name"/>
+        <result property="suppierType" column="suppier_type"/>
         <result property="suppierPy" column="suppier_py"/>
         <result property="linkMan" column="link_man"/>
         <result property="linkPhone" column="link_phone"/>
@@ -22,11 +23,11 @@
     </resultMap>
 
 	<select id="queryObject" resultType="com.kirin.modules.purchase.entity.SupplierInfoEntity">
-		select * from tb_supplier_info where id = #{value}
+		select *,(select TYPE_NAME from tb_type_info t where t.ID=s.suppier_type ) as typeName from tb_supplier_info s where id = #{value}
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.purchase.entity.SupplierInfoEntity">
-		select * from tb_supplier_info
+		select *,(select TYPE_NAME from tb_type_info t where t.ID=s.suppier_type ) as typeName from tb_supplier_info s
 		<where>
 			<if test="suppierCode != null">
 				or suppier_code like "%${suppierCode}%"
@@ -67,7 +68,8 @@
 			`suppier_name`, 
 			`suppier_code`, 
 			`suppier_short_name`, 
-			`suppier_py`, 
+			`suppier_type`,
+			`suppier_py`,
 			`link_man`, 
 			`link_phone`, 
 			`link_tell`, 
@@ -86,7 +88,8 @@
 			#{suppierName}, 
 			#{suppierCode}, 
 			#{suppierShortName}, 
-			#{suppierPy}, 
+			#{suppierType},
+			#{suppierPy},
 			#{linkMan}, 
 			#{linkPhone}, 
 			#{linkTell}, 
@@ -108,6 +111,7 @@
 			<if test="suppierName != null">`suppier_name` = #{suppierName}, </if>
 			<if test="suppierCode != null">`suppier_code` = #{suppierCode}, </if>
 			<if test="suppierShortName != null">`suppier_short_name` = #{suppierShortName}, </if>
+			<if test="suppierType != null">`suppier_type` = #{suppierType}, </if>
 			<if test="suppierPy != null">`suppier_py` = #{suppierPy}, </if>
 			<if test="linkMan != null">`link_man` = #{linkMan}, </if>
 			<if test="linkPhone != null">`link_phone` = #{linkPhone}, </if>

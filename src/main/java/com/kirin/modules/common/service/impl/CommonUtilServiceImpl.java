@@ -68,7 +68,22 @@ public class CommonUtilServiceImpl implements CommonUtilService{
         return commonUtilDao.outStoreSearch();
     }
 
+    @Override
     public List<Map> outStoreDetailSearch(Long outputId){
         return commonUtilDao.outStoreDetailSearch(outputId);
+    }
+
+    @Override
+    public String compBomCount(Long id,String type){
+        if(type != null || type.equals("MTR")){
+            return commonUtilDao.compBomMtrCount(id);
+        }else{
+            return commonUtilDao.compBomPrdCount(id);
+        }
+    }
+
+    @Override
+    public String getTableMaxNo(String returnFiled, String tableName,String likeDateStr){
+        return commonUtilDao.getTableMaxNo(returnFiled,tableName,likeDateStr);
     }
 }

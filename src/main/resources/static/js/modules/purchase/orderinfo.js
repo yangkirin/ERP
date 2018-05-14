@@ -327,10 +327,10 @@ var vm = new Vue({
             $.ajax({
                 type:"POST",
                 async:false,
-                url: baseURL + "common/commonUtil/getTableNewNo",
-                data:"tableName=TB_ORDER_INFO&noField=ORDER_NO",
+                url: baseURL + "common/commonUtil/createBillNo",
+                data:"billType=0",
                 success: function(r){
-                    no = r.newNo;
+                    no = r.newBillNo;
                 }
             });
             return no;

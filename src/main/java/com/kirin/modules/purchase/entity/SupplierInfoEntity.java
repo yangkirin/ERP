@@ -22,6 +22,8 @@ public class SupplierInfoEntity implements Serializable {
 	private String suppierCode;
 	//供应商简称
 	private String suppierShortName;
+	//供应商类型
+	private String suppierType;
 	//拼音码
 	private String suppierPy;
 	//联系人
@@ -42,6 +44,8 @@ public class SupplierInfoEntity implements Serializable {
 	private String createUser;
 	//备注
 	private String remark;
+
+	private String typeName;
 
 	private Date createDate;
 	private Date updateDate;
@@ -95,6 +99,15 @@ public class SupplierInfoEntity implements Serializable {
 	public String getSuppierShortName() {
 		return suppierShortName;
 	}
+
+	public String getSuppierType() {
+		return suppierType;
+	}
+
+	public void setSuppierType(String suppierType) {
+		this.suppierType = suppierType;
+	}
+
 	/**
 	 * 设置：拼音码
 	 */
@@ -214,6 +227,14 @@ public class SupplierInfoEntity implements Serializable {
 	 */
 	public String getRemark() {
 		return remark;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 
 	public Date getCreateDate() {

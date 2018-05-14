@@ -30,4 +30,10 @@ public interface CommonUtilDao extends BaseDao<Object> {
     List<Map> outStoreSearch();
 
     List<Map> outStoreDetailSearch(@Param("outputId")Long outputId);
+
+    String compBomMtrCount(@Param("mtrId") Long mtrId);
+
+    String compBomPrdCount(@Param("prdId") Long prdId);
+
+    String getTableMaxNo(@Param("returnFiled") String returnFiled,@Param("tableName") String tableName,@Param("likeDateStr") String likeDateStr);
 }

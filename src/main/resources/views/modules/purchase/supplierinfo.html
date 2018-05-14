@@ -27,7 +27,7 @@
 			<div class="row">
 				<div class="grid-btn col-sm-3">
 					<a v-if="hasPermission('purchase:supplierinfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
-					<a v-if="hasPermission('purchase:supplierinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+					<!--<a v-if="hasPermission('purchase:supplierinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
 					<a v-if="hasPermission('purchase:supplierinfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
 				</div>
 				<div class="input-group input-group-sm col-sm-2">
@@ -44,81 +44,78 @@
 		<div v-show="!showList" class="panel panel-default">
 			<div class="panel-heading">{{title}}</div>
 			<form class="form-horizontal" style="width: 100%;">
-												<div class="form-group">
+				<div class="form-group">
 					<div class="col-sm-2 control-label">供应商名称</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.suppierName" placeholder="供应商名称" @input="getPinying('supplierPy')"/>
 					</div>
-				<!--</div>-->
-										<!--<div class="form-group">-->
 					<div class="col-sm-2 control-label">供应商代码</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.suppierCode" placeholder="供应商代码"/>
 					</div>
 				</div>
-										<div class="form-group">
+				<div class="form-group">
 					<div class="col-sm-2 control-label">供应商简称</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.suppierShortName" placeholder="供应商简称"/>
 					</div>
-				<!--</div>-->
-										<!--<div class="form-group">-->
 					<div class="col-sm-2 control-label">拼音码</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.suppierPy" id="supplierPy" placeholder="拼音码"/>
 					</div>
 				</div>
-										<div class="form-group">
+				<div class="form-group">
+					<div class="col-sm-2 control-label">供应商类型</div>
+					<div class="col-sm-4">
+						<select class="form-control" v-model="supplierInfo.suppierType" placeholder="供应商类型" readonly="readonly">
+							<option v-for="option in typeArr" v-bind:value="option.value">{{option.text}}
+						</select>
+					</div>
 					<div class="col-sm-2 control-label">联系人</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.linkMan" placeholder="联系人"/>
 					</div>
-				<!--</div>-->
-										<!--<div class="form-group">-->
+				</div>
+				<div class="form-group">
 					<div class="col-sm-2 control-label">联系电话</div>
 					<div class="col-sm-4">
-					  <input type="text" class="form-control" v-model="supplierInfo.linkPhone" placeholder="联系电话"/>
+						<input type="text" class="form-control" v-model="supplierInfo.linkPhone" placeholder="联系电话"/>
 					</div>
-				</div>
-										<div class="form-group">
 					<div class="col-sm-2 control-label">固定电话</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.linkTell" placeholder="固定电话"/>
 					</div>
-				<!--</div>-->
-										<!--<div class="form-group">-->
+				</div>
+				<div class="form-group">
 					<div class="col-sm-2 control-label">地址</div>
 					<div class="col-sm-4">
-					  <input type="text" class="form-control" v-model="supplierInfo.address" placeholder="地址"/>
+						<input type="text" class="form-control" v-model="supplierInfo.address" placeholder="地址"/>
 					</div>
-				</div>
-										<div class="form-group">
 					<div class="col-sm-2 control-label">税率</div>
 					<div class="col-sm-4">
 					  <input type="text" class="form-control" v-model="supplierInfo.taxRate" placeholder="税率"/>
 					</div>
-				<!--</div>-->
-										<!--<div class="form-group">-->
+				</div>
+				<div class="form-group">
 					<div class="col-sm-2 control-label">账期</div>
 					<div class="col-sm-4">
-					  <input type="text" class="form-control" v-model="supplierInfo.paymentDays" placeholder="账期"/>
+						<input type="text" class="form-control" v-model="supplierInfo.paymentDays" placeholder="账期"/>
 					</div>
-				</div>
-										<div class="form-group">
 					<div class="col-sm-2 control-label">状态</div>
 					<div class="col-sm-4">
-					  <!--<input type="text" class="form-control" v-model="supplierInfo.status" placeholder="状态"/>-->
-						<select class="form-control" v-model="supplierInfo.status" placeholder="请选择状态">
+ 						<select class="form-control" v-model="supplierInfo.status" placeholder="请选择状态">
 							<option value="1">启用</option>
 							<option value="0">禁用</option>
 						</select>
 					</div>
+				</div>
+				<div class="form-group">
 					<div class="col-sm-2 control-label">备注</div>
-					<div class="col-sm-4">
-					  <input type="text" class="form-control" v-model="supplierInfo.remark" placeholder="备注"/>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" v-model="supplierInfo.remark" placeholder="备注"/>
 					</div>
 				</div>
-								<div class="form-group">
+				<div class="form-group">
 					<div class="col-sm-2 control-label"></div>
 					<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
 					&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadInfo" value="返回"/>

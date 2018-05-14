@@ -49,6 +49,17 @@ $(function () {
                 vm.mtrData = r.mtrData;
             });
 
+            $.ajax({
+                url: baseURL + "/common/commonUtil/compBomCount",
+                sync:true,
+                data: {id:id,type:'MTR'},
+                success: function(r){
+                    vm.bomCount = r.count;
+                }
+            });
+
+
+
             // $("#cutGrid").jqGrid('setGridParam',{datatype: "json",
             //     postData:{'mtrId': id}
             // }).trigger("reloadGrid");
@@ -315,7 +326,8 @@ var vm = new Vue({
         takestnArr:{},
         costArr:{},
         extendArr:{},
-        mtrExtend:{}
+        mtrExtend:{},
+        bomCount:0
 	},
 	methods: {
         getTypeInfoTree:function(){

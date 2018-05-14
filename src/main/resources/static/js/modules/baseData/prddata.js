@@ -63,6 +63,15 @@ $(function () {
                     vm.sfbcp = '1';
                 }
 
+                $.ajax({
+                    url: baseURL + "/common/commonUtil/compBomCount",
+                    sync:true,
+                    data: {id:id,type:'PRD'},
+                    success: function(r){
+                        vm.bomCount = r.count;
+                    }
+                });
+
                 $(".select2.select2-container.select2-container--default").attr("class","select2 select2-container select2-container--default select2-container--below select2-container--focus");
                 $("#select2-prdTypeId-container").attr("title",vm.prdData.typeName);
                 $("#select2-prdTypeId-container").text(vm.prdData.typeName);
@@ -164,7 +173,8 @@ var vm = new Vue({
         prdTypeArr:{},
         pdcStnArr:{},
         cookTypeArr:{},
-        sfbcp:null
+        sfbcp:null,
+        bomCount:0
 	},
 	methods: {
 		query: function () {

@@ -314,11 +314,25 @@
 					</div>
 				</form>
 			</div>
-			<!--&nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="add" value="新增产品"/>-->
-			<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="saveOrUpdate" value="保存更改"/>-->
-			&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
-			&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:update')" class="btn btn-primary" @click="saveOrUpdate"><i class="fa fa-pencil-square-o"></i>&nbsp;保存更改</a>
-			&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除产品</a>
+			<br>
+			<div class="form-group">
+				<div class="col-sm-1 control-label"></div>
+				<div class="col-sm-8">
+					<!--&nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="add" value="新增产品"/>-->
+					<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="saveOrUpdate" value="保存更改"/>-->
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:update')" class="btn btn-primary" @click="saveOrUpdate"><i class="fa fa-pencil-square-o"></i>&nbsp;保存更改</a>
+					&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除产品</a>
+				</div>
+			</div>
+			<br>
+			<br>
+			<div class="form-group">
+				<div class="col-sm-1 control-label"></div>
+				<div class="col-sm-8">
+					<div class="alert alert-info" role="alert">*此产品用于<a href="#"> <font  style="color: red;font-size: 18px;">&nbsp;&nbsp;{{bomCount}}&nbsp;&nbsp;</font></a>笔配方中</div>
+				</div>
+			</div>
 		</div>
 	</div>
 

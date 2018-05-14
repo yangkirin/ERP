@@ -100,4 +100,23 @@
 		where od.mtr_id=m.id and od.MTR_ID=tib.MTR_ID and od.ID=${outputId} GROUP BY od.OUTPORT_NO;
 
 	</select>
+
+	<select id="compBomMtrCount" resultType="String">
+		select count(bd.bom_id) as quty from mtr_data m,bom_detail bd
+		where  m.id=bd.mtr_id and bd.semi_finished='0' and m.id=${mtrId}
+		GROUP BY m.id;
+	</select>
+
+	<select id="compBomPrdCount" resultType="String">
+		select count(bd.bom_id) as quty from prd_data p,bom_detail bd
+		where  p.id=bd.mtr_id and bd.semi_finished='1' and p.id=${prdId}
+		GROUP BY p.id;
+
+	</select>
+
+	<select id="getTableMaxNo" resultType="String">
+		select ${returnFiled} from ${tableName} where
+			${returnFiled} LIKE concat('%',#{likeDateStr},'%')
+		order by id desc limit 1;
+	</select>
 </mapper>

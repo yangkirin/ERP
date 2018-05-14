@@ -117,6 +117,8 @@ public class MtrDataController extends AbstractController {
 		return R.ok();
 	}
 
+
+
 	public static void main(String[] args){
 		String a = "2.0";
 		BigDecimal b = new BigDecimal(new Double(a).doubleValue()).setScale(2);

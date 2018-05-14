@@ -7,8 +7,6 @@
     <resultMap type="com.kirin.modules.sales.entity.ProductionOrderEntity" id="productionOrderMap">
         <result property="id" column="ID"/>
         <result property="productionNo" column="PRODUCTION_NO"/>
-        <result property="planId" column="PLAN_ID"/>
-        <result property="planNo" column="PLAN_NO"/>
         <result property="orderTypeId" column="ORDER_TYPE_ID"/>
         <result property="orderTypeName" column="ORDER_TYPE_NAME"/>
         <result property="customerId" column="CUSTOMER_ID"/>
@@ -37,9 +35,6 @@
 	<select id="queryList" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
 		select * from tb_production_order
 		<where>
-			<if test="planId != null">
-				and PLAN_ID=#{planId}
-			</if>
 			<if test="orderTypeId != null">
 				and ORDER_TYPE_ID=#{orderTypeId}
 			</if>
@@ -95,9 +90,7 @@
 		insert into tb_production_order
 		(
 			`PRODUCTION_NO`, 
-			`PLAN_ID`, 
-			`PLAN_NO`, 
-			`ORDER_TYPE_ID`, 
+			`ORDER_TYPE_ID`,
 			`ORDER_TYPE_NAME`, 
 			`CUSTOMER_ID`, 
 			`CUSTOMER_NO`, 
@@ -120,9 +113,7 @@
 		values
 		(
 			#{productionNo}, 
-			#{planId}, 
-			#{planNo}, 
-			#{orderTypeId}, 
+			#{orderTypeId},
 			#{orderTypeName}, 
 			#{customerId}, 
 			#{customerNo}, 
@@ -148,8 +139,6 @@
 		update tb_production_order 
 		<set>
 			<if test="productionNo != null">`PRODUCTION_NO` = #{productionNo}, </if>
-			<if test="planId != null">`PLAN_ID` = #{planId}, </if>
-			<if test="planNo != null">`PLAN_NO` = #{planNo}, </if>
 			<if test="orderTypeId != null">`ORDER_TYPE_ID` = #{orderTypeId}, </if>
 			<if test="orderTypeName != null">`ORDER_TYPE_NAME` = #{orderTypeName}, </if>
 			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>

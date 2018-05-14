@@ -4,25 +4,28 @@ $(function () {
         datatype: "json",
         colModel: [			
 			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
-			{ label: '供应商名称', name: 'suppierName', index: 'suppier_name', width: 80 }, 			
-			{ label: '供应商代码', name: 'suppierCode', index: 'suppier_code', width: 80 }, 			
-			{ label: '供应商简称', name: 'suppierShortName', index: 'suppier_short_name', width: 80 }, 			
-			{ label: '拼音码', name: 'suppierPy', index: 'suppier_py', width: 80 }, 			
-			{ label: '联系人', name: 'linkMan', index: 'link_man', width: 80 }, 			
+			{ label: '供应商名称', name: 'suppierName', index: 'suppier_name', width: 120 },
+			{ label: '代码', name: 'suppierCode', index: 'suppier_code', width: 60 },
+			{ label: '简称', name: 'suppierShortName', index: 'suppier_short_name', width: 120 ,hidden:true},
+			{ label: '类型', name: 'typeName', index: 'typeName', width: 80 },
+			{ label: '拼音码', name: 'suppierPy', index: 'suppier_py', width: 80 },
+			{ label: '联系人', name: 'linkMan', index: 'link_man', width: 60 },
 			{ label: '联系电话', name: 'linkPhone', index: 'link_phone', width: 80 }, 			
 			{ label: '固定电话', name: 'linkTell', index: 'link_tell', width: 80 }, 			
 			{ label: '地址', name: 'address', index: 'address', width: 80 }, 			
-			{ label: '税率', name: 'taxRate', index: 'tax_rate', width: 80 }, 			
-			{ label: '账期', name: 'paymentDays', index: 'payment_days', width: 80 }, 			
-			{ label: '状态', name: 'status', index: 'status', width: 80 ,formatter: function(value, options, row){
+			{ label: '税率', name: 'taxRate', index: 'tax_rate', width: 60 },
+			{ label: '账期', name: 'paymentDays', index: 'payment_days', width: 60 },
+			{ label: '状态', name: 'status', index: 'status', width: 60 ,formatter: function(value, options, row){
                 return value === 0 ?
                     '<span class="label label-danger">禁用</span>' :
                     '<span class="label label-success">正常</span>';
             }},
 			{ label: '创建人', name: 'createUser', index: 'create_user', width: 80,hidden:true },
 			{ label: '备注', name: 'remark', index: 'remark', width: 80 ,hidden:true},
-			{ label: '操作', name: 'operation', index: 'operation', width: 80 ,formatter:function(value, options, row){
-				return "<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig("+row.id+")'>原料配置</button>"
+			{ label: '操作', name: 'operation', index: 'operation', width: 150 ,formatter:function(value, options, row){
+				var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo("+row.id+")'>修改</button>" +
+				 "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig("+row.id+")'>原料配置</button>";
+				return optionStr;
 			}}
         ],
 		viewrecords: true,
@@ -115,9 +118,7 @@ $(function () {
             vm.supplierMtr.mtrExtendDesc = $.trim(text);
         }
     });
-
 });
-
 
 function mtrConfig(rowid){
     vm.showInfo = false;
@@ -125,6 +126,10 @@ function mtrConfig(rowid){
     vm.supplierMtr.suppierId = rowid;
     vm.getTypeInfoTree();
     vm.reloadMtrConfig(rowid);
+}
+
+function editInfo(rowid){
+    vm.update(rowid);
 }
 
 var setting = {
@@ -180,7 +185,8 @@ var vm = new Vue({
 		title: null,
         titleMtr:null,
 		supplierInfo: {},
-        mtrExtendArr: {}
+        mtrExtendArr: {},
+        typeArr:{}
 	},
 	methods: {
 		query: function () {
@@ -194,11 +200,11 @@ var vm = new Vue({
                 suppierCode:vm.createNewNo()
 			};
 		},
-		update: function (event) {
-			var id = getSelectedRow();
-			if(id == null){
-				return ;
-			}
+		update: function (id) {
+			// var id = getSelectedRow();
+			// if(id == null){
+			// 	return ;
+			// }
 			vm.showList = false;
             vm.title = "修改";
             
@@ -503,7 +509,22 @@ var vm = new Vue({
                 page:page
             }).trigger("reloadGrid");
             // vm.reload();
+        },
+        initTypeInfoArr:function(parentId){
+            var dataArr = "";
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "common/commonUtil/getDataToCommbox",
+                // contentType: "application/json",
+                data: {tableName:"tb_type_info",search:"PARENT_ID="+parentId,returnField:"ID as value,TYPE_NAME as text"},
+                success: function(r){
+                    dataArr =  r.data;
+                }
+            });
+            return dataArr;
         }
 	}
 });
 
+vm.typeArr = vm.initTypeInfoArr('115');
