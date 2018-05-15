@@ -8,7 +8,6 @@
         <result property="id" column="ID"/>
         <result property="orderNo" column="ORDER_NO"/>
         <result property="supplierId" column="SUPPLIER_ID"/>
-        <result property="procurementId" column="PROCUREMENT_ID"/>
         <result property="exceptionDate" column="EXCEPTION_DATE"/>
         <result property="status" column="STATUS"/>
     </resultMap>
@@ -22,7 +21,6 @@
 
 	<select id="queryList" resultType="com.kirin.modules.purchase.entity.OrderInfoEntity">
 		select oe.* from (select oi.*,(select si.suppier_name from tb_supplier_info si where si.id = oi.SUPPLIER_ID) as supplierName,
-		(select pp.PROCUREMENT_NO from TB_PROCUREMENT_PLAN pp where pp.id = oi.PROCUREMENT_ID) as procurementNo,
 		(select cast(sum(od.price*od.AMOUNT) AS DECIMAL (19, 2)) from TB_ORDER_DETAIL od where od.ORDER_ID=oi.id) as orderSumPrice,
 		(select cast(sum(imd.IN_PRICE*imd.IN_COUNT) AS DECIMAL (19, 2)) from tb_import i,tb_import_detail imd where i.id=imd.IMPORT_ID and i.ORDER_ID=oi.id) as inSumPrice
 		from tb_order_info oi) as oe
@@ -66,8 +64,7 @@
 		(
 			`ORDER_NO`, 
 			`SUPPLIER_ID`, 
-			`PROCUREMENT_ID`, 
-			`EXCEPTION_DATE`, 
+			`EXCEPTION_DATE`,
 			`STATUS`,
 			`CREATE_USER`,
 			`CREATE_DATE`,
@@ -78,8 +75,7 @@
 		(
 			#{orderNo}, 
 			#{supplierId}, 
-			#{procurementId}, 
-			#{exceptionDate}, 
+			#{exceptionDate},
 			#{status},
 			#{createUser},
 			#{createDate},
@@ -93,7 +89,6 @@
 		(
 		`ORDER_NO`,
 		`SUPPLIER_ID`,
-		`PROCUREMENT_ID`,
 		`EXCEPTION_DATE`,
 		`STATUS`,
 		`CREATE_USER`,
@@ -105,7 +100,6 @@
 		(
 		#{orderNo},
 		#{supplierId},
-		#{procurementId},
 		#{exceptionDate},
 		#{status},
 		#{createUser},
@@ -120,7 +114,6 @@
 		<set>
 			<if test="orderNo != null">`ORDER_NO` = #{orderNo}, </if>
 			<if test="supplierId != null">`SUPPLIER_ID` = #{supplierId}, </if>
-			<if test="procurementId != null">`PROCUREMENT_ID` = #{procurementId}, </if>
 			<if test="exceptionDate != null">`EXCEPTION_DATE` = #{exceptionDate}, </if>
 			<if test="status != null">`STATUS` = #{status},</if>
 			<if test="createUser != null">`CREATE_USER` = #{createUser},</if>

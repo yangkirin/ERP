@@ -5,6 +5,7 @@ import com.kirin.modules.baseData.entity.TypeInfoEntity;
 import com.kirin.modules.baseData.service.TypeInfoService;
 import com.kirin.modules.common.service.CommonUtilService;
 import com.kirin.modules.common.utils.CommonUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -153,6 +154,22 @@ public class CommonUtil {
     }
 
     /**
+     * 根据条件查询是否存在结果，可用于针对表某一字段的值做唯一性校验
+     * @param searchFiled
+     * @param tableName
+     * @param checkStr
+     * @return
+     */
+    public R checkNameRepeat(@RequestParam("searchFiled")String searchFiled,@RequestParam("tableName")String tableName,@RequestParam("checkStr")String checkStr){
+        if(StringUtils.isEmpty(searchFiled) || StringUtils.isEmpty(tableName) || StringUtils.isEmpty(checkStr)){
+            return R.error("参数错误！请联系管理员...");
+        }
+        String count = commonUtilService.checkNameRepeat(searchFiled,tableName,checkStr);
+        return R.ok().put("count",count);
+    }
+
+
+    /**
      * 创建新的单据号
      * @param billType:单据类型（0-采购单，1-采购入库单，2-领料出库单，3-客户订单，4-盘点单）
      * @return
@@ -194,9 +211,6 @@ public class CommonUtil {
             default:
                 break;
         }
-        System.out.println(billCode);
-        System.out.println(currentDateStr);
-        System.out.println(newNo);
         newBillNo.append(billCode);
         newBillNo.append(currentDateStr);
         newBillNo.append(newNo.toString());

@@ -119,4 +119,9 @@
 			${returnFiled} LIKE concat('%',#{likeDateStr},'%')
 		order by id desc limit 1;
 	</select>
+
+	<select id="checkNameRepeat" resultType="String">
+		select count(*) from ${tableName} where
+			${searchFiled}=#{checkStr};
+	</select>
 </mapper>

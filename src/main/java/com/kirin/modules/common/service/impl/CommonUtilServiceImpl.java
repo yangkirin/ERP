@@ -86,4 +86,9 @@ public class CommonUtilServiceImpl implements CommonUtilService{
     public String getTableMaxNo(String returnFiled, String tableName,String likeDateStr){
         return commonUtilDao.getTableMaxNo(returnFiled,tableName,likeDateStr);
     }
+
+    @Override
+    public String checkNameRepeat(String searchFiled,String tableName,String checkStr){
+        return commonUtilDao.checkNameRepeat(searchFiled,tableName,checkStr);
+    }
 }

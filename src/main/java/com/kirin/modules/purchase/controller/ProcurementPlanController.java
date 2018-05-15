@@ -147,7 +147,6 @@ public class ProcurementPlanController {
 			order.setOrderNo(orderNo);
 			order.setSupplierId(se.getId());
 //			order.setExceptionDate(ppe.getExpectDate());
-			order.setProcurementId(ppe.getId());
 			order.setStatus("1");
 
 			Long orderId = orderInfoService.saveId(order);

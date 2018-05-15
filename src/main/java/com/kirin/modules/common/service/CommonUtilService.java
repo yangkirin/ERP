@@ -28,4 +28,6 @@ public interface CommonUtilService {
     String compBomCount(Long id,String type);
 
     String getTableMaxNo(String returnFiled, String tableName,String likeDateStr);
+
+    String checkNameRepeat(String searchFiled,String tableName,String checkStr);
 }

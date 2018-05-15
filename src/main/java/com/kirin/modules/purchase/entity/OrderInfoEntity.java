@@ -22,10 +22,6 @@ public class OrderInfoEntity implements Serializable {
 	//供应商ID
 	private Long supplierId;
 	private String supplierName;
-	//计划ID
-	private Long procurementId;
-	private String procurementNo;
-	//期望到货日期
 	private String exceptionDate;
 	//状态
 	private String status;
@@ -76,18 +72,6 @@ public class OrderInfoEntity implements Serializable {
 		return supplierId;
 	}
 	/**
-	 * 设置：计划ID
-	 */
-	public void setProcurementId(Long procurementId) {
-		this.procurementId = procurementId;
-	}
-	/**
-	 * 获取：计划ID
-	 */
-	public Long getProcurementId() {
-		return procurementId;
-	}
-	/**
 	 * 设置：期望到货日期
 	 */
 	public void setExceptionDate(String exceptionDate) {
@@ -118,14 +102,6 @@ public class OrderInfoEntity implements Serializable {
 
 	public void setSupplierName(String supplierName) {
 		this.supplierName = supplierName;
-	}
-
-	public String getProcurementNo() {
-		return procurementNo;
-	}
-
-	public void setProcurementNo(String procurementNo) {
-		this.procurementNo = procurementNo;
 	}
 
 	public BigDecimal getOrderSumPrice() {
