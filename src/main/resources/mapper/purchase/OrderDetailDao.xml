@@ -52,11 +52,11 @@
 			limit #{offset}, #{limit}
 		</if>
 	</select>
-	
+
  	<select id="queryTotal" resultType="int">
 		select count(*) from tb_order_detail 
 	</select>
-	 
+
 	<insert id="save" parameterType="com.kirin.modules.purchase.entity.OrderDetailEntity" useGeneratedKeys="true" keyProperty="id">
 		insert into tb_order_detail
 		(

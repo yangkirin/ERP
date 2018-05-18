@@ -11,12 +11,17 @@ import com.kirin.modules.baseData.entity.MtrDataEntity;
 import com.kirin.modules.baseData.entity.MtrExtendEntity;
 import com.kirin.modules.baseData.service.MtrDataService;
 import com.kirin.modules.baseData.service.MtrExtendService;
+import com.kirin.modules.purchase.entity.OrderDetailEntity;
 import com.kirin.modules.purchase.entity.SuppierMtrEntity;
 import com.kirin.modules.purchase.entity.SupplierInfoEntity;
+import com.kirin.modules.purchase.service.OrderDetailService;
+import com.kirin.modules.purchase.service.OrderInfoService;
 import com.kirin.modules.purchase.service.SupplierInfoService;
 import com.kirin.modules.storage.entity.ImportDetailEntity;
+import com.kirin.modules.storage.entity.ImportEntity;
 import com.kirin.modules.storage.entity.OutportDetailEntity;
 import com.kirin.modules.storage.service.ImportDetailService;
+import com.kirin.modules.storage.service.ImportService;
 import com.kirin.modules.storage.service.OutportDetailService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,12 +92,29 @@ public class ImportMtrBatchController {
 	@RequestMapping("/save")
 	@RequiresPermissions("storage:importmtrbatch:save")
 	public R save(@RequestBody ImportMtrBatchEntity importMtrBatch){
+
+		ImportDetailEntity importDetailEntity = new ImportDetailEntity();
+		importDetailEntity.setImportId(importMtrBatch.getImportId());
+		importDetailEntity.setMtrId(importMtrBatch.getMtrId());
+		importDetailEntity.setInUnit(importMtrBatch.getInUnitName());
+		System.out.println("-------------------------------------------"+importMtrBatch.getInUnitName());
+		System.out.println("-------------------------------------------"+importDetailEntity.getInUnit());
+//		importDetailEntity.setInUnit(importMtrBatch.getInUnitId().toString());
+		importDetailEntity.setInRate(importMtrBatch.getInUnitRate() == null ? "0" : importMtrBatch.getInUnitRate().toString());
+		importDetailEntity.setOrderCount(importMtrBatch.getOrderCount() == null ? "0" : importMtrBatch.getOrderCount().toString());
+		importDetailEntity.setOrderPrice(importMtrBatch.getOrderPrice());
+		//根据入库单ID与原料ID查询入库明细ID
+		ImportDetailEntity importDetailEntity2 = importDetailService.queryObject2(importDetailEntity);
+		importMtrBatch.setImportDetailId(importDetailEntity2.getId());
+
 		importMtrBatchService.save(importMtrBatch);
 		importMtrBatch.setStatus("1");
 
 		//更新入库明细当中该原料的入库数量
 		updateDetailInCount(importMtrBatch.getImportDetailId());
 
+		//更新订单明细中的入库数量
+		updateOrderDetailInCount(importMtrBatch);
 		return R.ok();
 	}
 	
@@ -127,6 +149,32 @@ public class ImportMtrBatchController {
 
 		return R.ok();
 	}
+
+	@Autowired
+	private ImportService importService;
+
+	@Autowired
+	private OrderDetailService orderDetailService;
+
+	public void updateOrderDetailInCount(ImportMtrBatchEntity importMtrBatchEntity){
+		//更新订单的某个原料的实际入库数量
+		ImportEntity importEntity = importService.queryObject(importMtrBatchEntity.getImportId());
+
+		ImportDetailEntity importDetailEntity = importDetailService.queryObject(importMtrBatchEntity.getImportDetailId());
+
+		Map<String,Object> param = new HashMap<>();
+		param.put("orderId",importEntity.getOrderId());
+		List<OrderDetailEntity> orderDetailEntityList = orderDetailService.queryList(param);
+		if(orderDetailEntityList != null && orderDetailEntityList.size() > 0){
+			for (OrderDetailEntity orderDetailEntity:orderDetailEntityList) {
+				if(orderDetailEntity.getMtrId().equals(importMtrBatchEntity.getMtrId())){
+					orderDetailEntity.setInCount(importDetailEntity.getInCount().toString());
+					orderDetailService.update(orderDetailEntity);
+				}
+			}
+		}
+	}
+
 
 	//更新入库明细入库数量，在进行入库批次的增删以及更新后的操作
 	public void updateDetailInCount(Long detailId){

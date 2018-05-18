@@ -27,4 +27,8 @@ public interface ImportDetailService {
 	void delete(Long id);
 	
 	void deleteBatch(Long[] ids);
+
+	void insertImportDetailFromOrderDetail(Long orderId);
+
+	ImportDetailEntity queryObject2(ImportDetailEntity importDetailEntity);
 }

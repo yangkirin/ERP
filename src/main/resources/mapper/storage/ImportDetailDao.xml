@@ -27,18 +27,59 @@
 		select * from tb_import_detail where ID = #{value}
 	</select>
 
-	<select id="queryList" resultType="com.kirin.modules.storage.entity.ImportDetailEntity">
-		select i.*,m.mtr_name as mtrName,m.tax_rate as taxRate from tb_import_detail i,mtr_data m where i.mtr_id=m.id
+	<select id="queryObject2" resultType="com.kirin.modules.storage.entity.ImportDetailEntity">
+		select * from tb_import_detail where 1=1
 		<if test="importId != null">
-			and i.IMPORT_ID = #{importId}
+			and IMPORT_ID = #{importId}
 		</if>
+		<if test="mtrId != null">
+			and MTR_ID = #{mtrId}
+		</if>
+		<if test="inUnit != null">
+
+			and IN_UNIT like "${inUnit}"
+
+		</if>
+		<if test="inRate != null">
+			and IN_RATE = ${inRate}
+		</if>
+		<if test="orderCount != null">
+			and ORDER_COUNT = ${orderCount}
+		</if>
+		<if test="orderPrice != null">
+			and ORDER_PRICE = ${orderPrice}
+		</if>
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.ImportDetailEntity">
+		SELECT
+		DISTINCT
+		imd.*,
+		m.MTR_NAME AS mtrName
+		FROM
+		tb_order_detail od,
+		tb_import_detail imd,
+		tb_import im,
+		mtr_data m
+		WHERE
+		od.ORDER_ID = im.ORDER_ID
+		AND im.id = imd.IMPORT_ID
+		AND imd.MTR_ID = m.id
+
+		<if test="importId != null">
+			and imd.IMPORT_ID = #{importId}
+		</if>
+		<if test="orderId != null">
+			AND od.ORDER_ID = #{orderId}
+		</if>
+
 
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
-                order by i.${sidx} ${order}
+                order by imd.${sidx} ${order}
             </when>
 			<otherwise>
-                order by i.ID desc
+                order by imd.ID desc
 			</otherwise>
         </choose>
 		<if test="offset != null and limit != null">
@@ -52,7 +93,41 @@
 			and i.IMPORT_ID = #{importId}
 		</if>
 	</select>
-	 
+
+
+
+
+	<insert id="insertImportDetailFromOrderDetail">
+		INSERT INTO tb_import_detail ( IMPORT_ID, MTR_ID, MTR_NO, IN_UNIT, IN_RATE, ORDER_COUNT, ORDER_PRICE, ORDER_SUM_PRICE, IN_COUNT, IN_PRICE, IN_SUM_PRICE, ORDER_MTR_WGT, IN_WGT ) SELECT
+			*
+			FROM
+				(
+			SELECT
+				im.id AS IMPORT_ID,
+				od.mtr_id AS MTR_ID,
+				od.MTR_CODE AS MTR_NO,
+				od.MTR_UNIT AS IN_UNIT,
+				od.MTR_RATE AS IN_RATE,
+				od.AMOUNT AS ORDER_COUNT,
+				od.price AS ORDER_PRICE,
+				( od.AMOUNT * od.price ) AS ORDER_SUM_PRICE,
+				od.IN_COUNT,
+				od.IN_PRICE,
+				( od.IN_COUNT * od.IN_PRICE ) AS IN_SUM_PRICE,
+				if(od.WGT_UNIT1=0,0,od.WGT_UNIT1) AS ORDER_MTR_WGT,
+				( od.IN_COUNT * m.MINI_RATE ) AS IN_WGT
+			FROM
+				tb_order_detail od,
+				mtr_data m,
+				tb_import im
+			WHERE
+				od.mtr_id = m.id
+				AND im.ORDER_ID = od.ORDER_ID
+				AND od.ORDER_ID = #{orderId}
+				) AS c;
+	</insert>
+
+
 	<insert id="save" parameterType="com.kirin.modules.storage.entity.ImportDetailEntity" useGeneratedKeys="true" keyProperty="id">
 		insert into tb_import_detail
 		(

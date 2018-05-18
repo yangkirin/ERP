@@ -1,43 +1,89 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    }
+
     $("#jqGrid").jqGrid({
-        url: baseURL + 'storage/import/list',
+        url: baseURL + 'storage/import/listOrder',
         datatype: "json",
-        colModel: [			
-			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-			{ label: '入库单号', name: 'importNo', index: 'IMPORT_NO', width: 80 }, 			
-			{ label: '订单ID', name: 'orderId', index: 'ORDER_ID', width: 80 ,hidden:true},
-            { label: '订单编号', name: 'orderNo', index: 'ORDER_NO', width: 100},
-            { label: '期望到货日期', name: 'exceptionDate', index: 'ORDER_NO', width: 80,formatter:'date',
-                formatoptions:{newformat:'Y-m-d'},unformat:function(value, options, row){
-                    var dateTemp = new Date(value);
-                    return dateTemp;
-            }},
-			{ label: '供应商ID', name: 'supplierId', index: 'SUPPLIER_ID', width: 80 ,hidden:true},
-			{ label: '供应商名称', name: 'supplierName', index: 'SUPPLIER_NAME', width: 80 }, 			
-			{ label: '供应商编号', name: 'supplierNo', index: 'SUPPLIER_NO', width: 80 }, 			
-			{ label: '入库日期', name: 'importDate', index: 'IMPORT_DATE', width: 80 }, 			
-			{ label: '状态', name: 'status', index: 'STATUS', width: 80,formatter: function(value, options, row){
-                return value === '1' ?
-                    '<span class="label label-info">待入库</span>' :
-                    '<span class="label label-success">已入库</span>';
+        colModel: [
+            { label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
+            { label: '订单编号', name: 'orderNo', index: 'ORDER_NO', width: 80 },
+            { label: '供应商ID', name: 'supplierId', index: 'SUPPLIER_ID', width: 80 ,hidden:true},
+            { label: '供应商', name: 'supplierName', index: 'SUPPLIER_NAME', width: 120 },
+            { label: '订购总额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 60 ,formatter : "number",align:"right"},
+            { label: '入库总额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 60 ,formatter : "number",align:"right"},
+            { label: '期望到货日期', name: 'exceptionDate', index: 'EXCEPTION_DATE', width: 60 ,align:"right"},
+            { label: '状态', name: 'status', index: 'STATUS', width: 40 ,align:"center",formatter: function(value, options, row){
+                var msg = "";
+                if(value == 0){
+                    msg = '<p class="bg-danger">已撤销</p>';
+                }else if(value == 1){
+                    msg = '<p class="bg-success">待确认</p>';
+                }else if(value == 2){
+                    msg = '<p class="bg-info">待入库</p>';
+                }else if(value == 3){
+                    msg = '<p class="bg-warning">已入库</p>';
+                }else if(value == 4){
+                    msg = '<p class="bg-primary">已结转</p>';
+                }else{
+                    msg = '<p class="bg-danger">未知</p>';
+                }
+                return msg;
             },unformat:function(value, options, row){
-                if($.trim(value).trim()=="待入库"){
+                if($.trim(value)=="已撤销"){
+                    return "0";
+                }else if($.trim(value)=="待确认"){
                     return "1";
-                }else if($.trim(value)=="已入库"){
+                }else if($.trim(value)=="待入库"){
                     return "2";
+                }else if($.trim(value)=="已入库"){
+                    return "3";
+                }else if($.trim(value)=="已结转"){
+                    return "4";
                 }
             }},
-			{ label: '入库人', name: 'createUser', index: 'CREATE_USER', width: 80 }			
+            { label: '操作', name: 'operation', index: 'operation', width: 150,formatter:function(value, options, row){
+                var operatorStr = "";
+                
+                var editStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"0\")'>修&nbsp;&nbsp;&nbsp;改</button>&nbsp;&nbsp;";
+                var importStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"1\")'>入&nbsp;&nbsp;&nbsp;库</button>&nbsp;&nbsp;";
+                var backStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"2\")'>反确认</button>&nbsp;&nbsp;";
+                var printStr = "<button type='button' class='btn btn-info btn-xs' onclick='oper("+row.id+",\"3\")'>打&nbsp;&nbsp;&nbsp;印</button>&nbsp;&nbsp;";
+
+                if(!hasPermission('purchase:orderinfo:update')){
+                    editStr = "";
+                }
+                if(!hasPermission('purchase:orderinfo:delete')){
+                    confirmStr = "";
+                }
+
+                var status = row.status;
+                if(status == '0'){
+                    operatorStr = "";
+                }else if(status == '2'){//待入库
+                    operatorStr = importStr;
+                }else if(status == '3'){//已入库
+                    operatorStr = editStr+backStr+printStr;
+                }else if(status == '4'){
+                    operatorStr = printStr;
+                }
+                
+                return operatorStr;
+            }}
         ],
 		viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        // height: 385,
+        height: 'auto',
+        rowNum: 99999999,
 		rowList : [10,30,50],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: true,
-        pager: "#jqGridPager",
+        multiselect: false,
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -56,7 +102,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
-            var url = baseURL + 'storage/importdetail/list?importId='+row_id;
+            var url = baseURL + 'storage/importdetail/orderDetailList?orderId='+row_id;
             createSubGrid(subgrid_id,row_id,url);
         },
         onSelectRow:function(id){
@@ -84,23 +130,6 @@ $(function () {
                     $('#printImport').attr("disabled", false);
                 }
             }
-
-
-            // if(ids != null && ids.length > 1){
-            //     $('#printImport').attr("disabled",true);
-            //     $('#confirm_storg').attr("disabled", true);
-            // }else {
-            //
-            //
-            //
-            //     $('#printImport').attr("disabled", false);
-            //     var rowData = $("#jqGrid").jqGrid("getRowData", id);
-            //     if (rowData != null && rowData.status == '2') {
-            //         $('#confirm_storg').attr("disabled", true);
-            //     } else {
-            //         $('#confirm_storg').attr("disabled", false);
-            //     }
-            // }
         }
     });
 
@@ -113,21 +142,22 @@ $(function () {
             url : url,
             datatype : "json",
             colModel : [
-                { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-                { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80 ,hidden:true},
-                { label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80,hidden:true },
-                { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 80 },
-                { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
-                { label: '入库单位', name: 'inUnit', index: 'IN_UNIT', width: 80 },
-                { label: '入库转换率', name: 'inRate', index: 'IN_RATE', width: 80 ,formatter : "number"},
-                { label: '采购数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 ,formatter : "number"},
-                { label: '采购单价', name: 'orderPrice', index: 'ORDER_PRICE', width: 80 ,formatter : "number"},
-                { label: '采购金额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 80 ,formatter : "number"},
-                { label: '入库单价', name: 'inPrice', index: 'IN_PRICE', width: 80 ,formatter : "number"},
-                { label: '入库金额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 80,formatter : "number" },
-                { label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 80 ,formatter : "number"},
-                { label: '入库日期', name: 'inDate', index: 'IN_DATE', width: 80 }
+                {label: 'id', name: 'id', index: 'ID', width: 50, key: true,hidden:true},
+                {label: '订单ID', name: 'orderId', index: 'ORDER_ID', width: 80,hidden:true},
+                {label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80,hidden:true},
+                {label: '原料编码', name: 'mtrCode', index: 'MTR_CODE', width: 100},
+                {label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 180},
+                {label: '单位', name: 'mtrUnit', index: 'MTR_UNIT', width: 40},
+                {label: '转换率', name: 'mtrRate', index: 'MTR_RATE', width: 60,formatter : "number",align:"right"},
+                {label: '采购数量', name: 'amount', index: 'AMOUNT', width: 80,editable:true,formatter : "number",align:"right"},
+                {label: '单价', name: 'price', index: 'PRICE', width: 50,editable:false,formatter : "number",align:"right"},
+                {label: '采购金额', name: 'sumPrice', index: 'SUM_PRICE', width: 60,editable:false,align:"right",formatter:function(value, options, row){
+                    return Number(Number(row.amount)*Number(row.price)).toFixed(2);
+                }},
+                {label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 60,editable:true,formatter : "number",align:"right"},
+                {label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 60,formatter : "number",align:"right"},
+                {label: '入库金额', name: 'inPrice', index: 'IN_PRICE', width: 60,formatter : "number",align:"right"},
+                {label: '实际入库日期', name: 'inDate', index: 'IN_DATE', width: 100}
             ],
             rowNum : 20,
             height : '100%',
@@ -160,30 +190,33 @@ $(function () {
         datatype: "json",
         colModel: [
             { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-            { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80 ,hidden:true},
+            { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80,hidden:true },
             { label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80,hidden:true },
+            { label: '原料名称', name: 'mtrName', index: 'mtrName', width: 140},
             { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 80 },
-            { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 220 },
-            { label: '入库单位', name: 'inUnit', index: 'IN_UNIT', width: 80  ,hidden:true,align:'right'},
-            { label: '入库转换率', name: 'inRate', index: 'IN_RATE', width: 80 ,formatter : "number" ,hidden:true},
-            { label: '采购数量', name: 'orderCount', index: 'ORDER_COUNT', width: 120 ,formatter : "number",align:'right'},
-            { label: '采购单价', name: 'orderPrice', index: 'ORDER_PRICE', width: 120 ,formatter : "number",align:'right'},
-            { label: '采购金额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 120 ,formatter : "number",align:'right'},
-            { label: '件重', name: 'orderMtrWgt', index: 'ORDER_MTR_WGT', width: 120,formatter : "number",align:'right'},
-            { label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 60 ,editable:true,formatter : "number" ,hidden:true},
-            { label: '入库单价', name: 'inPrice', index: 'IN_PRICE', width: 60 ,formatter : "number" ,hidden:true},
-            { label: '入库金额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 80 ,formatter : "number" ,hidden:true},
-            { label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 120,formatter : "number" ,align:'right'},
+            { label: '入库单位', name: 'inUnit', index: 'IN_UNIT', width: 60 },
+            { label: '入库转换率', name: 'inRate', index: 'IN_RATE', width: 70 },
+            { label: '采购数量', name: 'orderCount', index: 'ORDER_COUNT', width: 60 },
+            { label: '采购单价', name: 'orderPrice', index: 'ORDER_PRICE', width: 60 },
+            { label: '采购金额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 60, align:"right",formatter:function(value, options, row){
+                return Number(Number(row.orderCount)*Number(row.orderPrice)).toFixed(2);
+            }},
+            { label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 60 },
+            { label: '入库单价', name: 'inPrice', index: 'IN_PRICE', width: 60 },
+            { label: '入库金额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 60 , align:"right",formatter:function(value, options, row) {
+                return Number(Number(row.inCount) * Number(row.inPrice)).toFixed(2);
+            }},
+            { label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 60 },
             { label: '入库日期', name: 'inDate', index: 'IN_DATE', width: 120 }
         ],
         viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        height: 'auto',
+        rowNum: 99999999,
         rowList: [10, 30, 50],
         rownumbers: true,
         rownumWidth: 25,
         autowidth: true,
-        // multiselect: true,
+        multiselect: false,
         ondblClickRow:function(id){
             var orderId = $('#jqGrid').jqGrid("getGridParam","selrow");
             var rowData = $("#jqGridMtr").jqGrid("getRowData",id);
@@ -217,7 +250,7 @@ $(function () {
             }
 
         },
-        pager: "#jqGridPagerMtr",
+        // pager: "#jqGridPagerMtr",
         jsonReader: {
             root: "page.list",
             page: "page.currPage",
@@ -240,7 +273,7 @@ $(function () {
             $('#jqGridMtr_inWgt').css('text-align','right');
 
             //隐藏grid底部滚动条
-            // $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+            $("#jqGridMtr").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
 
         },
         subGrid : true,
@@ -276,9 +309,6 @@ $(function () {
                         return "<button type='button' class='btn btn-primary btn-xs' onclick='deleteMtr("+row.id+")'>删除</button>"
                     },
                 },
-
-
-
                 { label: '入库单ID', name: 'importId', index: 'IMPORT_ID', width: 80 ,hidden:true},
                 { label: '入库明细ID', name: 'importDetailId', index: 'IMPORT_DETAIL_ID', width: 80 ,hidden:true},
                 { label: '原料ID', name: 'mtrId', index: 'MTR_ID', width: 80 ,hidden:true},
@@ -328,8 +358,6 @@ $(function () {
             }
         })
     };
-
-
 
     var newDate = new Date();
     var currentDate = newDate.toJSON();
@@ -472,6 +500,56 @@ function deleteMtr(batchId){
     });
 };
 
+/**
+ * Grid操作列事件
+ * @param rowid 所选择的操作行数据ID
+ * @param type 操作类型：0-修改，1-入库，2-反确认，3-打印
+ */
+function oper(rowId,type){
+    //根据所选数据的状态来进行业务判断，5种状态：0.已撤销 1.待确认 2.已确认 3.已入库 4.已结转
+    var rowData = $("#jqGrid").jqGrid('getRowData',rowId);
+    var status = rowData.status;
+    vm.importInfo = vm.getInfo(rowId);
+    var msg = '所选单据状态不满足此操作，请选择合适的单据！';
+    switch(type){
+        case '0':
+            if(status == '3'){
+                console.log(vm.importInfo);
+                if(vm.importInfo.status == '3'){
+                    alert('已确认入库，无法继续编辑！');
+                }else{
+                    vm.confirm(rowId,'edit');
+                }
+                return;
+            }
+            break;
+        case '1':
+            if(status == '2' ){//入库
+                vm.confirm(rowId,'storg');
+                return;
+            }
+            break;
+        case '2'://反确认
+            if(status == '3'){//反确认：已确认和已入库的可以被反确认，已入库时需要判断是否存在出库，存在出库也不允许进行反确认
+                vm.confirm(rowId,'back');
+                return;
+            }
+            break;
+        case '3'://打印：已确认和已入库的订单可以进行打印
+            if(status == '2' || status == '3'){
+                // vm.print(rowId);
+                vm.print(rowId,'import');
+                return;
+            }
+            break;
+        default:
+            break;
+    }
+    alert(msg);
+}
+
+
+
 var lastSelection;
 
 var vm = new Vue({
@@ -507,7 +585,7 @@ var vm = new Vue({
             vm.getInfo(id)
 		},
 		saveOrUpdate: function (event) {
-			var url = vm.importInfo.id == null ? "storage/import/save" : "storage/import/update";
+			var url = "storage/import/update";
 			$.ajax({
 				type: "POST",
 			    url: baseURL + url,
@@ -548,17 +626,53 @@ var vm = new Vue({
 				});
 			});
 		},
-		getInfo: function(id){
-			$.get(baseURL + "storage/import/info/"+id, function(r){
-                vm.importInfo = r.importInfo;
+		getInfo: function(orderId){
+		    var importData;
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: baseURL + "storage/import/info/"+orderId,
+                success: function (r) {
+                    if(r.code == 0){
+                        importData = r.import;
+                        vm.importInfo = importData;
+                    }else{
+                        console.log(r.msg);
+                    }
+                }
             });
+            return importData;
+            // $.get(baseURL + "storage/import/info/"+id, function(r){
+            //     vm.importInfo = r.importInfo;
+            // });
 		},
+        getOrderInfo: function(id){
+            var orderData;
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: baseURL + "purchase/orderinfo/info/"+id,
+                success: function (r) {
+
+                    if(r.code == 0){
+                        orderData = r.orderInfo;
+                    }else{
+                        console.log(r.msg);
+                    }
+                }
+            });
+            return orderData;
+
+            // $.get(baseURL + "purchase/orderinfo/info/"+id, function(r){
+            //     vm.orderInfo = r.orderInfo;
+            // });
+        },
 		reload: function (event) {
 			vm.showList = true;
 			vm.showDetail = false;
 			var page = $("#jqGrid").jqGrid('getGridParam','page');
 			$("#jqGrid").jqGrid('setGridParam',{
-                postData:vm.orderInfo,
+                // postData:vm.orderInfo,
                 page:page
             }).trigger("reloadGrid");
 		},
@@ -566,11 +680,19 @@ var vm = new Vue({
 
 		},
         save:function(){
-            var importId = $("#jqGrid").jqGrid('getGridParam','selrow');
+
+		    confirm("确定保存后无法进行修改，是否继续？",function(){
+		        vm.importInfo.status = '3';
+                vm.saveOrUpdate();
+            });
+
+            // var importId = $("#jqGrid").jqGrid('getGridParam','selrow');
+		},
+        addImportInfo:function(){
             $.ajax({
                 type: "POST",
-                url: baseURL + "storage/import/updateInfo",
-                data: {id:importId,status:'2'},
+                url: baseURL + "storage/import/add",
+                data: JSON.stringify(vm.import),
                 success: function (r) {
                     if(r.code == 0){
                         alert('操作成功', function(index){
@@ -581,31 +703,69 @@ var vm = new Vue({
                     }
                 }
             });
-		},
-        confirm:function(type){//各级确认与反确认操作
-            var importId = $("#jqGrid").jqGrid('getGridParam','selrow');
+        },
+        confirm:function(rowId,type){//入库与反确认
             var url = "";
             var dataParam = "";
-            if(type == 'storg'){
-                vm.showDetail = true;
-                vm.showList = false;
-
-
+            if(type == 'edit') {//
                 $("#jqGridMtr").jqGrid('setGridParam',{
-                    postData:{'importId': importId},
+                    postData:{'orderId': rowId},
                 }).trigger("reloadGrid");
 
-                url = "purchase/orderdetail/storgConfirm";
-                dataParam = "importId="+importId;
-            }else if(type == 'finance'){
-                url = "purchase/orderdetail/financeConfirm";
-                dataParam = "importId="+importId;
+                vm.showDetail = true;
+                vm.showList = false;
+                vm.importInfo = vm.getInfo(rowId);
+            }else if(type == 'storg'){//入库
+                vm.importInfo = {};
+                //创建出库单，确定后创建入库明细
+                vm.orderInfo = vm.getOrderInfo(rowId);
+                var billNo = vm.createNewNo();
+                vm.importInfo.importNo = billNo;
+                vm.importInfo.orderId = rowId;
+                vm.importInfo.orderNo = vm.orderInfo.orderNo;
+                vm.importInfo.supplierId = vm.orderInfo.supplierId;
+                vm.importInfo.supplierName = vm.orderInfo.supplierName;
+                vm.importInfo.exceptionDate = vm.orderInfo.exceptionDate+" 00:00:00";
+
+                console.log(vm.orderInfo);
+                console.log(vm.importInfo);
+
+                url = "storage/import/add";
+                dataParam = JSON.stringify(vm.importInfo);
+
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + url,
+                    async:true,
+                    contentType: "application/json",
+                    data: JSON.stringify(vm.importInfo),
+                    success: function(r){
+                        vm.importInfo = r.import;
+                        console.log(r);
+                        // if(r.code === 0){
+                        //     alert('操作成功', function(index){
+                        //         vm.reload();
+                        //     });
+                        // }else{
+                        //     alert(r.msg);
+                        // }
+                        $("#jqGridMtr").jqGrid('setGridParam',{
+                            postData:{'orderId': rowId},
+                        }).trigger("reloadGrid");
+
+                        vm.showDetail = true;
+                        vm.showList = false;
+                    }
+                });
+
+
+
             }else if(type == 'back'){
                 url = "storage/import/updateInfo";
                 $.ajax({
                     type: "POST",
                     url: baseURL + url,
-                    data: {id:importId,status:'1'},
+                    data: {id:rowId,status:'1'},
                     success: function (r) {
                         // console.log(r.data);
                         // vm.reload();
@@ -653,8 +813,8 @@ var vm = new Vue({
             };
             vm.getFieldData();
         },
-        print:function(typeName){
-            var rowId = $('#jqGrid').jqGrid("getGridParam","selrow");
+        print:function(rowId,typeName){
+            // var rowId = $('#jqGrid').jqGrid("getGridParam","selrow");
             if(!rowId){
                 alert('请先选择要打印的订单！');
                 return;
@@ -739,8 +899,9 @@ var vm = new Vue({
         },
         addMtr:function(){
             //供应商信息
-            var id = $('#jqGrid').getGridParam("selrow");
-            var rowData = $('#jqGrid').jqGrid("getRowData",id);
+            console.log(vm.orderInfo);
+            // var id = $('#jqGrid').getGridParam("selrow");
+            var rowData = vm.orderInfo;
             //原料信息
             var detailId = $('#jqGridMtr').getGridParam("selrow");
             if(!detailId){
@@ -837,7 +998,7 @@ var vm = new Vue({
                                 alert('操作成功', function(index){
                                     vm.importMtrBatch={};
                                     $("#jqGridMtr").jqGrid('setGridParam',{
-                                        postData:{'importId': id},
+                                        postData:{'orderId': rowData.id},
                                     }).trigger("reloadGrid");
 
                                     layer.close(num);
@@ -883,13 +1044,13 @@ var vm = new Vue({
             return batchNo;
         },
         searchMtrInfo:function(){
-            var id = $('#jqGrid').getGridParam("selrow");
-            var rowData = $('#jqGrid').jqGrid("getRowData",id);
+            // var id = $('#jqGrid').getGridParam("selrow");
+            var rowData = vm.orderInfo;
             //原料信息
             var detailId = $('#jqGridMtr').getGridParam("selrow");
             var rowDetailData = $('#jqGridMtr').jqGrid("getRowData",detailId);
 
-            vm.importMtrBatch.importId = id;
+            vm.importMtrBatch.importId = vm.importInfo.id;
             vm.importMtrBatch.importDetailId = detailId;
             vm.importMtrBatch.supplierId = rowData.supplierId;
             vm.importMtrBatch.mtrId = rowDetailData.mtrId;
@@ -906,12 +1067,12 @@ var vm = new Vue({
             // vm.importMtrBatch.orderUnitName = r.mtrData.purchaseUnitName;//unitName
             // vm.importMtrBatch.orderUnitRate = r.mtrData.purchaseRate;//unitRate
             vm.importMtrBatch.orderPrice = rowDetailData.orderPrice;
-            vm.importMtrBatch.inPrice = rowDetailData.inPrice;//price
+            vm.importMtrBatch.inPrice = rowDetailData.price;//price
             // vm.importMtrBatch.inUnitId = rowDetailData.mtrData.miniUnit;
             vm.importMtrBatch.inUnitName = rowDetailData.inUnit;
             vm.importMtrBatch.inUnitRate = rowDetailData.inRate;
             vm.importMtrBatch.inUnit1Count = 0;//件数==入库数
-            vm.importMtrBatch.wgtUnit1 = rowDetailData.orderMtrWgt;
+            vm.importMtrBatch.wgtUnit1 = rowDetailData.inWgt;
 
 
 
@@ -963,7 +1124,20 @@ var vm = new Vue({
             $('#wgtUnit1').val(vm.importMtrBatch.wgtUnit1);
             $('#inWgt').val(vm.importMtrBatch.inWgt);
 
-        }
+        },
+        createNewNo:function(){
+            var no = '';
+            $.ajax({
+                type:"POST",
+                async:false,
+                url: baseURL + "common/commonUtil/createBillNo",
+                data:"billType=1",//0-采购单，1-采购入库单，2-领料出库单，3-客户订单，4-盘点单
+                success: function(r){
+                    no = r.newBillNo;
+                }
+            });
+            return no;
+        },
 	}
 });
 

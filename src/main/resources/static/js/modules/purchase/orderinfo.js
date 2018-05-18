@@ -25,9 +25,9 @@ $(function () {
                     msg = '<p class="bg-success">待确认</p>';
                 }else if(value == 2){
                     msg = '<p class="bg-info">已确认</p>';
-                }else if(value == 3){p
+                }else if(value == 3){
                     msg = '<p class="bg-warning">已入库</p>';
-                }else if(value == 4){p
+                }else if(value == 4){
                     msg = '<p class="bg-primary">已结转</p>';
                 }else{
                     msg = '<p class="bg-danger">未知</p>';
@@ -55,6 +55,13 @@ $(function () {
                 var backStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"3\")'>反确认</button>&nbsp;&nbsp;";
                 var printStr = "<button type='button' class='btn btn-info btn-xs' onclick='oper("+row.id+",\"4\")'>打&nbsp;&nbsp;&nbsp;印</button>&nbsp;&nbsp;";
                 var deleteStr = "<button type='button' class='btn btn-warning btn-xs' onclick='oper("+row.id+",\"5\")'>撤&nbsp;&nbsp;&nbsp;销</button>&nbsp;&nbsp;";
+
+                if(!hasPermission('purchase:orderinfo:update')){
+                    editStr = "";
+                }
+                if(!hasPermission('purchase:orderinfo:delete')){
+                    confirmStr = "";
+                }
 
                 var status = row.status;
                 if(status == '0'){
@@ -308,9 +315,6 @@ $(function () {
         vm.orderInfo.exceptionDate = newDate;
     });
 
-
-
-
 });
 
 /**
@@ -465,28 +469,9 @@ var vm = new Vue({
             };
             $('#jqGridMtr').jqGrid("clearGridData");
 
-            // $('#addMtr_btn').attr("disabled",true);
-            // $('#editMtr_btn').attr("disabled",true);
-            // $('#delMtr_btn').attr("disabled",true);
-            // $('#saveMtr_btn').attr("disabled",true);
-            //
-            // $('#confirm_storg').hide();
-            // $('#confirm_finance').hide();
-            // $('#confirm_back').hide();
-
             vm.getFieldData();
 		},
 		update: function (rowId) {
-			// var id = $('#jqGrid').getGridParam("selrow");
-            // var ids = $('#jqGrid').getGridParam("selarrrow");
-            //
-            // if(ids != null && ids.length > 1){
-             //    alert('不能选择多条记录进行修改！');
-             //    return ;
-            // }else if(id == null){
-			//     alert('请选择要修改的数据！');
-			// 	return ;
-			// }
 			var rowData = $('#jqGrid').jqGrid("getRowData",rowId);
 
             $("#jqGrid").jqGrid('setSelection',rowId);
@@ -496,20 +481,6 @@ var vm = new Vue({
 			vm.isEdit = true;
             vm.isAdd = false;
             vm.title = "修改";
-
-            // if(rowData.status == '0'){
-            //     $('#confirm_storg').hide();
-            //     $('#confirm_finance').hide();
-            // }else if(rowData.status == '1'){
-            //     $('#confirm_storg').show();
-            //     $('#confirm_finance').hide();
-            // }else if(rowData.status == '2'){
-            //     $('#confirm_storg').hide();
-            //     $('#confirm_finance').show();
-            // }else{
-            //     $('#confirm_storg').hide();
-            //     $('#confirm_finance').hide();
-            // }
 
             vm.getInfo(rowId);
             vm.reloadMtr(rowId);
@@ -534,10 +505,6 @@ var vm = new Vue({
 			});
 		},
 		del: function (rowId) {
-			// var ids = getSelectedRows();
-			// if(ids == null){
-			// 	return ;
-			// }
             var ids = new Array();
             ids.push(rowId);
 			
@@ -609,7 +576,7 @@ var vm = new Vue({
                 // var detailId = $("#jqGridMtr").jqGrid('getGridParam','selrow');
                 // var detailRowData = $("#jqGridMtr").jqGrid("getRowData",detailId);
 
-                console.log(detailRowData);
+                // console.log(detailRowData);
 
                 $.ajax({
                     type: "POST",
@@ -679,8 +646,6 @@ var vm = new Vue({
                 }
             }
             gridData.remove(gridData[delIndex]);
-            // console.log(removeData);
-            // console.log(gridData[delIndex]);
 
             $('#jqGridMtr').jqGrid("clearGridData");
             $('#jqGridMtr').jqGrid("addRowData",gridData.length+1,gridData,"first");

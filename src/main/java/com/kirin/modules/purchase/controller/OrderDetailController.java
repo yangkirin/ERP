@@ -375,6 +375,7 @@ public class OrderDetailController  extends AbstractController {
 
 	/**
 	 * 反确认
+	 * 逻辑：需要判断此订单是否做了入库，并且入库的原料没有进行出库，才能完成反确认，否则无法完成反确认
 	 * @param orderId
 	 * @return
 	 */
@@ -383,6 +384,10 @@ public class OrderDetailController  extends AbstractController {
 		OrderInfoEntity orderInfoEntity = orderInfoService.queryObject(orderId);
 		orderInfoEntity.setStatus("1");
 		orderInfoService.update(orderInfoEntity);
+
+		//TODO - 需要完善反确认逻辑
+		//查询此订单的原料是否做了出库，通过入库记录关联出库来进行查询。
+
 
 		//反确认 ，删除关联的入库记录，确认时重新生成
 		ImportEntity importEntity = importService.queryObjectByOrderId(orderId);

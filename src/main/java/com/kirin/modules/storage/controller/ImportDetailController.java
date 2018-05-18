@@ -12,6 +12,7 @@ import com.kirin.modules.common.utils.CommonUtils;
 import com.kirin.modules.purchase.entity.OrderDetailEntity;
 import com.kirin.modules.purchase.entity.OrderInfoEntity;
 import com.kirin.modules.purchase.entity.SupplierInfoEntity;
+import com.kirin.modules.purchase.service.OrderDetailService;
 import com.kirin.modules.purchase.service.SupplierInfoService;
 import com.kirin.modules.storage.entity.ImportEntity;
 import com.kirin.modules.storage.service.ImportService;
@@ -19,6 +20,7 @@ import com.kirin.modules.sys.controller.AbstractController;
 import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +48,29 @@ import com.kirin.common.utils.R;
 public class ImportDetailController extends AbstractController {
 	@Autowired
 	private ImportDetailService importDetailService;
-	
+
+	@Autowired
+	private OrderDetailService orderDetailService;
+
+	/**
+	 * 列表
+	 */
+	@RequestMapping("/orderDetailList")
+	@RequiresPermissions("storage:importdetail:orderDetailList")
+	public R orderDetailList(@RequestParam Map<String, Object> params){
+
+
+		//查询列表数据
+		Query query = new Query(params);
+
+		List<OrderDetailEntity> orderDetailEntityList = orderDetailService.queryList(query);
+		int total = orderDetailService.queryTotal(query);
+
+		PageUtils pageUtil = new PageUtils(orderDetailEntityList, total, query.getLimit(), query.getPage());
+
+		return R.ok().put("page", pageUtil);
+	}
+
 	/**
 	 * 列表
 	 */

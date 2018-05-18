@@ -6,6 +6,10 @@ import java.util.Map;
 
 import com.kirin.modules.common.service.CommonUtilService;
 import com.kirin.modules.common.utils.CommonUtils;
+import com.kirin.modules.purchase.entity.OrderInfoEntity;
+import com.kirin.modules.purchase.service.OrderDetailService;
+import com.kirin.modules.purchase.service.OrderInfoService;
+import com.kirin.modules.storage.service.ImportDetailService;
 import com.kirin.modules.sys.controller.AbstractController;
 import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -37,7 +41,32 @@ import com.kirin.common.utils.R;
 public class ImportController extends AbstractController {
 	@Autowired
 	private ImportService importService;
-	
+
+	@Autowired
+	ImportDetailService importDetailService;
+
+	@Autowired
+	private OrderInfoService orderInfoService;
+
+	@Autowired
+	private OrderDetailService orderDetailService;
+
+	/**
+	 * 列表
+	 */
+	@RequestMapping("/listOrder")
+	@RequiresPermissions("storage:import:listOrder")
+	public R listOrder(@RequestParam Map<String, Object> params){
+		//查询列表数据
+		String[] statusArr = new String[]{"2","3"};
+		params.put("status",statusArr);
+		Query query = new Query(params);
+		List<OrderInfoEntity> orderList = orderInfoService.queryList(query);
+		int total = orderInfoService.queryTotal(query);
+		PageUtils pageUtil = new PageUtils(orderList, total, query.getLimit(), query.getPage());
+		return R.ok().put("page", pageUtil);
+	}
+
 	/**
 	 * 列表
 	 */
@@ -49,9 +78,9 @@ public class ImportController extends AbstractController {
 
 		List<ImportEntity> importList = importService.queryList(query);
 		int total = importService.queryTotal(query);
-		
+
 		PageUtils pageUtil = new PageUtils(importList, total, query.getLimit(), query.getPage());
-		
+
 		return R.ok().put("page", pageUtil);
 	}
 	
@@ -62,11 +91,38 @@ public class ImportController extends AbstractController {
 	@RequestMapping("/info/{id}")
 	@RequiresPermissions("storage:import:info")
 	public R info(@PathVariable("id") Long id){
-		ImportEntity importInfo = importService.queryObject(id);
+		ImportEntity importInfo = importService.queryObjectByOrderId(id);
 		
 		return R.ok().put("import", importInfo);
 	}
-	
+
+	/**
+	 * 保存
+	 */
+	@RequestMapping("/add")
+	@RequiresPermissions("storage:import:add")
+	public R add(@RequestBody ImportEntity importInfo){
+		SysUserEntity sysUserEntity =  getUser();
+		importInfo.setCreateUser(sysUserEntity.getUsername());
+		importInfo.setImportDate(new Date());
+
+		//写入入库记录
+		importInfo.setStatus("2");
+		importService.save(importInfo);
+		//写入入库明细记录
+		importDetailService.insertImportDetailFromOrderDetail(importInfo.getOrderId());
+
+		//更新订单状态为已入库；防止重复入库
+		OrderInfoEntity orderInfoEntity = orderInfoService.queryObject(importInfo.getOrderId());
+		orderInfoEntity.setStatus("3");
+		orderInfoService.update(orderInfoEntity);
+
+
+
+
+		return R.ok().put("import",importInfo);
+	}
+
 	/**
 	 * 保存
 	 */

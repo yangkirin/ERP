@@ -26,7 +26,10 @@
 		from tb_order_info oi) as oe
 		<where>
 			<if test="status != null and status != ''">
-				and oe.STATUS=${status}
+				and oe.STATUS in
+				<foreach collection="status" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
 			</if>
 			<if test="exceptionDate != null and exceptionDate.trim != ''">
 				and oe.EXCEPTION_DATE = #{exceptionDate}

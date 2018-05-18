@@ -51,5 +51,14 @@ public class ImportDetailServiceImpl implements ImportDetailService {
 	public void deleteBatch(Long[] ids){
 		importDetailDao.deleteBatch(ids);
 	}
-	
+
+	@Override
+	public void insertImportDetailFromOrderDetail(Long orderId){
+		importDetailDao.insertImportDetailFromOrderDetail(orderId);
+	}
+
+	@Override
+	public ImportDetailEntity queryObject2(ImportDetailEntity importDetailEntity){
+		return importDetailDao.queryObject2(importDetailEntity);
+	}
 }
