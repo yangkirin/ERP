@@ -272,6 +272,16 @@ public class PrintController extends AbstractController {
         return returnList;
     }
 
+    @RequestMapping(value="/qclzy",produces="application/pdf;charset=UTF-8")
+    public void qclzy(HttpServletRequest request, HttpServletResponse response, @RequestParam("createDate")String createDate,@RequestParam(value="takeStn",required = false)String takeStn,@RequestParam(value="warehouse",required = false)String warehouse) throws Exception {
+
+    }
+
+    @RequestMapping("/searchDataQCLZY")
+    public List<Map> searchDataQCLZY(Map<String, Object> params){
+
+        return null;
+    }
 
     @Autowired
     BomDetailService bomDetailService;

@@ -40,4 +40,8 @@ public interface OutportDetailService {
 	 * @return
 	 */
 	BigDecimal getOutboundCount(Long mtrId, Long orderId);
+
+	List<OutportDetailEntity> queryDetailListByOrderId(Long orderId,Long mtrId);
+
+	List<Map> getOutportDetailList(Long orderId,Long mtrId);
 }

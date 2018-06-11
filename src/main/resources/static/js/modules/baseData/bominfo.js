@@ -4,8 +4,7 @@ $(function () {
         datatype: "json",
         colModel: [			
 			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
-			{ label: '配方名称', name: 'bomName', index: 'bom_name', width: 120 },
-			{ label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
+			{ label: '配方名称', name: 'bomName', index: 'bom_name', width: 120,hidden:true },
 			{ label: '产品ID', name: 'prdId', index: 'prd_id', width: 80 ,hidden:true},
 			{ label: '产品名称', name: 'prdIdName', index: 'prd_id_name', width: 120 ,formatter:function(value, options, row){
                 if(row.semiFinished == '1'){
@@ -14,6 +13,7 @@ $(function () {
                     return value;
                 }
             }},
+            { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
             { label: '配方成本', name: 'cost', index: 'cost', width: 60 },
 			{ label: '状态', name: 'status', index: 'status', width: 40 ,formatter: function(value, options, row){
                 return value === 0 ?
@@ -813,7 +813,7 @@ var vm = new Vue({
         countWgt:function(){
             var netWgt = $('#add_mtr_netWgt').val();
             vm.bomDetail.netWgt = netWgt;
-            vm.bomDetail.grossWgt= (Number(netWgt)*Number(vm.bomDetail.netRate)).toFixed(2);
+            vm.bomDetail.grossWgt= (Number(netWgt)/Number(vm.bomDetail.netRate)).toFixed(2);
             vm.bomDetail.modiWgt= (Number(netWgt)*Number(vm.bomDetail.modiRate)).toFixed(2);
         },
         countPrdWgt:function() {

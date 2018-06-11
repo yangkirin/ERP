@@ -32,13 +32,32 @@
     </resultMap>
 
 	<select id="queryObject" resultType="com.kirin.modules.sales.entity.CustomerPrdEntity">
-		select cp.*,p.prd_name as prdName,c.CUSTOMER_NAME as customerName from tb_customer_prd cp,prd_data p,TB_CUSTOMER_INFO c
+		SELECT
+			p.prd_name AS prdName,
+			c.CUSTOMER_NAME AS customerName,
+			p.PRD_CODE AS prdCode,
+			p.PRD_PY AS prdPy,
+			( SELECT bi.cost FROM bom_info bi WHERE bi.prd_id = p.id ) AS cost,
+			cp.*
+		FROM
+			tb_customer_prd cp,
+			prd_data p,
+			TB_CUSTOMER_INFO c
 		where cp.prd_id=p.id and cp.customer_id=c.id and  cp.ID = #{value}
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.sales.entity.CustomerPrdEntity">
-		select cp.*,p.prd_name as prdName,c.CUSTOMER_NAME as customerName,p.PRD_CODE as prdCode,p.PRD_PY as prdPy
-		from tb_customer_prd cp,prd_data p,TB_CUSTOMER_INFO c
+		SELECT
+			p.prd_name AS prdName,
+			c.CUSTOMER_NAME AS customerName,
+			p.PRD_CODE AS prdCode,
+			p.PRD_PY AS prdPy,
+			( SELECT bi.cost FROM bom_info bi WHERE bi.prd_id = p.id ) AS cost,
+			cp.*
+			FROM
+			tb_customer_prd cp,
+			prd_data p,
+			TB_CUSTOMER_INFO c
 		where cp.prd_id=p.id and cp.customer_id=c.id
 		<if test="searchWord != null and searchWord != ''">
 			and (p.prd_name like concat('%',#{searchWord},'%') or p.PRD_CODE like concat('%',#{searchWord},'%') or p.PRD_PY like concat('%',#{searchWord},'%'))

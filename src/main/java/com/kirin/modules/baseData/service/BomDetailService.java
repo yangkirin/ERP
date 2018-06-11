@@ -33,5 +33,5 @@ public interface BomDetailService {
 
 	BomDetailEntity queryDetailObject(Long id);
 
-
+	List<Map> searchMtrByPrdId(Map<String,Object> params);
 }

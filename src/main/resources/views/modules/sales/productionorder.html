@@ -27,8 +27,8 @@
 		<div class="row">
 			<div class="grid-btn col-lg-3">
 				<a v-if="hasPermission('sales:productionorder:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
-				<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
-				<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+				<!--<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
+				<!--<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>-->
 			</div>
 			<div class="input-group input-group-sm col-sm-4">
 				<input type="text" placeholder="订单编号/订单类型编号/客户编号/客户名称/售点名称" id="search" class="form-control">
@@ -41,38 +41,23 @@
 	    <div id="jqGridPager"></div>
     </div>
 
-	<div v-show="showForm" class="panel panel-default">
-		<!--<div class="panel-heading">{{title}}</div>-->
-		<div class="grid-btn">
-			<a  class="btn btn-primary" id="addPrd_btn" @click="addPrd"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
-			<a  class="btn btn-primary" id="editPrd_btn" @click="editPrd"><i class="fa fa-pencil"></i>&nbsp;编辑产品</a>
-			<a  class="btn btn-primary" id="delPrd_btn" @click="deletePrd"><i class="fa fa-close"></i>&nbsp;删除产品</a>
-			<a  class="btn btn-primary" id="savePrd_btn" @click="savePrd"><i class="fa fa-save"></i>&nbsp;保存</a>
-
-			<a  class="btn btn-info" id="confirm_ok" @click="confirm('ok')"><i class="fa fa-check"></i>&nbsp;确认</a>
-			<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>
-
-			<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
-		</div>
+	<div v-show="addOrderForm" class="panel panel-default">
 		<form class="form-horizontal" style="width: 100%;">
 			<div class="form-group">
 				<div class="col-sm-1 control-label">类型</div>
 				<div class="col-sm-2">
-					<!--<input type="text" class="form-control" v-model="productionOrder.orderTypeName" placeholder="类型" id="type" @input="getSelectDataType()" data-provide="typeahead" autocomplete="off"/>-->
 					<select class="form-control" @change="selectVal('orderTypeId')" v-model="productionOrder.orderTypeId" placeholder="类型" readonly="readonly">
 						<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
 					</select>
 				</div>
 				<div class="col-sm-1 control-label">客户</div>
 				<div class="col-sm-2">
-					<!--<input type="text" class="form-control" v-model="productionOrder.customerName" placeholder="客户" id="customer" @input="getSelectDataCustomer()" data-provide="typeahead" autocomplete="off"/>-->
 					<select class="form-control" @change="selectVal('customerId')" v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">
 						<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
 					</select>
 				</div>
 				<div class="col-sm-1 control-label">售点</div>
 				<div class="col-sm-2">
-					<!--<input type="text" class="form-control" v-model="productionOrder.placeName" placeholder="售点" id="place" @input="getSelectDataPlace()" data-provide="typeahead" autocomplete="off"/>-->
 					<select class="form-control" @change="selectVal('placeId')" v-model="productionOrder.placeId" placeholder="售点" readonly="readonly">
 						<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
 					</select>
@@ -85,7 +70,7 @@
 				</div>
 				<div class="col-sm-1 control-label">备注</div>
 				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.remark" placeholder="备注"/>
+					<input type="text" class="form-control" v-model="productionOrder.remakr" placeholder="备注"/>
 				</div>
 				<div class="col-sm-1 control-label">状态</div>
 				<div class="col-sm-2">
@@ -95,40 +80,63 @@
 					</select>
 				</div>
 			</div>
-			<div class="form-group">
-				<div class="col-sm-1 control-label">成本</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.prdCost" placeholder="成本"/>
-				</div>
-				<div class="col-sm-1 control-label">收入</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.prdIncome" placeholder="收入"/>
-				</div>
-				<div class="col-sm-1 control-label">折后收入</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.discountIncome" placeholder="折后收入"/>
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-1 control-label">产品总数</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.prdMount" placeholder="产品总数"/>
-				</div>
-				<div class="col-sm-1 control-label">成本率</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.costRate" placeholder="成本率"/>
-				</div>
-				<div class="col-sm-1 control-label">折扣成本比</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.discountCostRate" placeholder="折扣成本比"/>
-				</div>
-				<div class="col-sm-1 control-label"></div>
+			<!---->
+			<!--<div class="form-group">-->
+				<!--<div class="col-sm-1 control-label">成本</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>-->
-					<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.prdCost" placeholder="成本"/>-->
 				<!--</div>-->
+				<!--<div class="col-sm-1 control-label">收入</div>-->
+				<!--<div class="col-sm-2">-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.prdIncome" placeholder="收入"/>-->
+				<!--</div>-->
+				<!--<div class="col-sm-1 control-label">折后收入</div>-->
+				<!--<div class="col-sm-2">-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.discountIncome" placeholder="折后收入"/>-->
+				<!--</div>-->
+			<!--</div>-->
+			<!---->
+			<!--<div class="form-group">-->
+				<!--<div class="col-sm-1 control-label">产品总数</div>-->
+				<!--<div class="col-sm-2">-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.prdMount" placeholder="产品总数"/>-->
+				<!--</div>-->
+				<!--<div class="col-sm-1 control-label">成本率</div>-->
+				<!--<div class="col-sm-2">-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.costRate" placeholder="成本率"/>-->
+				<!--</div>-->
+				<!--<div class="col-sm-1 control-label">折扣成本比</div>-->
+				<!--<div class="col-sm-2">-->
+					<!--<input type="text" class="form-control" v-model="productionOrder.discountCostRate" placeholder="折扣成本比"/>-->
+				<!--</div>-->
+				<!--<div class="col-sm-1 control-label"></div>-->
+				<!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+				<!--&lt;!&ndash;<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>&ndash;&gt;-->
+				<!--&lt;!&ndash;&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>&ndash;&gt;-->
+				<!--&lt;!&ndash;</div>&ndash;&gt;-->
+			<!--</div>-->
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div>
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
 			</div>
 		</form>
+	</div>
+
+	<div v-show="showForm" class="panel panel-default">
+		<!--<div class="panel-heading">{{title}}</div>-->
+		<div class="grid-btn">
+			<a  class="btn btn-primary" id="addPrd_btn" @click="addPrd"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
+			<!--<a  class="btn btn-primary" id="editPrd_btn" @click="editPrd"><i class="fa fa-pencil"></i>&nbsp;编辑产品</a>-->
+			<!--<a  class="btn btn-primary" id="delPrd_btn" @click="deletePrd"><i class="fa fa-close"></i>&nbsp;删除产品</a>-->
+			<!--<a  class="btn btn-primary" id="savePrd_btn" @click="savePrd"><i class="fa fa-save"></i>&nbsp;保存</a>-->
+
+			<!--<a  class="btn btn-info" id="confirm_ok" @click="saveOrder"><i class="fa fa-check"></i>&nbsp;确认</a>-->
+			<!--<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>-->
+
+			<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+		</div>
+
 		<div class="container-fluid" style="width: 100%;">
 			<div class="row">
 				<div class="col-xs-12 col-md-12">
@@ -145,124 +153,30 @@
 			<div class="form-group">
 				<div class="col-sm-3 control-label">选择产品</div>
 				<div class="col-sm-9">
-					<input type="text" class="form-control" v-model="selectData.prdName" placeholder="请选择" id="prd" @input="getSelectDataPrd()" data-provide="typeahead" autocomplete="off"/>
+					<input type="text" class="form-control" v-model="productionOrderDetailEntity.prdName" placeholder="请选择" id="prd" @input="getSelectDataPrd()" data-provide="typeahead" autocomplete="off"/>
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-3 control-label">需求量</div>
 				<div class="col-sm-9">
-					<input type="text" class="form-control" v-model="selectData.amount" placeholder="需求量" />
+					<input type="text" class="form-control" v-model="productionOrderDetailEntity.amount" placeholder="需求量" />
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-3 control-label">定价</div>
 				<div class="col-sm-9">
-					<input type="text" class="form-control" v-model="selectData.price1" id="selectPrice1" placeholder="定价" />
+					<input type="text" class="form-control" v-model="productionOrderDetailEntity.price1" id="selectPrice1" placeholder="定价" />
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-3 control-label">售价</div>
 				<div class="col-sm-9">
-					<input type="text" class="form-control" v-model="selectData.price2" id="selectPrice2" placeholder="售价" />
+					<input type="text" class="form-control" v-model="productionOrderDetailEntity.price2" id="selectPrice2" placeholder="售价" />
 				</div>
 			</div>
 		</form>
 	</div>
 
-    <!--<div v-show="!showList" class="panel panel-default">-->
-		<!--<div class="panel-heading">{{title}}</div>-->
-		<!--<form class="form-horizontal">-->
-											<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">生产订单编号</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.productionNo" placeholder="生产订单编号"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">计划单ID</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.planId" placeholder="计划单ID"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">计划单编号</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.planNo" placeholder="计划单编号"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">订单类型ID</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.orderTypeId" placeholder="订单类型ID"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">订单类型名称</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.orderTypeName" placeholder="订单类型名称"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">客户ID</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.customerId" placeholder="客户ID"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">客户编号</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.customerNo" placeholder="客户编号"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">客户名称</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.customerName" placeholder="客户名称"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">售点ID</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.placeId" placeholder="售点ID"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">售点名称</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.placeName" placeholder="售点名称"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">备注</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.remakr" placeholder="备注"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">状态</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.status" placeholder="状态"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">创建者</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.createUser" placeholder="创建者"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-									<!--<div class="form-group">-->
-			   	<!--<div class="col-sm-2 control-label">创建日期</div>-->
-			   	<!--<div class="col-sm-10">-->
-			      <!--<input type="text" class="form-control" v-model="productionOrder.createDate" placeholder="创建日期"/>-->
-			    <!--</div>-->
-			<!--</div>-->
-							<!--<div class="form-group">-->
-				<!--<div class="col-sm-2 control-label"></div> -->
-				<!--<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>-->
-				<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>-->
-			<!--</div>-->
-		<!--</form>-->
-	<!--</div>-->
 </div>
 
 <script src="../../js/modules/sales/productionorder.js"></script>

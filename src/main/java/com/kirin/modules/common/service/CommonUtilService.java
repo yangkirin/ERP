@@ -30,4 +30,14 @@ public interface CommonUtilService {
     String getTableMaxNo(String returnFiled, String tableName,String likeDateStr);
 
     String checkNameRepeat(String searchFiled,String tableName,String checkStr);
+
+    List<Map> dataSearchLL(Map<String,Object> params);
+
+    List<Map> getMtrByOrderId(Long[] orderIds);
+
+    List<Map> eachGetPrdMtr(Long prdId,Long orderCount,Map<String,Object> params);
+
+    List<Map> eachGetPrd(Long prdId,Long orderCount,Map<String,Object> params);
+
+    List<Map> distinctListData(List<Map> listData);
 }

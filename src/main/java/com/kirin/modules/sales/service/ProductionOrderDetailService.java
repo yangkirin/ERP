@@ -29,4 +29,6 @@ public interface ProductionOrderDetailService {
 	void deleteBatch(Long[] ids);
 
 	void deleteByOrderId(Long orderId);
+
+	List<Map> searchPrd(Map<String,Object> params);
 }

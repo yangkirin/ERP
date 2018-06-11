@@ -33,16 +33,29 @@
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
-		select * from tb_production_order
+		SELECT
+			po.*,
+			oi.id AS outportId,
+			oi.STATUS AS outportStatus,
+			oi.OUTPORRT_NO AS outportNo
+			FROM
+			tb_production_order po
+			LEFT JOIN tb_outport_info oi ON po.ID = oi.ORDER_ID
 		<where>
 			<if test="orderTypeId != null">
-				and ORDER_TYPE_ID=#{orderTypeId}
+				and po.ORDER_TYPE_ID=#{orderTypeId}
 			</if>
 			<if test="customerId != null">
-				and CUSTOMER_ID=#{customerId}
+				and po.CUSTOMER_ID=#{customerId}
 			</if>
 			<if test="createDate != null">
-				and CREATE_DATE like CONCAT ('%',#{createDate},'%')
+				and po.CREATE_DATE like CONCAT ('%',#{createDate},'%')
+			</if>
+			<if test="status != null">
+				and po.STATUS in
+				<foreach collection="status" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
 			</if>
 			<!--<if test="productionNo != null and productionNo.trim() != ''">-->
 				<!--and PRODUCTION_NO=#{productionNo}-->
@@ -51,22 +64,21 @@
 			or customerName != null or placeName != null">
 				and (
 				<if test="productionNo != null">
-					PRODUCTION_NO like '%${productionNo}%'
+					po.PRODUCTION_NO like '%${productionNo}%'
 				</if>
 				<if test="orderTypeName != null">
-					or ORDER_TYPE_NAME like '%${orderTypeName}%'
+					or po.ORDER_TYPE_NAME like '%${orderTypeName}%'
 				</if>
 				<if test="customerNo != null">
-					or CUSTOMER_NO like '%${customerNo}%'
+					or po.CUSTOMER_NO like '%${customerNo}%'
 				</if>
 				<if test="customerName != null">
-					or CUSTOMER_NAME like '%${customerName}%'
+					or po.CUSTOMER_NAME like '%${customerName}%'
 				</if>
 				<if test="placeName != null">
-					or PLACE_NAME like '%${placeName}%'
+					or po.PLACE_NAME like '%${placeName}%'
 				</if>
 				)
-
 			</if>
 		</where>
         <choose>

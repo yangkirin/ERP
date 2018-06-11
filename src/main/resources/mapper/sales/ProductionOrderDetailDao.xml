@@ -115,4 +115,23 @@
 		</foreach>
 	</delete>
 
+	<select id="searchPrd" resultType="map" parameterType="Map">
+		SELECT
+			pod.PRD_ID as prdId,
+			sum(pod.AMOUNT) as orderCount,
+			pod.PRICE1 as basePrice,
+			pod.PRICE2 as salePrice
+		FROM
+			tb_production_order po
+			LEFT JOIN tb_production_order_detail pod ON po.ID = pod.PRODUCTION_ORDER_ID
+			LEFT JOIN prd_data p ON pod.PRD_ID= p.id
+		WHERE
+			po.CREATE_DATE LIKE CONCAT ( '%', #{createDate}, '%' )
+			AND po.STATUS IN
+			<foreach collection="status" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		GROUP BY p.id
+	</select>
+
 </mapper>

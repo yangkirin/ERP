@@ -514,7 +514,6 @@ function oper(rowId,type){
     switch(type){
         case '0':
             if(status == '3'){
-                console.log(vm.importInfo);
                 if(vm.importInfo.status == '3'){
                     alert('已确认入库，无法继续编辑！');
                 }else{
@@ -736,7 +735,7 @@ var vm = new Vue({
                 $.ajax({
                     type: "POST",
                     url: baseURL + url,
-                    async:true,
+                    async:false,
                     contentType: "application/json",
                     data: JSON.stringify(vm.importInfo),
                     success: function(r){

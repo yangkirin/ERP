@@ -17,24 +17,8 @@ public class OutportDetailEntity implements Serializable {
 	
 	//ID
 	private Long id;
-	//出库单号
-	private String outportNo;
-	//生产订单ID
-	private Long orderId;
-	//客户ID
-	private Long customerId;
-	//客户名称
-	private String customerName;
-	//客户编号
-	private String customerNo;
-	//产品ID
-	private Long prdId;
-	//产品编号
-	private String prdNo;
-	//产品类型
-	private String prdTypeName;
-	//产品名称
-	private String prdName;
+	//出库单ID
+	private String outportId;
 	//原料ID
 	private Long mtrId;
 	//原料编号
@@ -60,6 +44,14 @@ public class OutportDetailEntity implements Serializable {
 
 	private String batchNo;
 
+	public String getOutportId() {
+		return outportId;
+	}
+
+	public void setOutportId(String outportId) {
+		this.outportId = outportId;
+	}
+
 	/**
 	 * 设置：ID
 	 */
@@ -73,102 +65,6 @@ public class OutportDetailEntity implements Serializable {
 		return id;
 	}
 	/**
-	 * 设置：出库单号
-	 */
-	public void setOutportNo(String outportNo) {
-		this.outportNo = outportNo;
-	}
-	/**
-	 * 获取：出库单号
-	 */
-	public String getOutportNo() {
-		return outportNo;
-	}
-	/**
-	 * 设置：生产订单ID
-	 */
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
-	}
-	/**
-	 * 获取：生产订单ID
-	 */
-	public Long getOrderId() {
-		return orderId;
-	}
-
-	public Long getCustomerId() {
-		return customerId;
-	}
-
-	public void setCustomerId(Long customerId) {
-		this.customerId = customerId;
-	}
-
-	public String getCustomerName() {
-		return customerName;
-	}
-
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
-	}
-
-	public String getCustomerNo() {
-		return customerNo;
-	}
-
-	public void setCustomerNo(String customerNo) {
-		this.customerNo = customerNo;
-	}
-
-	/**
-	 * 设置：产品ID
-	 */
-	public void setPrdId(Long prdId) {
-		this.prdId = prdId;
-	}
-	/**
-	 * 获取：产品ID
-	 */
-	public Long getPrdId() {
-		return prdId;
-	}
-	/**
-	 * 设置：产品编号
-	 */
-	public void setPrdNo(String prdNo) {
-		this.prdNo = prdNo;
-	}
-	/**
-	 * 获取：产品编号
-	 */
-	public String getPrdNo() {
-		return prdNo;
-	}
-	/**
-	 * 设置：产品类型
-	 */
-	public void setPrdTypeName(String prdTypeName) {
-		this.prdTypeName = prdTypeName;
-	}
-	/**
-	 * 获取：产品类型
-	 */
-	public String getPrdTypeName() {
-		return prdTypeName;
-	}
-	/**
-	 * 设置：产品名称
-	 */
-	public void setPrdName(String prdName) {
-		this.prdName = prdName;
-	}
-	/**
-	 * 获取：产品名称
-	 */
-	public String getPrdName() {
-		return prdName;
-	}
 	/**
 	 * 设置：原料ID
 	 */

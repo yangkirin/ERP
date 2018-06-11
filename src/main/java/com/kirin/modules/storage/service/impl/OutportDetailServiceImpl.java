@@ -82,4 +82,13 @@ public class OutportDetailServiceImpl implements OutportDetailService {
 		}
 		return haveOutboundCount;
 	}
+
+	@Override
+	public List<OutportDetailEntity> queryDetailListByOrderId(Long orderId,Long mtrId){
+		return outportDetailDao.queryDetailListByOrderId(orderId,mtrId);
+	}
+
+	public List<Map> getOutportDetailList(Long orderId,Long mtrId){
+		return  outportDetailDao.getOutportDetailList(orderId,mtrId);
+	}
 }

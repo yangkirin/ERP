@@ -22,4 +22,6 @@ public interface BomDetailDao extends BaseDao<BomDetailEntity> {
     BomDetailEntity queryDetailObject(@Param("id") Long id);
 
     List<BomDetailEntity> queryListByPrdId(Map<String, Object> map);
+
+    List<Map> searchMtrByPrdId(Map<String,Object> params);
 }

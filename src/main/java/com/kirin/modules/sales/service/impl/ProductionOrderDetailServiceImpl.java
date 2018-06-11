@@ -10,8 +10,6 @@ import com.kirin.modules.sales.dao.ProductionOrderDetailDao;
 import com.kirin.modules.sales.entity.ProductionOrderDetailEntity;
 import com.kirin.modules.sales.service.ProductionOrderDetailService;
 
-
-
 @Service("productionOrderDetailService")
 public class ProductionOrderDetailServiceImpl implements ProductionOrderDetailService {
 	@Autowired
@@ -55,5 +53,10 @@ public class ProductionOrderDetailServiceImpl implements ProductionOrderDetailSe
 	@Override
 	public void deleteByOrderId(Long orderId){
 		productionOrderDetailDao.deleteByOrderId(orderId);
+	}
+
+	@Override
+	public List<Map> searchPrd(Map<String,Object> params){
+		return productionOrderDetailDao.searchPrd(params);
 	}
 }

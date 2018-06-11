@@ -1,27 +1,36 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        // $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    }
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'storage/search/outStoreSearch',
         datatype: "json",
         colModel: [			
-			{ label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
+			{ label: 'id', name: 'OUTPORT_ID', index: 'OUTPORT_ID', width: 50, key: true ,hidden:true},
 			{ label: '出库单号', name: 'OUTPORT_NO', index: 'OUTPORT_NO', width: 120 },
-			{ label: '销售订单ID', name: 'ORDER_ID', index: 'ORDER_ID', width: 80 ,hidden:true},
+			{ label: '销售订单ID', name: 'ORDER_ID', index: 'ORDER_ID' ,hidden:true},
 			{ label: '销售单编号', name: 'PRODUCTION_NO', index: 'PRODUCTION_NO', width: 120 },
+			{ label: '订单类型ID', name: 'ORDER_TYPE_ID', index: 'ORDER_TYPE_ID' ,hidden:true },
 			{ label: '订单类型', name: 'ORDER_TYPE_NAME', index: 'ORDER_TYPE_NAME', width: 80 },
-			{ label: '售点', name: 'PLACE_NAME', index: 'PLACE_NAME', width: 120 },
+			{ label: '售点', name: 'PLACE_NAME', index: 'PLACE_NAME', width: 100 },
+			{ label: '客户编号', name: 'CUSTOMER_ID', index: 'CUSTOMER_ID' ,hidden:true},
 			{ label: '客户编号', name: 'CUSTOMER_NO', index: 'CUSTOMER_NO', width: 80 },
 			{ label: '客户名称', name: 'CUSTOMER_NAME', index: 'CUSTOMER_NAME', width: 160 },
             { label: '出库日期', name: 'OUT_DATE', index: 'OUT_DATE', width: 100},
             { label: '操作人', name: 'CREATE_USER', index: 'CREATE_USER', width: 80 }
         ],
 		viewrecords: true,
-        height: 385,
+        // height: 385,
+        height: "auto",
         rowNum: 9999999,
 		rowList : [10,30,50],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: true,
+        multiselect: false,
         // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -41,8 +50,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
-            console.log(rowData);
-            var url = baseURL + 'storage/search/outStoreDetailSearch?outputId='+rowData.ID;
+            var url = baseURL + 'storage/search/outStoreDetailSearch?outputId='+rowData.OUTPORT_ID;
             createSubGrid(subgrid_id,row_id,url);
         },
         onSelectRow:function(id){
@@ -59,16 +67,13 @@ $(function () {
             url : url,
             datatype : "json",
             colModel : [
-                { label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
-                { label: '原料ID', name: 'MTR_ID', index: 'MTR_ID', width: 80 ,hidden:true},
+                { label: '原料ID', name: 'MTR_ID', index: 'MTR_ID', key: true,hidden:true},
                 { label: '原料编码', name: 'MTR_CODE', index: 'MTR_CODE', width: 80 },
                 { label: '原料名称', name: 'MTR_NAME', index: 'MTR_NAME', width: 80 },
                 { label: '原料类型名称', name: 'MTR_TYPE_NAME', index: 'MTR_TYPE_NAME', width: 80 },
-                { label: '出库批次号', name: 'BATCH_NO', index: 'BATCH_NO', width: 80 },
+                { label: '单位', name: 'MINI_UNIT_NAME', index: 'MINI_UNIT_NAME', width: 80 },
                 { label: '需求数量', name: 'ORDER_COUNT', index: 'ORDER_COUNT', width: 80},
-                { label: '出库数量', name: 'OUT_COUNT', index: 'OUT_COUNT', width: 80 ,formatter : "number"},
-                { label: '生产日期', name: 'PRODUCTION_DATE', index: 'PRODUCTION_DATE', width: 80 },
-                { label: '失效日期', name: 'EFFECTIVE_DATE', index: 'EFFECTIVE_DATE', width: 80 }
+                { label: '出库数量', name: 'OUT_COUNT', index: 'OUT_COUNT', width: 80 ,formatter : "number"}
             ],
             rowNum : 20,
             height : '100%',
@@ -147,13 +152,29 @@ var vm = new Vue({
 	el:'#rrapp',
 	data:{
         showList:true,
-        search:{
-        }
-
+        newOutportLayer:false,
+        search:{},
+        outportInfo:{},
+        orderTypeArr:{},
+        placeArr:{},
+        customerArr:{}
 	},
 	methods: {
         query: function () {
             vm.reload();
+        },
+        createNewNo:function(){
+            var no = '';
+            $.ajax({
+                type:"POST",
+                async:false,
+                url: baseURL + "common/commonUtil/createBillNo",
+                data:"billType=2",
+                success: function(r){
+                    no = r.newBillNo;
+                }
+            });
+            return no;
         },
         outSearch:function(){
             alert('查询开始');
@@ -161,6 +182,23 @@ var vm = new Vue({
             //1.出库单号以及订单号是否存在
 
 
+        },
+        addNewOutport:function(){
+            vm.showList=false;
+            vm.newOutportLayer = true;
+            vm.outportInfo.outporrtNo = vm.createNewNo();
+        },
+        saveOrUpdate:function(){
+
+            console.log(vm.outportInfo);
+        },
+        reload:function(){
+            vm.showList=true;
+            vm.newOutportLayer = false;
+            var page = $("#jqGrid").jqGrid('getGridParam','page');
+            $("#jqGrid").jqGrid('setGridParam',{
+                page:page
+            }).trigger("reloadGrid");
         },
         clean:function(){
 
@@ -227,8 +265,75 @@ var vm = new Vue({
                     // });
                 }
             })
+        },
+        selectVal:function(type){
+            var i=0;
+            var typeInfo;
+            var customerNo;
+            var customerName;
+            var placeInfo;
+            if(type == 'orderTypeId'){
+                i=1;
+                $.get(baseURL + "baseData/typeinfo/info/"+vm.outportInfo.orderTypeId, function(r){
+                    typeInfo = r.typeInfo;
+                    vm.outportInfo.orderTypeName = typeInfo.typeName
+                });
+            }else if(type == 'customerId'){
+                i=2;
+                $.get(baseURL + "sales/customerinfo/info/"+vm.outportInfo.customerId, function(r){
+                    customerNo = r.customerInfo;
+                    customerName = r.customerName;
+                    vm.outportInfo.customerNo = customerNo.customerCode;
+                    vm.outportInfo.customerName = customerNo.customerName;
+                    $('#addCustomerNo').val(customerNo.customerCode);
+                });
+            }else if(type == 'placeId'){
+                i=3;
+                $.get(baseURL + "baseData/typeinfo/info/"+vm.outportInfo.placeId, function(r){
+                    placeInfo = r.typeInfo;
+                    vm.outportInfo.placeName = placeInfo.typeName;
+                });
+            }
+            // if(i == 3){
+            //     vm.outportInfo.orderTypeName = typeInfo.typeName;
+            //     vm.outportInfo.customerNo = customerNo.customerCode;
+            //     vm.outportInfo.customerName = customerNo.customerName;
+            //     vm.outportInfo.placeName = placeInfo.typeName;
+            //
+            // }
+        },
+        initCsutomerInfoArr:function(){
+            var dataArr = "";
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "common/commonUtil/getDataToCommbox",
+                // contentType: "application/json",
+                data: {tableName:"tb_customer_info",search:"STATUS='1'",returnField:"ID as value,CUSTOMER_NAME as text"},
+                success: function(r){
+                    dataArr =  r.data;
+                }
+            });
+            return dataArr;
+        },
+        initTypeInfoArr:function(parentId){
+            var dataArr = "";
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "common/commonUtil/getDataToCommbox",
+                // contentType: "application/json",
+                data: {tableName:"tb_type_info",search:"PARENT_ID="+parentId,returnField:"ID as value,TYPE_NAME as text"},
+                success: function(r){
+                    dataArr =  r.data;
+                }
+            });
+            return dataArr;
         }
     }
 });
+vm.orderTypeArr = vm.initTypeInfoArr(40);
+vm.placeArr = vm.initTypeInfoArr(82);
+vm.customerArr = vm.initCsutomerInfoArr();
 
 vm.getFieldData();

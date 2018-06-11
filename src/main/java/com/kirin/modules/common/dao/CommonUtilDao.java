@@ -38,4 +38,6 @@ public interface CommonUtilDao extends BaseDao<Object> {
     String getTableMaxNo(@Param("returnFiled") String returnFiled,@Param("tableName") String tableName,@Param("likeDateStr") String likeDateStr);
 
     String checkNameRepeat(@Param("searchFiled") String searchFiled,@Param("tableName") String tableName,@Param("checkStr")String  checkStr);
+
+    List<Map> dataSearchLL(Map<String,Object> params);
 }

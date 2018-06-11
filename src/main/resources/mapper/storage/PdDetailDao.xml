@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.storage.dao.PdDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.storage.entity.PdDetailEntity" id="pdDetailMap">
+        <result property="id" column="ID"/>
+        <result property="pdInfoId" column="PD_INFO_ID"/>
+        <result property="mtrId" column="MTR_ID"/>
+        <result property="mtrCode" column="MTR_CODE"/>
+        <result property="lastCount" column="LAST_COUNT"/>
+        <result property="lastAmt" column="LAST_AMT"/>
+        <result property="currentCount" column="CURRENT_COUNT"/>
+        <result property="currentAmt" column="CURRENT_AMT"/>
+        <result property="currentIn" column="CURRENT_IN"/>
+        <result property="currentOut" column="CURRENT_OUT"/>
+        <result property="realCount" column="REAL_COUNT"/>
+        <result property="realAmtlossCount" column="REAL_AMTLOSS_COUNT"/>
+        <result property="profttCount" column="PROFTT_COUNT"/>
+        <result property="lossCount" column="LOSS_COUNT"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.storage.entity.PdDetailEntity">
+		select * from tb_pd_detail where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.PdDetailEntity">
+		select * from tb_pd_detail
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_pd_detail 
+	</select>
+
+
+	<select id="createPdMtrDetail" parameterType="java.util.Map" resultType="map">
+		select m.id,m.MTR_CODE,m.MTR_NAME,(select t.TYPE_NAME from tb_type_info t where m.MINI_UNIT=t.id) as mini_unit_name,(imd.IN_COUNT) as sum_in_count,sum(od.OUT_COUNT) as sum_out_count from mtr_data m
+		LEFT JOIN tb_import_detail imd on m.id=imd.MTR_ID
+		LEFT JOIN tb_import i on imd.IMPORT_ID = i.id
+		<if test="pdStartDate != null">
+			 and i.IMPORT_DATE > #{pdStartDate} and i.IMPORT_DATE &lt;= #{pdStartDate}
+		</if>
+		LEFT JOIN tb_outport_detail od on m.id=od.MTR_ID
+		LEFT JOIN tb_outport_info o on od.OUTPORT_ID=o.id
+		<if test="pdEndDate != null">
+			 and o.OUTPORT_DATE > #{pdEndDate} and o.OUTPORT_DATE &lt;= #{pdEndDate}
+		</if>
+		<if test="pdOrgId != null">
+			WHERE m.WAREHOUSE_ID=#{pdOrgId}
+		</if>
+		GROUP BY m.id,m.MTR_CODE,m.MTR_NAME,mini_unit_name
+		ORDER BY sum_in_count desc
+	</select>
+
+	<insert id="save" parameterType="com.kirin.modules.storage.entity.PdDetailEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_pd_detail
+		(
+			`PD_INFO_ID`, 
+			`MTR_ID`, 
+			`MTR_CODE`, 
+			`LAST_COUNT`, 
+			`LAST_AMT`, 
+			`CURRENT_COUNT`, 
+			`CURRENT_AMT`, 
+			`CURRENT_IN`, 
+			`CURRENT_OUT`, 
+			`REAL_COUNT`, 
+			`REAL_AMTLOSS_COUNT`, 
+			`PROFTT_COUNT`, 
+			`LOSS_COUNT`
+		)
+		values
+		(
+			#{pdInfoId}, 
+			#{mtrId}, 
+			#{mtrCode}, 
+			#{lastCount}, 
+			#{lastAmt}, 
+			#{currentCount}, 
+			#{currentAmt}, 
+			#{currentIn}, 
+			#{currentOut}, 
+			#{realCount}, 
+			#{realAmtlossCount}, 
+			#{profttCount}, 
+			#{lossCount}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.storage.entity.PdDetailEntity">
+		update tb_pd_detail 
+		<set>
+			<if test="pdInfoId != null">`PD_INFO_ID` = #{pdInfoId}, </if>
+			<if test="mtrId != null">`MTR_ID` = #{mtrId}, </if>
+			<if test="mtrCode != null">`MTR_CODE` = #{mtrCode}, </if>
+			<if test="lastCount != null">`LAST_COUNT` = #{lastCount}, </if>
+			<if test="lastAmt != null">`LAST_AMT` = #{lastAmt}, </if>
+			<if test="currentCount != null">`CURRENT_COUNT` = #{currentCount}, </if>
+			<if test="currentAmt != null">`CURRENT_AMT` = #{currentAmt}, </if>
+			<if test="currentIn != null">`CURRENT_IN` = #{currentIn}, </if>
+			<if test="currentOut != null">`CURRENT_OUT` = #{currentOut}, </if>
+			<if test="realCount != null">`REAL_COUNT` = #{realCount}, </if>
+			<if test="realAmtlossCount != null">`REAL_AMTLOSS_COUNT` = #{realAmtlossCount}, </if>
+			<if test="profttCount != null">`PROFTT_COUNT` = #{profttCount}, </if>
+			<if test="lossCount != null">`LOSS_COUNT` = #{lossCount}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_pd_detail where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_pd_detail where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

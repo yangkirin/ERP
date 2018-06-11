@@ -106,6 +106,10 @@ public class ImportController extends AbstractController {
 		importInfo.setCreateUser(sysUserEntity.getUsername());
 		importInfo.setImportDate(new Date());
 
+		if(importInfo.getImportNo() == null || importInfo.getImportNo().equals("")){
+			return R.ok();
+		}
+
 		//写入入库记录
 		importInfo.setStatus("2");
 		importService.save(importInfo);
@@ -133,6 +137,10 @@ public class ImportController extends AbstractController {
 
 		importInfo.setCreateUser(sysUserEntity.getUsername());
 		importInfo.setImportDate(new Date());
+
+		if(importInfo.getImportNo() == null || importInfo.getImportNo().equals("")){
+			return R.ok();
+		}
 
 		importService.save(importInfo);
 		

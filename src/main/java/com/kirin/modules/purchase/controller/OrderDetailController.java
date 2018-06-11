@@ -253,6 +253,7 @@ public class OrderDetailController  extends AbstractController {
 		OrderInfoEntity orderInfoEntity = orderInfoService.queryObject(orderId);
 		SupplierInfoEntity supplierInfoEntity = supplierInfoService.queryObject(orderInfoEntity.getSupplierId());
 
+		/*
 		ImportEntity importEntity = new ImportEntity();
 //		importEntity.setImportNo(newNo);
 		importEntity.setOrderId(orderInfoEntity.getId());
@@ -264,13 +265,13 @@ public class OrderDetailController  extends AbstractController {
 		importEntity.setSupplierNo(supplierInfoEntity.getSuppierCode());
 
 		importService.save(importEntity);
+		*/
+//		Map<String,Object> map = new HashMap<String,Object>();
+//		map.put("orderId",orderId);
+//
+//		List<OrderDetailEntity> orderDetailEntityList = orderDetailService.queryList(map);
 
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put("orderId",orderId);
-
-		List<OrderDetailEntity> orderDetailEntityList = orderDetailService.queryList(map);
-
-		saveImportDetail(orderDetailEntityList,importEntity);
+//		saveImportDetail(orderDetailEntityList,importEntity);
 
 		orderInfoEntity.setStatus("2");
 		orderInfoService.update(orderInfoEntity);

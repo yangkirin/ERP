@@ -73,7 +73,6 @@ public class StorageController extends AbstractController {
 //	@RequiresPermissions("storage:import:list")
 	public R outStoreSearch(@RequestParam Map<String, Object> params){
 		List<Map> listMap = commonUtilService.outStoreSearch();
-		Map<String,Object> returnMap = new HashMap<>();
 		Query query = new Query(params);
 		PageUtils pageUtil = new PageUtils(listMap, listMap == null ? 0:listMap.size(), query.getLimit(), query.getPage());
 		return R.ok().put("page", pageUtil);
@@ -162,5 +161,16 @@ public class StorageController extends AbstractController {
 		
 		return R.ok();
 	}
-	
+
+	/**
+	 * 盘点查询
+	 * @param params
+	 * @return
+	 */
+	@RequestMapping(value="/pdSearch")
+	public R pdSearch(@RequestParam Map<String, Object> params){
+
+
+		return R.ok();
+	}
 }

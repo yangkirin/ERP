@@ -10,10 +10,14 @@ import com.kirin.modules.baseData.entity.MtrDataEntity;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
 import com.kirin.modules.baseData.service.MtrDataService;
+import com.kirin.modules.common.controller.CommonUtil;
+import com.kirin.modules.common.service.CommonUtilService;
 import com.kirin.modules.sales.entity.ProductionOrderDetailEntity;
 import com.kirin.modules.sales.entity.ProductionOrderEntity;
 import com.kirin.modules.sales.service.ProductionOrderDetailService;
 import com.kirin.modules.sales.service.ProductionOrderService;
+import com.kirin.modules.storage.entity.OutportInfoEntity;
+import com.kirin.modules.storage.service.OutportInfoService;
 import com.kirin.modules.sys.controller.AbstractController;
 import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -40,7 +44,32 @@ import com.kirin.modules.storage.service.OutportDetailService;
 public class OutportDetailController extends AbstractController {
 	@Autowired
 	private OutportDetailService outportDetailService;
-	
+	@Autowired
+	private OutportInfoService outportInfoService;
+
+	@Autowired
+	private ProductionOrderService productionOrderService;
+
+	/**
+	 * 查询可用于出库的订单列表
+	 */
+	@RequestMapping("/orderList")
+//	@RequiresPermissions("storage:outportdetail:list")
+	public R orderList(@RequestParam Map<String, Object> params){
+		//查询列表数据
+		params.put("status",new String[]{"2","3"});
+
+		Query query = new Query(params);
+
+		List<ProductionOrderEntity> productionOrderEntityList = productionOrderService.queryList(query);
+		int total = productionOrderService.queryTotal(query);
+
+		PageUtils pageUtil = new PageUtils(productionOrderEntityList, total, query.getLimit(), query.getPage());
+
+		return R.ok().put("page", pageUtil);
+	}
+
+
 	/**
 	 * 列表
 	 */
@@ -69,7 +98,18 @@ public class OutportDetailController extends AbstractController {
 		
 		return R.ok().put("outportDetail", outportDetail);
 	}
-	
+
+	/**
+	 * 根据订单Id查询出库单信息
+	 */
+	@RequestMapping("/outportInfo/{id}")
+//	@RequiresPermissions("storage:outportdetail:outportInfo")
+	public R outportInfo(@PathVariable("id") Long id){
+		OutportInfoEntity outportInfoEntity = outportInfoService.queryObjectByOrderId(id);
+
+		return R.ok().put("outportInfo", outportInfoEntity);
+	}
+
 	/**
 	 * 保存
 	 */
@@ -80,8 +120,6 @@ public class OutportDetailController extends AbstractController {
 
 		outportDetail.setCreateUser(sysUserEntity.getUsername());
 		outportDetail.setOutDate(new Date());
-
-		outportDetail.setOutportNo(CommonUtils.createBillNo("LLCK"));
 
 		outportDetailService.save(outportDetail);
 		
@@ -110,6 +148,119 @@ public class OutportDetailController extends AbstractController {
 		return R.ok();
 	}
 
+	@Autowired
+	private CommonUtilService commonUtilService;
+
+	/**
+	 * 根据订单ID来生成出库单信息
+	 * @param orderId
+	 * @return
+	 */
+	@RequestMapping("/createOutportInfo")
+	public R createOutportInfo(@RequestParam("orderId")Long orderId,@RequestParam("billNo")String billNo){
+		ProductionOrderEntity productionOrderEntity = productionOrderService.queryObject(orderId);
+
+		SysUserEntity sysUserEntity =  getUser();
+		if(productionOrderEntity != null){
+			OutportInfoEntity outportInfoEntity = new OutportInfoEntity();
+			outportInfoEntity.setOrderId(productionOrderEntity.getId());
+
+//			String likeDateStr = DateUtils.format(new Date(),"yyyyMMdd");
+//			String currentMaxNo = commonUtilService.getTableMaxNo("OUTPORRT_NO","tb_outport_info",likeDateStr);
+
+			outportInfoEntity.setOutporrtNo(billNo);
+			outportInfoEntity.setCustomerId(productionOrderEntity.getCustomerId());
+			outportInfoEntity.setOrderTypeId(productionOrderEntity.getOrderTypeId());
+			outportInfoEntity.setOutDate(DateUtils.format(new Date(),"yyyy-MM-dd HH:mm:ss"));
+			outportInfoEntity.setStatus("1");
+			outportInfoEntity.setCreateUser(sysUserEntity.getUsername());
+			outportInfoEntity.setCreateDate(new Date());
+
+			outportInfoService.save(outportInfoEntity);
+			//修改订单状态
+			productionOrderEntity.setStatus("3");
+			productionOrderService.update(productionOrderEntity);
+		}
+		return R.ok();
+	}
+
+	@RequestMapping("/getOrderMtrList")
+	public R getOrderMtrList(@RequestParam Map<String, Object> params){
+
+		List<OutportDetailEntity> outportDetailEntityList = new ArrayList<>();
+
+		if(params.get("orderId") == null){
+			Query query = new Query(params);
+			PageUtils pageUtil = new PageUtils(outportDetailEntityList, 0, query.getLimit(), query.getPage());
+			return R.ok().put("page", pageUtil);
+		}
+
+		Long orderId = Long.valueOf(params.get("orderId").toString());
+
+		List<Map> map = createOutPortDetail(orderId);
+		for (Map temp:map) {
+			OutportDetailEntity outportDetailEntity = new OutportDetailEntity();
+			outportDetailEntity.setMtrId(Long.valueOf(temp.get("mtrId").toString()));
+			outportDetailEntity.setMtrName(temp.get("mtrName").toString());
+			outportDetailEntity.setMtrNo(temp.get("mtrCode").toString());
+			outportDetailEntity.setMtrTypeName(temp.get("mtrTypeName").toString());
+			outportDetailEntity.setOrderCount(new BigDecimal(temp.get("orderCount").toString()));
+			outportDetailEntity.setOutUnit(temp.get("outUnit") == null ? "" : temp.get("outUnit").toString());
+
+			//计算已领数量
+			String outCount = compOutCount(orderId,Long.valueOf(temp.get("mtrId").toString()));
+			outportDetailEntity.setOutCount(new BigDecimal(outCount));
+
+			outportDetailEntityList.add(outportDetailEntity);
+		}
+		Query query = new Query(params);
+
+		int total = outportDetailEntityList.size();
+		PageUtils pageUtil = new PageUtils(outportDetailEntityList, total, query.getLimit(), query.getPage());
+		return R.ok().put("page", pageUtil);
+	}
+
+
+	public String compOutCount(Long orderId,Long mtrId){
+		//根据订单ID以及原料ID查询该原料的已领数量
+		BigDecimal outCount = new BigDecimal("0");
+		//根据订单查询出库单明细
+		List<OutportDetailEntity> outportDetailEntityList =	outportDetailService.queryDetailListByOrderId(orderId,mtrId);
+		if(outportDetailEntityList != null && outportDetailEntityList.size() > 0){
+			for (OutportDetailEntity outportDetailEntity:outportDetailEntityList) {
+				outCount = outCount.add(outportDetailEntity.getOutCount());
+			}
+		}
+		return outCount.toString();
+	}
+
+	/**
+	 * 根据订单ID以及原料Id来查询已出库的明细信息
+	 * @param params
+	 * @return
+	 */
+	@RequestMapping("/getOutportDetailList")
+	public R getOutportDetailList(@RequestParam Map<String, Object> params){
+		Long orderId = Long.valueOf(params.get("orderId").toString());
+		Long mtrId = Long.valueOf(params.get("mtrId").toString());
+		List<Map> map = outportDetailService.getOutportDetailList(orderId,mtrId);
+
+		Query query = new Query(params);
+
+		PageUtils pageUtil = new PageUtils(map, map.size(), query.getLimit(), query.getPage());
+		return R.ok().put("page", pageUtil);
+	}
+
+	@RequestMapping("/updateOutportInfoStatus")
+	public R updateOutportInfoStatus(@RequestParam("orderId")Long orderId,@RequestParam("status")String status){
+		OutportInfoEntity outportInfoEntity = outportInfoService.queryObjectByOrderId(orderId);
+		outportInfoEntity.setStatus(status);
+
+		outportInfoService.update(outportInfoEntity);
+		return R.ok();
+	}
+
+
 	@RequestMapping("/confirmOrder")
 	public R confirmOrder(@RequestBody Long[] ids){
 		for (Long id:ids) {
@@ -118,25 +269,25 @@ public class OutportDetailController extends AbstractController {
 			String no = "L"+productionOrderEntity.getProductionNo();
 			for (Map temp:map) {
 				OutportDetailEntity outportDetailEntity = new OutportDetailEntity();
-				outportDetailEntity.setOrderId(id);
-				outportDetailEntity.setCustomerId(Long.valueOf(temp.get("customerId").toString()));
-				outportDetailEntity.setCustomerName(temp.get("customerName").toString());
-				outportDetailEntity.setCustomerNo(temp.get("customerNo").toString());
-				outportDetailEntity.setPrdId(Long.valueOf(temp.get("prdId").toString()));
-				outportDetailEntity.setPrdName(temp.get("prdName").toString());
-				outportDetailEntity.setPrdNo(temp.get("prdCode").toString());
-				outportDetailEntity.setPrdTypeName(temp.get("prdTypeName").toString());
+//				outportDetailEntity.setOrderId(id);
+//				outportDetailEntity.setCustomerId(Long.valueOf(temp.get("customerId").toString()));
+//				outportDetailEntity.setCustomerName(temp.get("customerName").toString());
+//				outportDetailEntity.setCustomerNo(temp.get("customerNo").toString());
+//				outportDetailEntity.setPrdId(Long.valueOf(temp.get("prdId").toString()));
+//				outportDetailEntity.setPrdName(temp.get("prdName").toString());
+//				outportDetailEntity.setPrdNo(temp.get("prdCode").toString());
+//				outportDetailEntity.setPrdTypeName(temp.get("prdTypeName").toString());
 				outportDetailEntity.setMtrId(Long.valueOf(temp.get("mtrId").toString()));
 				outportDetailEntity.setMtrName(temp.get("mtrName").toString());
 				outportDetailEntity.setMtrNo(temp.get("mtrCode").toString());
 				outportDetailEntity.setMtrTypeName(temp.get("mtrTypeName").toString());
 				outportDetailEntity.setOrderCount(new BigDecimal(temp.get("orderCount").toString()));
 				outportDetailEntity.setOutUnit(temp.get("outUnit") == null ? "" : temp.get("outUnit").toString());
-				outportDetailEntity.setOutportNo(no);
-				outportDetailService.save(outportDetailEntity);
+//				outportDetailEntity.setOutportNo(no);
+//				outportDetailService.save(outportDetailEntity);
 			}
-			productionOrderEntity.setStatus("2");
-			productionOrderService.update(productionOrderEntity);
+//			productionOrderEntity.setStatus("2");
+//			productionOrderService.update(productionOrderEntity);
 		}
 		return R.ok();
 	}
@@ -144,8 +295,6 @@ public class OutportDetailController extends AbstractController {
 
 	@Autowired
 	ProductionOrderDetailService productionOrderDetailService;
-	@Autowired
-	ProductionOrderService productionOrderService;
 
 	public List<Map> createOutPortDetail(Long orderId){
 		ProductionOrderEntity productionOrderEntity = productionOrderService.queryObject(orderId);

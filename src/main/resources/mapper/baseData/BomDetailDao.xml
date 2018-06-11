@@ -185,4 +185,32 @@
 		</foreach>
 	</delete>
 
+	<select id="searchMtrByPrdId" parameterType="Map" resultType="map">
+		SELECT
+			CONCAT( bd.mtr_id, '', IFNULL( bd.mtr_extend_id, 'A' ) ) AS id,
+			bd.mtr_id AS mtrId,
+			bd.mtr_extend_id AS mtrExtendId,
+			bd.mtr_extend_desc AS mtrExtendDesc,
+			bd.semi_finished AS semiFinished,
+			m.MTR_NAME AS mtrName,
+			m.MTR_CODE AS mtrCode,
+			bd.gross_wgt AS grossWgt,
+			m.WGT_UNIT1 AS wgtUnit,
+			m.TAKE_STN_ID AS takeStnId,
+			m.MODI_RATE1 AS netRate,
+			m.MODI_RATE2 AS cookedRate,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TAKE_STN_ID ) AS takeStnName,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id=m.MINI_UNIT) AS miniUnitName,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.FORMULA_UNIT ) AS formulaUnitName,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TYPE_ID ) AS mtrTypeName,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS warehouseName
+		FROM
+			bom_info bi
+			LEFT JOIN bom_detail bd ON bi.id = bd.bom_id
+			LEFT JOIN mtr_data m ON bd.mtr_id = m.id
+		<where>
+			<if test="prdId != ''">bi.prd_id = #{prdId}</if>
+		</where>
+	</select>
+
 </mapper>

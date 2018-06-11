@@ -1,8 +1,14 @@
 package com.kirin.modules.sales.controller;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.kirin.modules.sales.entity.ProductionOrderEntity;
+import com.kirin.modules.sales.service.ProductionOrderService;
+import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,8 +74,26 @@ public class ProductionOrderDetailController {
 	@RequestMapping("/save")
 //	@RequiresPermissions("sales:productionorderdetail:save")
 	public R save(@RequestBody ProductionOrderDetailEntity productionOrderDetail){
+		//判断是否重复
+		Map<String,Object> params = new HashMap<>();
+		params.put("productionOrderId",productionOrderDetail.getProductionOrderId());
+		List<ProductionOrderDetailEntity> productionOrderDetailList = productionOrderDetailService.queryList(params);
+		if(productionOrderDetailList != null && productionOrderDetailList.size() > 0){
+			for (ProductionOrderDetailEntity productionOrderDetailEntity : productionOrderDetailList) {
+				if(productionOrderDetail.getPrdId().equals(productionOrderDetailEntity.getPrdId())){
+					return R.error("产品已存在列表，请直接进行编辑！");
+				}
+			}
+		}
+		//计算预估收入=(数量*售价）-（数量*定价）
+		BigDecimal revenue = new BigDecimal(0);
+		revenue = new BigDecimal(productionOrderDetail.getAmount()).multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(new BigDecimal(productionOrderDetail.getAmount()).multiply(productionOrderDetail.getCost())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+
+		productionOrderDetail.setRevenue(revenue.toString());
+
 		productionOrderDetailService.save(productionOrderDetail);
-		
+
+		updateOrderPrdCount(productionOrderDetail.getProductionOrderId());
 		return R.ok();
 	}
 	
@@ -79,11 +103,43 @@ public class ProductionOrderDetailController {
 	@RequestMapping("/update")
 //	@RequiresPermissions("sales:productionorderdetail:update")
 	public R update(@RequestBody ProductionOrderDetailEntity productionOrderDetail){
+
+		//计算预估收入=(数量*售价）-（数量*定价）
+		BigDecimal revenue = new BigDecimal(0);
+		revenue = new BigDecimal(productionOrderDetail.getAmount()).multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(new BigDecimal(productionOrderDetail.getAmount()).multiply(productionOrderDetail.getCost())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+
+		productionOrderDetail.setRevenue(revenue.toString());
+
 		productionOrderDetailService.update(productionOrderDetail);
-		
+
+		updateOrderPrdCount(productionOrderDetail.getProductionOrderId());
+
 		return R.ok();
 	}
-	
+
+	@Autowired
+	private ProductionOrderService productionOrderService;
+
+
+	/**
+	 * 更新订单产品总数
+	 * @param orderId
+	 */
+	public void updateOrderPrdCount(Long orderId){
+		BigDecimal sumCount = new BigDecimal(0);
+		Map<String,Object> params = new HashMap<>();
+		params.put("productionOrderId",orderId);
+		List<ProductionOrderDetailEntity> productionOrderDetailList = productionOrderDetailService.queryList(params);
+		if(productionOrderDetailList != null && productionOrderDetailList.size() > 0){
+			for (ProductionOrderDetailEntity productionOrderDetailEntity : productionOrderDetailList) {
+				sumCount = sumCount.add(new BigDecimal(productionOrderDetailEntity.getAmount()));
+			}
+		}
+		ProductionOrderEntity productionOrder = productionOrderService.queryObject(orderId);
+		productionOrder.setPrdMount(sumCount.toString());
+		productionOrderService.update(productionOrder);
+	}
+
 	/**
 	 * 删除
 	 */

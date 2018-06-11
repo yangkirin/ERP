@@ -78,26 +78,89 @@
 	</select>
 
 	<select id="batchInventorySearch" resultType="map">
-		select tib.ID,tib.BATCH_NO,tib.PRODUCTION_DATE,tib.EFFECTIVE_DATE,tib.MTR_ID,tib.MTR_NAME,tib.IN_COUNT,tib.IN_UNIT_NAME,tib.IN_UNIT_RATE,tib.ORDER_PRICE,tib.IN_TOTLA_PRICE
-		from tb_import_detail ti,tb_import_mtr_batch tib
-		where ti.MTR_ID=tib.MTR_ID and tib.MTR_ID=${mtrId} group by tib.BATCH_NO ;
+		SELECT
+			s.*,od.OUT_COUNT
+		FROM
+			(
+		SELECT
+			tib.ID,
+			tib.BATCH_NO,
+			tib.PRODUCTION_DATE,
+			tib.EFFECTIVE_DATE,
+			tib.MTR_ID,
+			tib.MTR_NAME,
+			tib.IN_COUNT,
+			tib.IN_UNIT_NAME,
+			tib.IN_UNIT_RATE,
+			tib.ORDER_PRICE,
+			tib.IN_TOTLA_PRICE
+		FROM
+			tb_import_detail ti,
+			tb_import_mtr_batch tib
+		WHERE
+			ti.MTR_ID = tib.MTR_ID
+			AND tib.MTR_ID = ${mtrId}
+		GROUP BY
+			tib.BATCH_NO
+			) as s LEFT JOIN tb_outport_detail od on s.BATCH_NO=od.BATCH_NO
 	</select>
 
 	<select id="outStoreSearch" resultType="map">
-		select od.ID,od.OUTPORT_NO,od.ORDER_ID,o.PRODUCTION_NO,o.ORDER_TYPE_NAME,o.PLACE_NAME,od.CUSTOMER_NO,od.CUSTOMER_NAME,od.OUT_DATE,od.CREATE_USER
-		from tb_production_order o,tb_outport_detail od
-		where od.ORDER_ID=o.ID
-		GROUP BY od.OUTPORT_NO;
+-- 		select od.ID,od.OUTPORT_NO,od.ORDER_ID,o.PRODUCTION_NO,o.ORDER_TYPE_NAME,o.PLACE_NAME,od.CUSTOMER_NO,od.CUSTOMER_NAME,od.OUT_DATE,od.CREATE_USER
+-- 		from tb_production_order o,tb_outport_detail od
+-- 		where od.ORDER_ID=o.ID
+-- 		GROUP BY od.OUTPORT_NO;
+
+		SELECT
+			oi.id as OUTPORT_ID,
+			oi.OUTPORRT_NO as OUTPORT_NO,
+			o.id as ORDER_ID,
+			o.PRODUCTION_NO,
+			oi.ORDER_TYPE_ID,
+			t.TYPE_NAME as ORDER_TYPE_NAME,
+			o.PLACE_NAME,
+			oi.CUSTOMER_ID,
+			c.CUSTOMER_NAME,
+			c.CUSTOMER_CODE as CUSTOMER_NO,
+			oi.OUTPORT_DATE as OUT_DATE,
+			oi.CREATE_USER
+		FROM
+			tb_outport_info oi
+			LEFT JOIN tb_production_order o ON oi.ORDER_ID =o.id
+			LEFT JOIN tb_customer_info c on oi.CUSTOMER_ID=c.id
+			LEFT JOIN tb_type_info t on t.id=oi.ORDER_TYPE_ID
+			where oi.`STATUS` in('2','3')
+		<!--<where>-->
+			<!--<if test="status != null">-->
+				<!--and oi.STATUS in-->
+				<!--<foreach collection="status" index="index" item="item" open="(" separator="," close=")">-->
+					<!--#{item}-->
+				<!--</foreach>-->
+			<!--</if>-->
+		<!--</where>-->
+
+
 	</select>
 
 	<select id="outStoreDetailSearch" resultType="map">
-		select od.ID,od.MTR_ID,m.MTR_CODE,m.MTR_NAME,od.MTR_TYPE_NAME,tib.BATCH_NO,
-		(select t.TYPE_NAME from tb_type_info t where t.id=m.PURCHASE_UNIT) as PURCHASE_UNIT_NAME,
-		m.PURCHASE_RATE,
-		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as MINI_UNIT_NAME,
-		m.MINI_RATE,od.ORDER_COUNT,od.OUT_COUNT,tib.PRODUCTION_DATE,tib.EFFECTIVE_DATE
-		from tb_outport_detail od,mtr_data m,tb_import_mtr_batch tib
-		where od.mtr_id=m.id and od.MTR_ID=tib.MTR_ID and od.ID=${outputId} GROUP BY od.OUTPORT_NO;
+		SELECT
+			od.MTR_ID,
+			od.MTR_NO as MTR_CODE,
+			od.MTR_NAME,
+			od.MTR_TYPE_NAME,
+			(select TYPE_NAME from tb_type_info where id=m.MINI_UNIT) as MINI_UNIT_NAME,
+			sum( od.OUT_COUNT ) AS OUT_COUNT,
+			od.ORDER_COUNT
+		FROM
+			tb_outport_info oi,
+			mtr_data m,
+			tb_outport_detail od
+		WHERE
+			oi.id = od.OUTPORT_ID
+			and od.MTR_ID = m.id
+			AND oi.id = ${outputId}
+		GROUP BY
+			od.MTR_ID
 
 	</select>
 
@@ -123,5 +186,49 @@
 	<select id="checkNameRepeat" resultType="String">
 		select count(*) from ${tableName} where
 			${searchFiled}=#{checkStr};
+	</select>
+
+	<select id="getPrdMtr" resultType="map">
+
+	</select>
+
+	<select id="dataSearchLL" resultType="map" parameterType="Map">
+		SELECT
+			MTR_ID AS mtrId,
+			MTR_NO AS mtrNo,
+			MTR_NAME AS mtrName,
+			MTR_TYPE_NAME AS mtrTypeName,
+			sum( ORDER_COUNT ) AS orderCount,
+			OUT_UNIT AS outUnit,
+			sum( OUT_COUNT ) AS outCount,
+			TAKE_STN_NAME as takeStnName,
+			WAREHOUSE_NAME as warehouseName
+		FROM
+			(
+			SELECT
+				od.MTR_ID,
+				od.MTR_NO,
+				od.MTR_NAME,
+				od.MTR_TYPE_NAME,
+				od.ORDER_COUNT,
+				( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.MINI_UNIT ) AS OUT_UNIT,
+				sum( od.OUT_COUNT ) AS OUT_COUNT,
+				( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TAKE_STN_ID ) AS TAKE_STN_NAME,
+				( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS WAREHOUSE_NAME,
+				od.OUT_DATE
+			FROM
+				tb_outport_info oi
+				INNER JOIN tb_outport_detail od ON oi.id = od.OUTPORT_ID
+				LEFT JOIN tb_production_order po ON oi.ORDER_ID = po.id
+				LEFT JOIN mtr_data m ON od.MTR_ID = m.id
+			WHERE
+				oi.id = od.OUTPORT_ID
+				AND oi.ORDER_ID = po.id
+			GROUP BY
+				od.MTR_ID,
+				od.OUTPORT_ID
+			) AS c
+		GROUP BY
+			MTR_ID;
 	</select>
 </mapper>

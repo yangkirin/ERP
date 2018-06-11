@@ -1,9 +1,15 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        // $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    }
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'storage/search/inventorySearch',
         datatype: "json",
         colModel: [			
-			{ label: 'id', name: 'ID', index: 'ID', width: 50, key: true ,hidden:true},
+			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
 			{ label: '名称', name: 'MTR_NAME', index: 'MTR_NAME', width: 160 },
 			{ label: '原料编码', name: 'MTR_CODE', index: 'MTR_CODE', width: 80 },
             { label: '采购单位', name: 'PURCHASE_UNIT', index: 'PURCHASE_UNIT', width: 60},
@@ -16,7 +22,8 @@ $(function () {
             { label: '库存数量', name: 'STORE_COUNT', index: 'STORE_COUNT', width: 80}
         ],
 		viewrecords: true,
-        height: 385,
+        height: "auto",
+        // height: 385,
         rowNum: 999999,
 		rowList : [500,1000,2000],
         rownumbers: true, 
@@ -42,6 +49,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid("getRowData",row_id);
+            console.log(rowData);
             var url = baseURL + 'storage/search/batchInventorySearch?mtrId='+row_id;
             createSubGrid(subgrid_id,row_id,url);
         },
@@ -65,11 +73,12 @@ $(function () {
                 { label: '生产日期', name: 'PRODUCTION_DATE', index: 'PRODUCTION_DATE', width: 120},
                 { label: '失效日期', name: 'EFFECTIVE_DATE', index: 'EFFECTIVE_DATE', width: 120 },
                 { label: '原料ID', name: 'MTR_ID', index: 'MTR_ID', width: 80 ,hidden:true },
-                { label: '入库数量', name: 'IN_UNIT_NAME', index: 'IN_COUNT', width: 60 ,formatter : "number" },
-                { label: '入库单位', name: 'inUnitName', index: 'IN_UNIT_NAME', width: 60 },
+                { label: '入库数量', name: 'IN_COUNT', index: 'IN_COUNT', width: 60 ,formatter : "number"},
+                { label: '入库单位', name: 'IN_UNIT_NAME', index: 'IN_UNIT_NAME', width: 60 },
                 { label: '入库转换率', name: 'IN_UNIT_RATE', index: 'IN_UNIT_RATE', width: 60 },
                 { label: '采购单价', name: 'ORDER_PRICE', index: 'ORDER_PRICE', width: 60 ,formatter : "number"},
-                { label: '入库金额', name: 'IN_TOTLA_PRICE', index: 'IN_TOTLA_PRICE', width: 60 ,formatter : "number"}
+                { label: '入库金额', name: 'IN_TOTLA_PRICE', index: 'IN_TOTLA_PRICE', width: 60 ,formatter : "number"},
+                { label: '出库数量', name: 'OUT_COUNT', index: 'OUT_COUNT', width: 60 ,formatter : "number"}
             ],
             rowNum : 9999999,
             height : '100%',
@@ -157,6 +166,7 @@ var vm = new Vue({
 	el:'#rrapp',
 	data:{
         showList:true,
+
         search:{
             type:'1'
         },
@@ -170,6 +180,7 @@ var vm = new Vue({
         clean:function(){
 
         },
+
         initTypeInfoArr:function(parentId){
             var dataArr = "";
             $.ajax({

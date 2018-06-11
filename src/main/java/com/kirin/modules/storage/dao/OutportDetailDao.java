@@ -30,4 +30,9 @@ public interface OutportDetailDao extends BaseDao<OutportDetailEntity> {
 	 * @return
 	 */
 	public List<OutportDetailEntity> getOutportDetail(@Param("mtrId") Long mtrId,@Param("orderId")Long orderId);
+
+	List<OutportDetailEntity> queryDetailListByOrderId(@Param("orderId")Long orderId,@Param("mtrId")Long mtrId);
+
+	List<Map> getOutportDetailList(@Param("orderId")Long orderId,@Param("mtrId")Long mtrId);
+
 }

@@ -1,30 +1,27 @@
 $(function () {
     $("#jqGrid").jqGrid({
-        url: baseURL + 'businessPrint/dataSearch/DataSearchLL',
+        url: baseURL + 'businessPrint/biSearch/DataSearchLL',
         datatype: "json",
         colModel: [
-            { label: 'id', name: 'mtrId', index: 'mtrId', width: 50, key: true ,hidden:true},
-            { label: '产品ID', name: 'prdId', index: 'PRD_ID', width: 80,hidden:true },
-            { label: '产品编号', name: 'prdCode', index: 'PRD_CODE', width: 80 },
-            { label: '产品类型', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 80 },
-            { label: '产品名称', name: 'prdName', index: 'PRD_NAME', width: 80 },
-            { label: '原料编号', name: 'mtrCode', index: 'MTR_CODE', width: 80 },
-            { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 80 },
-            { label: '原料类型', name: 'mtrTypeName', index: 'MTR_TYPE_NAME', width: 80 },
-            { label: '需求数量', name: 'orderCount', index: 'ORDER_COUNT', width: 80 },
-            { label: '领料单位', name: 'outUnit', index: 'OUT_UNIT', width: 80 },
-            { label: '领料站点', name: 'takeStnName', index: 'OUT_UNIT', width: 80 },
-            { label: '所属仓库', name: 'wareHouseName', index: 'OUT_UNIT', width: 80 },
-            { label: '领料数量', name: 'outCount', index: 'OUT_COUNT', width: 80 }
+            { label: 'id', name: 'id', index: 'id', key: true ,hidden:true},
+            { label: 'mtrId', name: 'mtrId', index: 'mtrId' ,hidden:true},
+            { label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120 },
+            { label: '原料名称', name: 'mtrName', index: 'mtrName', width: 180 },
+            { label: '原料类型', name: 'mtrTypeName', index: 'mtrTypeName', width: 100 },
+            { label: '需求数量', name: 'grossWgt', index: 'grossWgt', width: 80 },
+            { label: '领料单位', name: 'miniUnitName', index: 'miniUnitName', width: 80 },
+            { label: '件重', name: 'wgtUnit', index: 'wgtUnit', width: 80 },
+            { label: '件数', name: 'numberCase', index: 'numberCase', width: 80 },
+            { label: '所属仓库', name: 'warehouseName', index: 'warehouseName', width: 120 }
         ],
         viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        height: "auto",
+        rowNum: 9999999,
         rowList: [10, 30, 50],
         rownumbers: true,
         rownumWidth: 25,
         autowidth: true,
-        multiselect: true,
+        multiselect: false,
         // pager: "#jqGridPager",
         jsonReader: {
             root: "page.list",
@@ -55,13 +52,14 @@ $(function () {
         minView:2,
         todayBtn:true,
         todayHighlight:true,
+        // initialDate:'2018-05-27',
         weekStart:1
         // startDate:new Date(currentDate)
     });
     $('.form_datetime').datetimepicker().on('hide', function (ev) {
-            var value = $(".form_datetime").val();
-            vm.productionOrder.createDate = value;
-        });
+        var value = $(".form_datetime").val();
+        vm.productionOrder.createDate = value;
+    });
 });
 
 var vm = new Vue({
@@ -84,7 +82,6 @@ var vm = new Vue({
                 data: {tableName:"tb_type_info",search:"PARENT_ID=23",returnField:"ID as value,TYPE_NAME as text"},
                 success: function(r){
                     vm.selectArr = r.data;
-                    vm.productionOrder.warehouse = 0;
                 }
             });
         },
@@ -108,14 +105,15 @@ var vm = new Vue({
             }).trigger("reloadGrid");
         },
         print:function(){
-
-
-
-            window.open(baseURL + "businessPrint/print/ll?token="+token+"&createDate="+vm.productionOrder.createDate+"&warehouse="+vm.productionOrder.warehouse+"&takeStn="+vm.productionOrder.takeStn);
+            var orderNo = "";
+            if(vm.productionOrder.productionNo !== undefined){
+                orderNo = vm.productionOrder.productionNo;
+            }
+            console.log(vm.productionOrder);
+            window.open(baseURL + "businessPrint/biSearch/PrintLL?token="+token+"&createDate="+vm.productionOrder.createDate+"&orderNo="+orderNo+"&takeStn="+vm.productionOrder.takeStn);
         }
     }
 });
-vm.takeStnArr = vm.initTypeInfoArr('48');
+vm.takeStnArr = vm.initTypeInfoArr('19');
 vm.initCommbox();
-vm.productionOrder.takeStn = 0;
 vm.productionOrder.takeStn = 0;

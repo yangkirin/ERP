@@ -70,22 +70,60 @@
 					</div>
 				</div>
 			</div>
-
-			<!--<div class="form-group">-->
-				<!--<div class="col-sm-12">-->
-					<!--<div class="grid-btn">-->
-						<!--&lt;!&ndash;<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>&ndash;&gt;-->
-						<!--&lt;!&ndash;<a  class="btn btn-info" id="confirm_storg" @click="confirm('storg')"><i class="fa fa-check"></i>&nbsp;确认入库</a>&ndash;&gt;-->
-						<!--&lt;!&ndash;<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>&ndash;&gt;-->
-						<!--&lt;!&ndash;<a v-if="hasPermission('purchase:orderinfo:delete')" class="btn btn-primary" id="printImport" @click="print('import')"><i class="fa fa-print"></i>&nbsp;打印入库单</a>&ndash;&gt;-->
-					<!--</div>-->
-				<!--</div>-->
-			<!--</div>-->
+			<div class="form-group">
+				<div class="col-sm-12">
+					<div class="grid-btn">
+						<a  class="btn btn-primary" @click="addNewOutport"><i class="fa fa-search"></i>新建出库</a>
+						<!--<a  class="btn btn-info" id="confirm_storg" @click="confirm('storg')"><i class="fa fa-check"></i>&nbsp;确认入库</a>-->
+						<!--<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>-->
+						<!--<a v-if="hasPermission('purchase:orderinfo:delete')" class="btn btn-primary" id="printImport" @click="print('import')"><i class="fa fa-print"></i>&nbsp;打印入库单</a>-->
+					</div>
+				</div>
+			</div>
 		</form>
 
 	    <table id="jqGrid"></table>
 	    <div id="jqGridPager"></div>
     </div>
+
+	<div  v-show="newOutportLayer">
+		<div class="panel-heading">
+			<form class="form-horizontal" style="width: 100%;">
+				<div class="form-group">
+					<div class="col-sm-1 control-label">客户名称</div>
+					<div class="col-sm-2">
+						<!--<input type="text" class="form-control" v-model="outportInfo.customerName" placeholder="客户名称"/>-->
+						<select class="form-control" @change="selectVal('customerId')" v-model="outportInfo.customerId" placeholder="客户" readonly="readonly">
+							<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
+						</select>
+					</div>
+					<div class="col-sm-1 control-label">客户编号</div>
+					<div class="col-sm-2">
+						<input type="text" class="form-control" id="addCustomerNo" v-model="outportInfo.customerNo" placeholder="客户编号"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-1 control-label">订单类型</div>
+					<div class="col-sm-2">
+						<select class="form-control" @change="selectVal('orderTypeId')" v-model="outportInfo.orderTypeId" placeholder="类型" readonly="readonly">
+							<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
+						</select>
+					</div>
+					<div class="col-sm-1 control-label">售点名称</div>
+					<div class="col-sm-2">
+						<select class="form-control" @change="selectVal('placeId')" v-model="outportInfo.placeId" placeholder="售点" readonly="readonly">
+							<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2 control-label"></div>
+					<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>&nbsp;&nbsp;
+					<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+				</div>
+			</form>
+		</div>
+	</div>
 
 </div>
 

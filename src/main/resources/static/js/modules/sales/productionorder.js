@@ -1,4 +1,10 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        $("#jqGridPRD").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    }
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'sales/productionorder/list',
         datatype: "json",
@@ -6,41 +12,98 @@ $(function () {
 			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
 			{ label: '订单编号', name: 'productionNo', index: 'PRODUCTION_NO', width: 80 },
 			{ label: '订单类型ID', name: 'orderTypeId', index: 'ORDER_TYPE_ID', width: 80 ,hidden:true},
-			{ label: '订单类型名称', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 80 }, 			
+			{ label: '类型', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 60 },
 			{ label: '客户ID', name: 'customerId', index: 'CUSTOMER_ID', width: 80 ,hidden:true},
 			{ label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 }, 			
-			{ label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 80 }, 			
+			{ label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 140 },
 			{ label: '售点ID', name: 'placeId', index: 'PLACE_ID', width: 80,hidden:true },
-			{ label: '售点名称', name: 'placeName', index: 'PLACE_NAME', width: 80 },
-            { label: '成本', name: 'prdCost', index: 'PRD_COST', width: 80 },
-            { label: '收入', name: 'prdIncome', index: 'PRD_INCOME', width: 80 },
-            { label: '折后收入', name: 'discountIncome', index: 'DISCOUNT_INCOME', width: 80 },
-            { label: '产品总数', name: 'prdMount', index: 'PRD_MOUNT', width: 80 },
-            { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80 },
-            { label: '折扣成本比', name: 'discountCostRate', index: 'DISCOUNT_COST_RATE', width: 80 },
-            { label: '备注', name: 'remakr', index: 'REMAKR', width: 80 },
-            { label: '状态', name: 'status', index: 'STATUS', width: 80, formatter: function (value, options, row) {
-					var msg = "";
-					if (value == 0) {
-						msg = '<span class="label label-danger">已禁用</span>';
-					} else if (value == 1) {
-						msg = '<span class="label label-info">待确认</span>';
-					} else if (value == 2) {
-						msg = '<span class="label label-primary">已确认</span>';
-					}
-					return msg;
-				}
+			{ label: '售点名称', name: 'placeName', index: 'PLACE_NAME', width: 60 },
+            { label: '成本', name: 'prdCost', index: 'PRD_COST', width: 80,hidden:true },
+            { label: '收入', name: 'prdIncome', index: 'PRD_INCOME', width: 80 ,hidden:true},
+            { label: '折后收入', name: 'discountIncome', index: 'DISCOUNT_INCOME', width: 80,hidden:true },
+            { label: '产品总数', name: 'prdMount', index: 'PRD_MOUNT', width: 60,hidden:false },
+            { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80,hidden:true },
+            { label: '折扣成本比', name: 'discountCostRate', index: 'DISCOUNT_COST_RATE', width: 80,hidden:true },
+            { label: '备注', name: 'remakr', index: 'REMAKR', width: 100 },
+            { label: '状态', name: 'status', index: 'STATUS', width: 40, formatter: function (value, options, row) {
+                var msg = "";
+                if(value == 0){
+                    msg = '<p class="bg-danger">已撤销</p>';
+                }else if(value == 1){
+                    msg = '<p class="bg-success">待确认</p>';
+                }else if(value == 2){
+                    msg = '<p class="bg-info">已确认</p>';
+                }else if(value == 3){
+                    msg = '<p class="bg-warning">已出库</p>';
+                }else if(value == 4){
+                    msg = '<p class="bg-primary">已完结</p>';
+                }else{
+                    msg = '<p class="bg-danger">未知</p>';
+                }
+                return msg;
+				},unformat:function(value, options, row){
+                if($.trim(value)=="已撤销"){
+                    return "0";
+                }else if($.trim(value)=="待确认"){
+                    return "1";
+                }else if($.trim(value)=="已确认"){
+                    return "2";
+                }else if($.trim(value)=="已出库"){
+                    return "3";
+                }else if($.trim(value)=="已完结"){
+                    return "4";
+                }
             }
+            },
+            { label: '操作', name: 'operation', index: 'operation', width: 200,formatter:function(value, options, row){
+                var operatorStr = "";
+
+                var editStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"0\")'>修&nbsp;&nbsp;&nbsp;改</button>&nbsp;&nbsp;";
+                var confirmStr = "<button type='button' class='btn btn-primary btn-xs' onclick='orderConfirm("+row.id+",\"1\")'>确&nbsp;&nbsp;&nbsp;认</button>&nbsp;&nbsp;";
+                var backStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"2\")'>反确认</button>&nbsp;&nbsp;";
+                var closeStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"3\")'>完结</button>&nbsp;&nbsp;";
+                var printStr = "<button type='button' class='btn btn-info btn-xs' onclick='oper("+row.id+",\"4\")'>打&nbsp;&nbsp;&nbsp;印</button>&nbsp;&nbsp;";
+                var cancleStr = "<button type='button' class='btn btn-warning btn-xs' onclick='oper("+row.id+",\"5\")'>撤&nbsp;&nbsp;&nbsp;销</button>&nbsp;&nbsp;";
+
+                var configPrd = "<button type='button' class='btn btn-primary btn-xs' onclick='configPrd("+row.id+")'>产品配置</button>&nbsp;&nbsp;";
+
+                // if(!hasPermission('purchase:orderinfo:update')){
+                //     editStr = "";
+                // }
+                // if(!hasPermission('purchase:orderinfo:delete')){
+                //     confirmStr = "";
+                // }
+                //状态说明：0-撤销，1-待确认，2-已确认，3-已出库，4-已完结
+                //撤销的单据无任何操作；
+                //待确认表示刚刚新建的单据，可以进行反复的修改以及确认
+                //已确认的单据不允许修改，可以被反确认和打印。反确认需要进行逻辑校验
+                //已出库表示单据做了领料出库操作，只能被完结掉。不能做其它操作
+                //已完结表述单据已正常关闭。可以打印。
+                var status = row.status;
+                if(status == '0'){
+                    operatorStr = "";
+                }else if(status == '1'){//待确认
+                    operatorStr = configPrd+editStr+confirmStr+cancleStr;
+                }else if(status == '2'){//已确认
+                    operatorStr = backStr+printStr;
+                }else if(status == '3'){//已出库
+                    operatorStr = closeStr;
+                }else if(status == '4'){//已完结
+                    operatorStr = printStr;
+                }
+
+                return operatorStr;
+            }}
         ],
 		viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        height: 'auto',
+        rowNum: 9999999,
 		rowList : [10,30,50],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: true,
-        pager: "#jqGridPager",
+        multiselect: false,
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -120,24 +183,39 @@ $(function () {
             { label: '生产订单ID', name: 'productionOrderId', index: 'PRODUCTION_ORDER_ID', width: 80 ,hidden:true},
             { label: '生产订单编号', name: 'productionOrderNo', index: 'PRODUCTION_ORDER_NO', width: 80 ,hidden:true},
             { label: '产品ID', name: 'prdId', index: 'PRD_ID', width: 80 ,hidden:true},
-            { label: '产品编号', name: 'prdNo', index: 'PRD_NO', width: 150 },
+            { label: '产品编号', name: 'prdNo', index: 'PRD_NO', width: 60 },
             { label: '产品名称', name: 'prdName', index: 'PRD_NAME', width: 300 },
             { label: '产品类型ID', name: 'prdTypeId', index: 'PRD_TYPE_ID', width: 80 ,hidden:true},
-            { label: '产品类型', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 120 },
-            { label: '需求数量', name: 'amount', index: 'AMOUNT', width: 80 },
-            { label: '定价', name: 'price1', index: 'PRICE1', width: 80 },
-            { label: '售价', name: 'price2', index: 'PRICE2', width: 80 },
-            { label: '成本', name: 'cost', index: 'COST', width: 80 },
-            { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 80 }
+            { label: '产品类型', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 80 },
+            { label: '需求数量', name: 'amount', index: 'AMOUNT', width: 60 },
+            { label: '定价', name: 'price1', index: 'PRICE1', width: 60 },
+            { label: '售价', name: 'price2', index: 'PRICE2', width: 60 },
+            { label: '成本', name: 'cost', index: 'COST', width: 60 },
+            { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 60 },
+            { label: '操作', name: 'operation', index: 'operation', width: 200,formatter:function(value, options, row){
+                var operatorStr = "";
+
+                var editStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editPrd("+row.id+")'>修&nbsp;&nbsp;&nbsp;改</button>&nbsp;&nbsp;";
+                var delStr = "<button type='button' class='btn btn-primary btn-xs' onclick='delPrd("+row.id+")'>删&nbsp;&nbsp;&nbsp;除</button>&nbsp;&nbsp;";
+
+                // if(!hasPermission('purchase:orderinfo:update')){
+                //     editStr = "";
+                // }
+
+                operatorStr = editStr+delStr;
+
+                return operatorStr;
+            }}
         ],
         viewrecords: true,
-        height: 230,
-        rowNum: 10,
+        // height: 230,
+        height: 'auto',
+        rowNum: 9999999,
         rowList : [10,30,50],
         rownumbers: true,
         // rownumWidth: 25,
         autowidth:true,
-        pager: "#jqGridPagerPRD",
+        // pager: "#jqGridPagerPRD",
         // toolbar:[true,"top"],
         jsonReader : {
             root: "page.list",
@@ -158,11 +236,127 @@ $(function () {
 
 });
 
+/**
+ * Grid操作列事件
+ * @param rowid 所选择的操作行数据ID
+ * @param type 操作类型：0-修改，1-确认，2-反确认，3-完结，4-打印
+ */
+function oper(rowId,type){
+    //根据所选数据的状态来进行业务判断，5种状态说明：0-撤销，1-待确认，2-已确认，3-已出库，4-已完结
+    var rowData = $("#jqGrid").jqGrid('getRowData',rowId);
+    var status = rowData.status;
+    var msg = '所选单据状态不满足此操作，请选择合适的单据！';
+    switch(type){
+        case '0'://修改订单
+            //TODO 修改订单
+            vm.productionOrder = rowData;
+            vm.update(rowId);
+            return;
+            break;
+        case '1'://确认
+            //修改订单状态
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: baseURL + "sales/productionorder/updateStatus",
+                data: {orderId:rowId,status:'2'},
+                success: function (r) {
+                    console.log(r);
+                    msg = "操作成功！";
+                    vm.reload();
+                }
+            });
+            break;
+        case '2'://反确认
+            //TODO 反确认后台逻辑校验
+            var isBack = true;
+            if(isBack){
+                //修改订单状态
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    url: baseURL + "sales/productionorder/updateStatus",
+                    data: {orderId:rowId,status:'1'},
+                    success: function (r) {
+                        console.log(r);
+                        msg = "操作成功！";
+                        vm.reload();
+                    }
+                });
+            }else{
+                msg = "订单已做领料出库，无法进行反确认！";
+            }
+            break;
+        case '3'://
+            //修改订单状态
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: baseURL + "sales/productionorder/updateStatus",
+                data: {orderId:rowId,status:'4'},
+                success: function (r) {
+                    console.log(r);
+                    msg = "操作成功！";
+                    vm.reload();
+                }
+            });
+            break;
+        case '4'://完结
+            //TODO 打印
+            msg = "打印单据";
+            break;
+        case '5'://撤销
+            //修改订单状态
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: baseURL + "sales/productionorder/updateStatus",
+                data: {orderId:rowId,status:'0'},
+                success: function (r) {
+                    console.log(r);
+                    msg = "操作成功！";
+                    vm.reload();
+                }
+            });
+            break;
+        default:
+            break;
+    }
+    alert(msg);
+}
+
+function configPrd(rowId){
+
+    vm.showList = false;
+    vm.showForm = true;
+    vm.addOrderForm = false;
+
+    $("#jqGridPRD").jqGrid('setGridParam',{
+        postData:{'productionOrderId': rowId},
+    }).trigger("reloadGrid");
+
+    vm.getInfo(rowId);
+    vm.getSelectDataPrd();
+}
+
+function editPrd(detailId){
+    vm.editPrd(detailId);
+}
+
+function delPrd(detailId){
+    vm.deletePrd(detailId);
+}
+
+function orderConfirm(rowId){
+    vm.saveOrder(rowId);
+}
+
 var vm = new Vue({
 	el:'#rrapp',
 	data:{
 		showList: true,
         showForm:false,
+        addOrderForm:false,
 		title: null,
 		productionOrder: {},
         productionOrderDetailEntity: {},
@@ -176,37 +370,42 @@ var vm = new Vue({
 		query: function () {
 			vm.reload();
 		},
+        createNewNo:function(){
+            var no = '';
+            $.ajax({
+                type:"POST",
+                async:false,
+                url: baseURL + "common/commonUtil/createBillNo",
+                data:"billType=3",
+                success: function(r){
+                    no = r.newBillNo;
+                }
+            });
+            return no;
+        },
 		add: function(){
 			vm.showList = false;
-			vm.showForm = true;
+			vm.showForm = false;
+			vm.addOrderForm = true;
 			vm.title = "新增";
 			vm.productionOrder = {
                 productionNo:vm.createNewNo(),
                 status:1
 			};
-			$('#confirm_ok').hide();
-			$('#confirm_back').hide();
 
-            // $('#addPrd_btn').attr("disabled",true);
-            // $('#editPrd_btn').attr("disabled",true);
-            // $('#delPrd_btn').attr("disabled",true);
-            // $('#savePrd_btn').attr("disabled",true);
-
-            $('#jqGridPRD').jqGrid("clearGridData");
+            // $('#jqGridPRD').jqGrid("clearGridData");
 		},
-		update: function (event) {
-			var id = getSelectedRow();
+		update: function (rowId) {
+			var id = rowId;
 			if(id == null){
 				return ;
 			}
-			vm.showList = false;
-			vm.showForm = true;
+            vm.showList = false;
+            vm.showForm = false;
+            vm.addOrderForm = true;
             vm.title = "修改";
-            
+            vm.productionOrder = {};
             vm.getInfo(id);
-            $("#jqGridPRD").jqGrid('setGridParam',{
-                postData:{'productionOrderId': id},
-            }).trigger("reloadGrid");
 		},
 		saveOrUpdate: function (event) {
 			var url = vm.productionOrder.id == null ? "sales/productionorder/save" : "sales/productionorder/update";
@@ -258,91 +457,64 @@ var vm = new Vue({
 		reload: function (event) {
 			vm.showList = true;
 			vm.showForm = false;
+            vm.addOrderForm = false;
 			var page = $("#jqGrid").jqGrid('getGridParam','page');
 			$("#jqGrid").jqGrid('setGridParam',{ 
                 page:page
             }).trigger("reloadGrid");
 		},
-        createNewNo:function(){
-            var no = '';
-            $.ajax({
-                type:"POST",
-                async:false,
-                url: baseURL + "common/commonUtil/getTableNewNo",
-                data:"tableName=tb_production_order&noField=PRODUCTION_NO&length=4",
-                success: function(r){
-                    no = r.newNo;
-                }
-            });
-            return no;
-        },
         addPrd:function(){
-            // console.log(vm.productionOrder.orderTypeId);
-            // console.log(vm.productionOrder.customerId);
-            if(vm.checkFormAttr()){
-                vm.showPrdForm('新增');
-            }
+            vm.showPrdForm('新增');
 		},
-        editPrd:function(){
-            var prdRowId = $("#jqGridPRD").jqGrid('getGridParam','selrow');
-            if(prdRowId){
-                var rowData = $("#jqGridPRD").jqGrid("getRowData",prdRowId);
-                vm.selectData = rowData;
-                vm.showPrdForm('修改');
-            }else{
-                alert('请选择要修改的产品！');
-            }
-            // $('#addPrd_btn').attr("disabled",true);
-            // $('#editPrd_btn').attr("disabled",true);
-            // $('#delPrd_btn').attr("disabled",true);
-            // $('#savePrd_btn').attr("disabled",true);
+        editPrd:function(detailId){
+            var rowData = $("#jqGridPRD").jqGrid("getRowData",detailId);
+            vm.productionOrderDetailEntity = rowData;
+            vm.showPrdForm('修改');
 		},
-		deletePrd:function(){
-            var prdRowId = $("#jqGridPRD").jqGrid('getGridParam','selrow');
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');//计划单Id
-            if(prdRowId){
-            	if(id){//服务端删除
-                    confirm('确定要删除选中的记录？', function(){
-                        $.ajax({
-                            type: "POST",
-                            url: baseURL + "sales/productionorderdetail/deleteById",
-                            data: {id:prdRowId},
-                            success: function(r){
-                                if(r.code == 0){
-                                    alert('操作成功', function(index){
-                                        $("#jqGridPRD").jqGrid('setGridParam',{
-                                            postData:{'productionOrderId': id},
-                                        }).trigger("reloadGrid");
-                                    });
-                                }else{
-                                    alert(r.msg);
-                                }
-                            }
-                        });
-                    });
-				}else{//客户端删除
-                    var count = vm.getGridMaxId($('#jqGridPRD'));
-                    var rowData = $("#jqGridPRD").jqGrid("getRowData",prdRowId);
-                    var tempData = [];
-                    for (var i = 0; i < vm.prdGridRowData.length; i++) {
-                        if (vm.prdGridRowData[i].prdId != rowData.prdId) {
-                            // vm.prdGridRowData.remove(vm.prdGridRowData[i]);
-                            tempData.push(vm.prdGridRowData[i]);
+		deletePrd:function(detailId){
+            confirm('确定要删除选中的记录？', function(){
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "sales/productionorderdetail/deleteById",
+                    data: {id:detailId},
+                    success: function(r){
+                        if(r.code == 0){
+                            alert('操作成功', function(index){
+                                $("#jqGridPRD").jqGrid('setGridParam',{
+                                    postData:{'productionOrderId': vm.productionOrder.id},
+                                }).trigger("reloadGrid");
+                            });
+                        }else{
+                            alert(r.msg);
                         }
                     }
-                    vm.prdGridRowData = tempData;
-                    $('#jqGridPRD').jqGrid("clearGridData");
-                    $('#jqGridPRD').jqGrid("addRowData", count + 1, tempData, "first");
-				}
-			}else{
-            	alert('请选择要删除的产品！');
-            	return;
-			}
+                });
+            });
 		},
+        saveOrder:function(rowId){
+            confirm("确定保存后无法进行修改，是否继续？",function(){
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    url: baseURL + "sales/productionorder/updateStatus",
+                    data: {orderId:rowId,status:'2'},
+                    success: function (r) {
+                        if(r.code == 0){
+                            alert('操作成功', function(index){
+                                vm.reload();
+                            });
+                        }else{
+                            alert(r.msg);
+                        }
+
+                    }
+                });
+            });
+        },
         savePrd:function(){
 			console.log(vm.productionOrder);
             //1.保存订单信息
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');//计划单Id
+            var id = $("#jqGrid").jqGrid('getGridParam','selrow');//单据Id
 			var orderUrl = baseURL + "sales/productionorder/save";
 			var orderParam = JSON.stringify(vm.productionOrder);
 			var flag = 0;
@@ -411,7 +583,7 @@ var vm = new Vue({
                 vm.showList=true;
 			}
 		},
-        confirm:function(type){
+        confirm:function(rowId,type){
             var id = $("#jqGrid").jqGrid('getGridParam','selrow');//计划单Id
             var rowData = $("#jqGrid").jqGrid("getRowData",id);//计划单信息
             if(!id){
@@ -432,30 +604,21 @@ var vm = new Vue({
                     console.log(r);
                 }
             });
-            // console.log(vm.productionOrder);
 		},
 		showPrdForm:function(title){
-            vm.getSelectDataPrd();
             //判断是否是客户端&服务端操作---如存在计划Id则为服务端操作，否则为客户端操作。
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');//计划单Id
-            var rowData = $("#jqGrid").jqGrid("getRowData",id);//计划单信息
+            var id = vm.productionOrder.id;
+            var rowData = vm.productionOrder;
 			var operType;
-			if(id){//服务端
-                operType = 'Server';
-                //判断是否进行明细修改
-                var prdRowId = $("#jqGridPRD").jqGrid('getGridParam','selrow');
-                if(prdRowId){//修改Detail
-                    url = "sales/productionorderdetail/update";
-                    $.get(baseURL + "sales/productionplandetail/info/"+prdRowId, function(r){
-                        vm.productionOrderDetailEntity = r.productionOrderDetail;
-                    });
-                }else{//新增Detail
 
-                    url = "sales/productionorderdetail/save";
-                }
-			}else{//客户端
-                operType = 'Client';
-			}
+			if(title == '新增'){
+                url = "sales/productionorderdetail/save";
+                vm.productionOrderDetailEntity.productionOrderId = id;
+                vm.productionOrderDetailEntity.productionOrderNo = vm.productionOrder.productionNo;
+            }else if(title == '修改'){//修改
+                //根据detailId查询信息进行修改
+                url = "sales/productionorderdetail/update";
+            }
 
             var num = layer.open({
                 type: 1,
@@ -466,135 +629,31 @@ var vm = new Vue({
                 content: jQuery("#addLayer"),
                 btn: ['提交','取消'],
                 btn1: function (event) {
-                    if(operType == 'Server'){
-                        var revenue = Number(Number(vm.selectData.amount) * Number(vm.selectData.price2)).toFixed(2);
-                        $.ajax({
-                            type: "POST",
-                            async: false,
-                            url: baseURL + "baseData/prddata/info/" + vm.selectData.prdId,
-                            success: function (r) {
-                                var prdData = r.prdData;
-                                vm.productionOrderDetailEntity = {
-                                    productionOrderId:id,
-                                    prdTypeName: prdData.typeName,
-                                    prdTypeId: prdData.typeId,
-                                    prdId: prdData.id,
-                                    prdNo: prdData.prdCode,
-                                    prdName: prdData.prdName,
-                                    amount: vm.selectData.amount,
-                                    price1: vm.selectData.price1,
-                                    price2: vm.selectData.price2,
-                                    cost: prdData.cost,
-                                    revenue: revenue
-                                };
-                            }
-                        });
 
-                        // vm.productionOrderDetailEntity.productionOrderId=id;
-                        // vm.productionOrderDetailEntity.prdId=vm.selectData.prdId;
-                        // vm.productionOrderDetailEntity.prdName=vm.selectData.prdName;
-                        // vm.productionOrderDetailEntity.prdNo=vm.selectData.prdNo;
-                        // vm.productionOrderDetailEntity.prdTypeId=vm.selectData.prdTypeId;
-                        // vm.productionOrderDetailEntity.prdTypeName=vm.selectData.prdTypeName;
-                        // vm.productionOrderDetailEntity.amount = vm.selectData.amount;
-                        // vm.productionOrderDetailEntity.price1 = vm.selectData.price1;
-                        // vm.productionOrderDetailEntity.price2 = vm.selectData.price2;
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json",
+                        url: baseURL + url,
+                        async:false,
+                        data: JSON.stringify(vm.productionOrderDetailEntity),
+                        success: function (r) {
+                            if(r.code === 0){
+                                alert('操作成功');
+                            }else{
+                                alert(r.msg);
+                            }
+                        }
+                    });
+                    $("#jqGridPRD").jqGrid('setGridParam',{
+                        postData:{'productionOrderId': id},
+                    }).trigger("reloadGrid");
 
-                        //判断是否存在相同产品
-                        var isExtis = false;
-                        var allDetail = $("#jqGridPRD").jqGrid("getRowData");
-                        var allDetail2 = getGridAllData('jqGridPRD');
-                        for (var i = 0; i < allDetail.length; i++) {
-                            if (allDetail2[i].prdId == vm.productionOrderDetailEntity.prdId) {
-                                isExtis = true;
-                                break;
-							}
-                        }
-						if(isExtis){
-							alert('存在相同产品，请做修改！');
-							return;
-						}else{
-                            $.ajax({
-                                type: "POST",
-                                contentType: "application/json",
-                                url: baseURL + url,
-                                async:false,
-                                data: JSON.stringify(vm.productionOrderDetailEntity),
-                                success: function (r) {
-                                    if(r.code === 0){
-                                        alert('操作成功');
-                                    }else{
-                                        alert(r.msg);
-                                    }
-                                }
-                            });
-                            $("#jqGridPRD").jqGrid('setGridParam',{
-                                postData:{'productionOrderId': id},
-                            }).trigger("reloadGrid");
-						}
-                    }else if(operType == 'Client'){
-                        if(title == '新增'){
-                            var count = vm.getGridMaxId($('#jqGridPRD'));
-                            var rowId = $('#jqGridPRD').jqGrid("getGridParam", "selrow");
-                            //判断列表当中是否存在当前所选原料，如存在，则提示是否累加数量，如不存在，则进入下一流程
-                            var isExtis = false;
-                            for (var i = 0; i < vm.prdGridRowData.length; i++) {
-                                if (vm.prdGridRowData[i].prdId == vm.selectData.prdId) {
-                                    vm.prdGridRowData[i].amount = Number(Number(vm.prdGridRowData[i].amount) + Number(vm.selectData.amount)).toFixed(2);
-                                    vm.prdGridRowData[i].revenue = Number(Number(vm.prdGridRowData[i].amount) * Number(vm.selectData.price2)).toFixed(2);
-                                    isExtis = true;
-                                    break;
-                                }
-                            }
-                            if (!isExtis) {
-                                var dataRow = {};
-                                var prdData;
-                                var revenue = Number(Number(vm.selectData.amount) * Number(vm.selectData.price2)).toFixed(2);
-                                $.ajax({
-                                    type: "POST",
-                                    async: false,
-                                    url: baseURL + "baseData/prddata/info/" + vm.selectData.prdId,
-                                    success: function (r) {
-                                        prdData = r.prdData;
-                                        // dataRow={prdTypeName:prdData.typeName,prdName:prdData.prdName,amount:vm.selectData.amount,PRICE1:0,PRICE2:prdData.referencePrice,COST:prdData.cost,revenue:0};
-                                        dataRow = {
-                                            prdTypeName: prdData.typeName,
-                                            prdTypeId: prdData.typeId,
-                                            prdId: prdData.id,
-                                            prdNo: prdData.prdCode,
-                                            prdName: prdData.prdName,
-                                            amount: vm.selectData.amount,
-                                            price1: vm.selectData.price1,
-                                            price2: vm.selectData.price2,
-                                            cost: prdData.cost,
-                                            revenue: revenue
-                                        };
-                                    }
-                                });
-                                vm.prdGridRowData.push(dataRow);
-                                $("#jqGridPRD").jqGrid("addRowData", Number(count) + 1, dataRow, "first");
-                            } else {
-                                $('#jqGridPRD').jqGrid("clearGridData");
-                                $('#jqGridPRD').jqGrid("addRowData", count + 1, vm.prdGridRowData, "first");
-                            }
-                        }else if(title == '修改'){
-                            for(var i=0;i<vm.prdGridRowData.length;i++){
-                                if(vm.prdGridRowData[i].prdId == vm.selectData.prdId){
-                                    vm.prdGridRowData[i].amount = vm.selectData.amount;
-                                    vm.prdGridRowData[i].revenue = Number(Number(vm.selectData.amount)*Number(vm.selectData.price2)).toFixed(2);
-                                }
-                            }
-                            $('#jqGridPRD').jqGrid("clearGridData");
-                            var count = $("#jqGridPRD").jqGrid("getGridParam", "records");
-                            $('#jqGridPRD').jqGrid("addRowData",count+1,vm.prdGridRowData,"first");
-                        }
-                    }
                     layer.close(num);
-                    vm.selectData = {};
+                    vm.productionOrderDetailEntity = {};
                 },
                 btn2:function(event){
                     layer.close(num);
-                    vm.selectData = {};
+                    vm.productionOrderDetailEntity = {};
                 }
             });
 		},
@@ -685,8 +744,8 @@ var vm = new Vue({
                 },
                 updater: function (obj) {
                     var item = JSON.parse(obj);
-                    vm.selectData.prdId=item.id;
-                    vm.selectData.prdName=item.name;
+                    vm.productionOrderDetailEntity.prdId=item.id;
+                    vm.productionOrderDetailEntity.prdName=item.name;
                     return item.name;
                 },
                 afterSelect:function(obj){
@@ -695,10 +754,15 @@ var vm = new Vue({
                         type: "POST",
                         url: baseURL + "sales/customerprd/getCustomerPrdById",
                         async:false,
-                        data: {customerId:vm.productionOrder.customerId,prdId:vm.selectData.prdId},
+                        data: {customerId:vm.productionOrder.customerId,prdId:vm.productionOrderDetailEntity.prdId},
                         success: function (r) {
-                            vm.selectData.price1 = r.data.price1;
-                            vm.selectData.price2 = r.data.price2;
+                            vm.productionOrderDetailEntity.price1 = r.data.price1;
+                            vm.productionOrderDetailEntity.price2 = r.data.price2;
+                            vm.productionOrderDetailEntity.cost = r.data.cost;
+
+                            vm.productionOrderDetailEntity.prdNo = r.data.prdNo;
+                            vm.productionOrderDetailEntity.prdTypeId = r.data.prdTypeId;
+                            vm.productionOrderDetailEntity.prdTypeName = r.data.prdTypeName;
                             $('#selectPrice1').val(r.data.price1);
                             $('#selectPrice2').val(r.data.price2);
                         }

@@ -117,6 +117,10 @@ public class CustomerPrdController {
 				returnMap.put("prdId",customerPrdEntity.getPrdId());
 				returnMap.put("price1",prdDataEntity.getReferencePrice());
 				returnMap.put("price2",customerPrdEntity.getPrdPrice());
+				returnMap.put("cost",prdDataEntity.getCost());
+				returnMap.put("prdNo",prdDataEntity.getPrdCode());
+				returnMap.put("prdTypeId",prdDataEntity.getTypeId());
+				returnMap.put("prdTypeName",prdDataEntity.getTypeName());
 //			}
 		}
 		return R.ok().put("data",returnMap);

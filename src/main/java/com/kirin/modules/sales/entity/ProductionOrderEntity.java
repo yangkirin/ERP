@@ -63,6 +63,12 @@ public class ProductionOrderEntity implements Serializable {
 	//
 	private String updateUser;
 
+	private Long outportId;
+
+	private String outportStatus;
+
+	private String outportNo;
+
 	/**
 	 * 设置：ID
 	 */
@@ -306,5 +312,29 @@ public class ProductionOrderEntity implements Serializable {
 
 	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
+	}
+
+	public Long getOutportId() {
+		return outportId;
+	}
+
+	public void setOutportId(Long outportId) {
+		this.outportId = outportId;
+	}
+
+	public String getOutportStatus() {
+		return outportStatus;
+	}
+
+	public void setOutportStatus(String outportStatus) {
+		this.outportStatus = outportStatus;
+	}
+
+	public String getOutportNo() {
+		return outportNo;
+	}
+
+	public void setOutportNo(String outportNo) {
+		this.outportNo = outportNo;
 	}
 }

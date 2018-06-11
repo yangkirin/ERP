@@ -258,7 +258,6 @@ $(function () {
             // var id = $("#jqGrid").jqGrid('getGridParam','selrow');
             var rowData = $("#jqGridExtend").jqGrid("getRowData",id);
             vm.mtrExtend = rowData;
-            console.log(vm.mtrExtend);
         },
         gridComplete: function () {
             //隐藏grid底部滚动条

@@ -60,11 +60,55 @@
 			limit #{offset}, #{limit}
 		</if>
 	</select>
-	
+
+	<select id="queryDetailListByOrderId" resultType="com.kirin.modules.storage.entity.OutportDetailEntity">
+		SELECT
+			od.*
+		FROM
+			tb_outport_info oi,
+			tb_outport_detail od
+		WHERE
+			oi.id = od.OUTPORT_ID
+			<if test="orderId != null">
+				AND oi.ORDER_ID = #{orderId}
+			</if>
+			<if test="mtrId != null">
+				AND od.MTR_ID = #{mtrId}
+			</if>
+	</select>
+
  	<select id="queryTotal" resultType="int">
 		select count(*) from tb_outport_detail 
 	</select>
-	 
+
+	<select id="getOutportDetailList" resultType="map">
+		SELECT DISTINCT
+			ib.IN_UNIT_NAME as mtrUnit,
+			ib.IN_UNIT_RATE as mtrRate,
+			ib.ORDER_PRICE as price,
+			(ib.ORDER_PRICE*od.OUT_COUNT) as outPrice,
+			od.*,
+			od.BATCH_NO as batchNo,
+			od.OUT_DATE as outDate,
+			od.OUT_COUNT as outCount
+		FROM
+			tb_outport_info oi,
+			tb_outport_detail od,
+			tb_import_mtr_batch ib,
+			mtr_data m
+		WHERE
+			oi.id = od.OUTPORT_ID
+			AND od.MTR_ID = m.id
+			AND od.MTR_ID = ib.MTR_ID
+			AND od.BATCH_NO = ib.BATCH_NO
+			<if test="orderId != null">
+				AND oi.ORDER_ID = #{orderId}
+			</if>
+			<if test="mtrId != null">
+				AND od.MTR_ID = #{mtrId}
+			</if>
+	</select>
+
 	<insert id="save" parameterType="com.kirin.modules.storage.entity.OutportDetailEntity" useGeneratedKeys="true" keyProperty="id">
 		insert into tb_outport_detail
 		(
@@ -114,7 +158,7 @@
 			<if test="outUnit != null">`OUT_UNIT` = #{outUnit}, </if>
 			<if test="outDate != null">`OUT_DATE` = #{outDate}, </if>
 			<if test="status != null">`STATUS` = #{status}, </if>
-			<if test="createUser != null">`CREATE_USER` = #{createUser}</if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser},</if>
 			<if test="batchNo != null">`BATCH_NO` = #{batchNo}</if>
 		</set>
 		where ID = #{id}

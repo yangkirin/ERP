@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.storage.dao.PdInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.kirin.modules.storage.entity.PdInfoEntity" id="pdInfoMap">
+        <result property="id" column="ID"/>
+        <result property="pdNo" column="PD_NO"/>
+        <result property="pdType" column="PD_TYPE"/>
+        <result property="pdStartDate" column="PD_START_DATE"/>
+        <result property="pdEndDate" column="PD_END_DATE"/>
+        <result property="pdStatus" column="PD_STATUS"/>
+        <result property="pdOrgId" column="PD_ORG_ID"/>
+        <result property="pdOrgName" column="PD_ORG_NAME"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="CREATE_USER"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.kirin.modules.storage.entity.PdInfoEntity">
+		select * from tb_pd_info where ID = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.PdInfoEntity">
+		select * from tb_pd_info
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_pd_info 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.storage.entity.PdInfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_pd_info
+		(
+			`PD_NO`, 
+			`PD_TYPE`, 
+			`PD_START_DATE`, 
+			`PD_END_DATE`, 
+			`PD_STATUS`, 
+			`PD_ORG_ID`, 
+			`PD_ORG_NAME`, 
+			`CREATE_DATE`, 
+			`CREATE_USER`
+		)
+		values
+		(
+			#{pdNo}, 
+			#{pdType}, 
+			#{pdStartDate}, 
+			#{pdEndDate}, 
+			#{pdStatus}, 
+			#{pdOrgId}, 
+			#{pdOrgName}, 
+			#{createDate}, 
+			#{createUser}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.storage.entity.PdInfoEntity">
+		update tb_pd_info 
+		<set>
+			<if test="pdNo != null">`PD_NO` = #{pdNo}, </if>
+			<if test="pdType != null">`PD_TYPE` = #{pdType}, </if>
+			<if test="pdStartDate != null">`PD_START_DATE` = #{pdStartDate}, </if>
+			<if test="pdEndDate != null">`PD_END_DATE` = #{pdEndDate}, </if>
+			<if test="pdStatus != null">`PD_STATUS` = #{pdStatus}, </if>
+			<if test="pdOrgId != null">`PD_ORG_ID` = #{pdOrgId}, </if>
+			<if test="pdOrgName != null">`PD_ORG_NAME` = #{pdOrgName}, </if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate}, </if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_pd_info where ID = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_pd_info where ID in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

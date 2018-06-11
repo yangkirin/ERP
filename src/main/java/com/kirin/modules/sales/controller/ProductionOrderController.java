@@ -122,8 +122,6 @@ public class ProductionOrderController extends AbstractController {
 
 		productionOrderService.save(productionOrder);
 
-
-
 		return R.ok().put("data",productionOrder);
 	}
 	

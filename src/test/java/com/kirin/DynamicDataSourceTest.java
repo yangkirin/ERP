@@ -25,8 +25,8 @@ public class DynamicDataSourceTest {
         System.out.println(ToStringBuilder.reflectionToString(user));
 
         //切换数据源
-        DynamicDataSource.setDataSource(DataSourceContext.SECOND.getName());
-        UserEntity user2 = userService.queryObject(1L);
-        System.out.println(ToStringBuilder.reflectionToString(user2));
+//        DynamicDataSource.setDataSource(DataSourceContext.SECOND.getName());
+//        UserEntity user2 = userService.queryObject(1L);
+//        System.out.println(ToStringBuilder.reflectionToString(user2));
     }
 }

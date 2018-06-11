@@ -61,4 +61,9 @@ public class BomDetailServiceImpl implements BomDetailService {
 	public BomDetailEntity queryDetailObject(Long id){
 		return bomDetailDao.queryDetailObject(id);
 	}
+
+	@Override
+	public List<Map> searchMtrByPrdId(Map<String,Object> params){
+		return bomDetailDao.searchMtrByPrdId(params);
+	}
 }
