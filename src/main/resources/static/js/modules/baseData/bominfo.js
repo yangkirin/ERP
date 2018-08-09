@@ -1,4 +1,10 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        $("#bomDetailGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    };
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'baseData/bominfo/list',
         datatype: "json",
@@ -7,14 +13,30 @@ $(function () {
 			{ label: '配方名称', name: 'bomName', index: 'bom_name', width: 120,hidden:true },
 			{ label: '产品ID', name: 'prdId', index: 'prd_id', width: 80 ,hidden:true},
 			{ label: '产品名称', name: 'prdIdName', index: 'prd_id_name', width: 120 ,formatter:function(value, options, row){
-                if(row.semiFinished == '1'){
-                    return ''+value;
-                }else{
+                // if(row.semiFinished == '1'){
+                //     return value.slice(1);
+                // }else{
                     return value;
-                }
+                // }
             }},
+            { label: '产品类别', name: 'prdTypeName', index: 'prdTypeName', width: 80 },
+            { label: '产品编码', name: 'prdCode', index: 'prdCode', width: 80 },
+            { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 80 },
             { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
+            { label: '售价', name: 'price', index: 'price', width: 60 },
+            { label: '锅重', name: 'potWgt', index: 'potWgt', width: 60 },
+            { label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 60 },
+            { label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 60 },
+            { label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 60 },
+            { label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 60 },
             { label: '配方成本', name: 'cost', index: 'cost', width: 60 },
+            { label: '成本率', name: 'sumCostRate', index: 'sumCostRate', width: 60,formatter:function(value, options, row){
+                if(value == null){
+                    return "";
+                }else{
+                    return value+'%';
+                }
+            } },
 			{ label: '状态', name: 'status', index: 'status', width: 40 ,formatter: function(value, options, row){
                 return value === 0 ?
                     '<span class="label label-danger">禁用</span>' :
@@ -34,14 +56,15 @@ $(function () {
             { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
         ],
 		viewrecords: true,
-        height: '100%',
-        rowNum: 50,
+        height: 'auto',
+        rowNum: 999999,
 		rowList : [50,100,150],
         rownumbers: true,
         rownumWidth: 25, 
         autowidth:true,
         multiselect: false,
-        pager: "#jqGridPager",
+        // scroll:true,
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -63,6 +86,7 @@ $(function () {
         gridComplete:function(){
         	//隐藏grid底部滚动条
         	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
+        	// $("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-y" : "scroll" });
         },
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
@@ -86,7 +110,7 @@ $(function () {
                     return value;
                 }
             }},
-            { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 80 ,hidden:true},
+            { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 120 },
             { label: '规格说明', name: 'mtrExtendDesc', index: 'MTR_EXTEND_DESC', width: 150},
             { label: '净菜', name: 'netWgt', index: 'NET_WGT', editable:true,width: 40 },
             { label: '净菜得率', name: 'netRate', index: 'NET_RATE', editable:true,width: 40,formatter:function(value, options, row){
@@ -119,21 +143,23 @@ $(function () {
                     return Number(value).toFixed(2);
                 }
             } },
-            { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 40  },
+            { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 40 ,hidden:true,formatter:function(value, options, row){
+                return value+'%';
+            }},
             { label: '备注', name: 'remark', index: 'REMARK', editable:true,width: 150 },
             { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
 
         ],
         viewrecords: true,
-        height: 385,
-        width: 1000,
-        rowNum: 10,
+        height: "auto",
+        rowNum: 999999,
         rowList : [10,30,50],
         rownumbers: true,
         rownumWidth: 25,
         autowidth:true,
         multiselect: false,
-        pager: "#bomDetailGridPager",
+        // scroll:true,
+        // pager: "#bomDetailGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -194,7 +220,7 @@ $(function () {
                         return value;
                     }
                 }},
-                { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 80 ,hidden:true},
+                { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 100 },
                 { label: '规格说明', name: 'mtrExtendDesc', index: 'MTR_EXTEND_DESC', width: 100},
                 { label: '净菜', name: 'netWgt', index: 'NET_WGT', editable:true,width: 40 },
                 { label: '净菜得率', name: 'netRate', index: 'NET_RATE', editable:true,width: 40,formatter:function(value, options, row){
@@ -221,7 +247,9 @@ $(function () {
                         return Number(value).toFixed(2);
                     }
                 } },
-                { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80 },
+                { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80,hidden:true,formatter:function(value, options, row){
+                    return value+'%';
+                } },
                 { label: '备注', name: 'remark', index: 'REMARK', editable:true,width: 80 },
                 { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
             ],
@@ -428,6 +456,42 @@ var vm = new Vue({
                 }
             });
         },
+        getTypeInfoTakeStnTree:function(){
+            //加载树
+            $.ajax({
+                type: "POST",
+                url: baseURL + "baseData/typeinfo/select",
+                data:{parentId:19},
+                success: function(r){
+                    ztree = $.fn.zTree.init($("#typeInfoTakeStnTree"), setting, r.typeInfoList);
+                    var node = ztree.getNodeByParam("id", vm.typeInfo.parentId);
+                    ztree.selectNode(node);
+                }
+            });
+        },
+        typeInfoTakeStnTree: function(opeation){
+            layer.open({
+                type: 1,
+                offset: '50px',
+                skin: 'layui-layer-molv',
+                title: "选择",
+                area: ['300px', '450px'],
+                shade: 0,
+                shadeClose: false,
+                content: jQuery("#typeInfoTakeStnLayer"),
+                btn: ['确定', '取消'],
+                btn1: function (index) {
+                    var node = ztree.getSelectedNodes();
+                        // $('#mtr_takeStnName').val(node[0].typeName);
+                    vm.bomDetail.takeStnId = node[0].id;
+                    vm.bomDetail.takeStnIdName = node[0].typeName;
+                    layer.close(index);
+                },
+                btn2:function(event){
+                    // vm.bomDetail = {};
+                }
+            });
+        },
 		query: function () {//查询
 			vm.reload();
 		},
@@ -460,7 +524,32 @@ var vm = new Vue({
             vm.showDetailList = false;
             vm.title = "修改";
             vm.getFieldData();
-            vm.getInfo(id)
+            vm.getInfo(id);
+        },
+        del:function(){
+            var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+            if(id == null){
+                return ;
+            }
+            var ids = new Array();
+            ids[0] = id;
+            confirm('确定要删除选中的记录？', function(){
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "baseData/bominfo/delete",
+                    contentType: "application/json",
+                    data: JSON.stringify(ids),
+                    success: function(r){
+                        if(r.code == 0){
+                            alert('操作成功', function(index){
+                                $("#jqGrid").trigger("reloadGrid");
+                            });
+                        }else{
+                            alert(r.msg);
+                        }
+                    }
+                });
+            });
         },
         saveOrUpdate: function (event) {//保存 新增或修改的配方信息
             var url = vm.bomInfo.id == null ? "baseData/bominfo/save" : "baseData/bominfo/update";
@@ -557,7 +646,7 @@ var vm = new Vue({
                         vm.bomDetail = vm.bomDetailPrd;
                     }
 
-                    var url = id == null ? "baseData/bomdetail/save":"baseData/bomdetail/update";
+                    var url = id == null ? "baseData/bomdetail/newSave":"baseData/bomdetail/newUpdate";
                     $.ajax({
                         type: "POST",
                         url: baseURL + url,
@@ -818,7 +907,10 @@ var vm = new Vue({
         },
         countPrdWgt:function() {
             vm.bomDetailPrd.modiWgt = (Number(vm.bomDetailPrd.netWgt)*Number(vm.bomDetailPrd.modiRate)).toFixed(2);
+            //毛重=净重/净得率
+            vm.bomDetailPrd.grossWgt= (Number(vm.bomDetailPrd.netWgt)/Number(vm.bomDetailPrd.netRate)).toFixed(2);
             $('#add_prd_modiWgt').val(vm.bomDetailPrd.modiWgt);
+            $('#add_prd_grossWgt').val(vm.bomDetailPrd.grossWgt);
         },
 
         getFieldData2:function(){
@@ -902,9 +994,10 @@ var vm = new Vue({
 	}
 });
 vm.getTypeInfoTree();
+vm.getTypeInfoTakeStnTree();
 var dataSource;
 vm.takestnArr = vm.initTypeInfoArr('19');
-// vm.cutArr = vm.initTypeInfoArr('68');
+vm.cutArr = vm.initTypeInfoArr('68');
 // vm.mtrExtendArr = {};
 
 

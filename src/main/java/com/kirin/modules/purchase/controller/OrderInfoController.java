@@ -95,6 +95,22 @@ public class OrderInfoController extends AbstractController {
 	/**
 	 * 列表
 	 */
+	@RequestMapping("/searchList")
+	@RequiresPermissions("purchase:orderinfo:searchList")
+	public R searchList(@RequestParam Map<String, Object> params){
+		//查询列表数据
+		Query query = new Query(params);
+
+		List<OrderInfoEntity> orderInfoList = orderInfoService.searchList(query);
+
+		PageUtils pageUtil = new PageUtils(orderInfoList, orderInfoList.size(), query.getLimit(), query.getPage());
+
+		return R.ok().put("page", pageUtil);
+	}
+
+	/**
+	 * 列表
+	 */
 	@RequestMapping("/list")
 	@RequiresPermissions("purchase:orderinfo:list")
 	public R list(@RequestParam Map<String, Object> params){
@@ -312,9 +328,9 @@ public class OrderInfoController extends AbstractController {
 
 	//打印入库单
 	@RequestMapping(value="/inputPrint",produces="image/*;charset=UTF-8")
-	public void inputPrint(HttpServletRequest request, HttpServletResponse response,@RequestParam("importId")Long importId)throws IOException{
+	public void inputPrint(HttpServletRequest request, HttpServletResponse response,@RequestParam("orderId")Long orderId)throws IOException{
 		Map<String,Object> map = new HashMap();
-		ImportEntity importEntity = importService.queryObject(importId);
+		ImportEntity importEntity = importService.queryObjectByOrderId(orderId);
 		SupplierInfoEntity supplierInfoEntity = supplierInfoService.queryObject(importEntity.getSupplierId());
 
 		// 设置response参数，可以打开下载页面
@@ -417,8 +433,12 @@ public class OrderInfoController extends AbstractController {
 			table2.addCell(detail.getOrderCount().toString());
 			table2.addCell(detail.getInCount().toString());
 			table2.addCell(new BigDecimal(detail.getInCount()).multiply(detail.getInPrice()).toString());
+
 			table2.addCell(detail.getTaxRate());
-			table2.addCell("");
+			//不含税金额=含税金额-（含税金额*税率）
+			BigDecimal taxSumPrice = new BigDecimal(detail.getInCount()).multiply(detail.getInPrice());
+			BigDecimal priceTemp = taxSumPrice.subtract(taxSumPrice.multiply(new BigDecimal(detail.getTaxRate())).setScale(2,BigDecimal.ROUND_HALF_UP));
+			table2.addCell(priceTemp.toString());
 			table2.addCell("");
 
 			sumOrder += Double.valueOf(detail.getOrderCount());

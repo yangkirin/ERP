@@ -3,7 +3,7 @@ $(function () {
         var ss = pageSize();
         $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
         $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
-    }
+    };
 
     $("#jqGrid").jqGrid({
         url: baseURL + 'storage/import/listOrder',
@@ -82,7 +82,8 @@ $(function () {
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: false,
+        multiselect: true,
+        // scroll:true,
         // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -159,7 +160,7 @@ $(function () {
                 {label: '入库金额', name: 'inPrice', index: 'IN_PRICE', width: 60,formatter : "number",align:"right"},
                 {label: '实际入库日期', name: 'inDate', index: 'IN_DATE', width: 100}
             ],
-            rowNum : 20,
+            rowNum : 99999,
             height : '100%',
             rowList : [10,30,50],
             rownumbers: true,
@@ -217,6 +218,7 @@ $(function () {
         rownumWidth: 25,
         autowidth: true,
         multiselect: false,
+        // scroll:true,
         ondblClickRow:function(id){
             var orderId = $('#jqGrid').jqGrid("getGridParam","selrow");
             var rowData = $("#jqGridMtr").jqGrid("getRowData",id);
@@ -283,8 +285,6 @@ $(function () {
             createSubBatchGrid(subgrid_id,row_id,url);
         }
     });
-
-
 
     function createSubBatchGrid(subgrid_id,row_id,url){
         var subgrid_table_id, pager_id;
@@ -388,6 +388,39 @@ $(function () {
     //     console.log(vm.importMtrBatch);
     //
     // });
+
+    $("#exportStartDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:'zh-CN',
+        autoclose:true,
+        minView:2,
+        todayBtn:true,
+        todayHighlight:true,
+        weekStart:1,
+        endDate:new Date(currentDate)
+    });
+
+    $('#exportStartDate').datetimepicker().on('changeDate', function(ev){
+        var newDate = dateFtt('yyyy-MM-dd',ev.date);
+        vm.exportStartDate = newDate;
+    });
+
+    $("#exportEndDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:'zh-CN',
+        autoclose:true,
+        minView:2,
+        todayBtn:true,
+        todayHighlight:true,
+        weekStart:1,
+        endDate:new Date(currentDate)
+    });
+
+    $('#exportEndDate').datetimepicker().on('changeDate', function(ev){
+        var newDate = dateFtt('yyyy-MM-dd',ev.date);
+        vm.exportEndDate = newDate;
+    });
+
 });
 
 function editMtr(batchId){
@@ -547,7 +580,9 @@ function oper(rowId,type){
     alert(msg);
 }
 
-
+// function modalCommit(){
+//     console.log(vm.exportType+'----'+vm.exportStartDate+'----'+vm.exportEndDate);
+// }
 
 var lastSelection;
 
@@ -561,7 +596,10 @@ var vm = new Vue({
         importDetail: {},
         orderInfo:{},
         importMtrBatch:{},
-        mtrExtendArr:{}
+        mtrExtendArr:{},
+        exportType:null,
+        exportStartDate:null,
+        exportEndDate:null
 	},
 	methods: {
 		query: function () {
@@ -675,9 +713,6 @@ var vm = new Vue({
                 page:page
             }).trigger("reloadGrid");
 		},
-		deleteMtr:function(){
-
-		},
         save:function(){
 
 		    confirm("确定保存后无法进行修改，是否继续？",function(){
@@ -708,7 +743,7 @@ var vm = new Vue({
             var dataParam = "";
             if(type == 'edit') {//
                 $("#jqGridMtr").jqGrid('setGridParam',{
-                    postData:{'orderId': rowId},
+                    postData:{'orderId': rowId}
                 }).trigger("reloadGrid");
 
                 vm.showDetail = true;
@@ -726,9 +761,6 @@ var vm = new Vue({
                 vm.importInfo.supplierName = vm.orderInfo.supplierName;
                 vm.importInfo.exceptionDate = vm.orderInfo.exceptionDate+" 00:00:00";
 
-                console.log(vm.orderInfo);
-                console.log(vm.importInfo);
-
                 url = "storage/import/add";
                 dataParam = JSON.stringify(vm.importInfo);
 
@@ -740,7 +772,6 @@ var vm = new Vue({
                     data: JSON.stringify(vm.importInfo),
                     success: function(r){
                         vm.importInfo = r.import;
-                        console.log(r);
                         // if(r.code === 0){
                         //     alert('操作成功', function(index){
                         //         vm.reload();
@@ -756,27 +787,35 @@ var vm = new Vue({
                         vm.showList = false;
                     }
                 });
-
-
-
             }else if(type == 'back'){
-                url = "storage/import/updateInfo";
-                $.ajax({
-                    type: "POST",
-                    url: baseURL + url,
-                    data: {id:rowId,status:'1'},
-                    success: function (r) {
-                        // console.log(r.data);
-                        // vm.reload();
-                        if(r.code == 0){
-                            alert('操作成功', function(index){
-                                vm.reload();
-                            });
-                        }else{
-                            alert(r.msg);
-                        }
-                    }
-                });
+                //订单反确认：修改入库单状态为待确认状态，删除已入库的明细记录
+                var rowData = $('#jqGrid').jqGrid("getRowData",rowId);
+                var flag = false;
+                if(rowData.status == '3'){
+                    confirm('此单已入库，是否继续进行反确认操作？',function(){
+                        url = "storage/import/updateInfo";
+                        $.ajax({
+                            type: "POST",
+                            url: baseURL + url,
+                            data: {orderId: rowId, status: '1',type:'back'},
+                            success: function (r) {
+                                // console.log(r.data);
+                                // vm.reload();
+                                if (r.code == 0) {
+                                    alert('操作成功', function (index) {
+                                        vm.reload();
+                                    });
+                                } else {
+                                    alert(r.msg);
+                                }
+                            }
+                        });
+                    });
+                }
+
+                // if(flag) {
+                //
+                // }
             }
             // $.ajax({
             //     type: "POST",
@@ -821,7 +860,7 @@ var vm = new Vue({
             if(typeName == 'order'){
                 window.open(baseURL + "purchase/orderinfo/printPdf?token="+token+"&orderId="+rowId);
             }else if(typeName == 'import'){
-                window.open(baseURL + "purchase/orderinfo/inputPrint?token="+token+"&importId="+rowId);
+                window.open(baseURL + "purchase/orderinfo/inputPrint?token="+token+"&orderId="+rowId);
             }
         },
         getFieldData:function(){
@@ -984,8 +1023,6 @@ var vm = new Vue({
                 },
                 btn1: function (event) {
                     vm.importMtrBatch.inTotlaPrice = Number(Number(vm.importMtrBatch.inCount)*Number(vm.importMtrBatch.orderPrice)).toFixed(2);
-
-
                     $.ajax({
                         type: "POST",
                         async:false,
@@ -1137,6 +1174,23 @@ var vm = new Vue({
             });
             return no;
         },
+
+        down:function(type){
+            var paramType;
+            if(type == 'cw'){//财务导出
+                paramType='CW';
+            }else{//普通导出
+                paramType='PT';
+            }
+            vm.exportType = paramType;
+            $("#myModal").modal("show");
+        },
+        modalCommit:function(){
+            console.log(vm.exportType+'----'+vm.exportStartDate+'----'+vm.exportEndDate);
+
+            window.open(baseURL + "storage/import/export?token="+token+"&type="+vm.exportType+"&startDate="+vm.exportStartDate+"&endDate="+vm.exportEndDate);
+        }
+
 	}
 });
 

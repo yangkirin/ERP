@@ -29,4 +29,6 @@ public interface BomInfoService {
 	void deleteBatch(Long[] ids);
 
 	BomInfoEntity queryObjectByPrdId(Long prdId);
+
+	List<BomInfoEntity> queryObjectByMtrId(Long mtrId);
 }

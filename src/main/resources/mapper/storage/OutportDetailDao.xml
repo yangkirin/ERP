@@ -47,6 +47,9 @@
 			<if test="mtrId != null">
 				MTR_ID = #{mtrId}
 			</if>
+			<if test="outportId != null">
+				OUTPORT_ID = #{outportId}
+			</if>
 		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
@@ -101,6 +104,9 @@
 			AND od.MTR_ID = m.id
 			AND od.MTR_ID = ib.MTR_ID
 			AND od.BATCH_NO = ib.BATCH_NO
+			<if test="outportId != null">
+				AND oi.ID = #{outportId}
+			</if>
 			<if test="orderId != null">
 				AND oi.ORDER_ID = #{orderId}
 			</if>
@@ -167,7 +173,11 @@
 	<delete id="delete">
 		delete from tb_outport_detail where ID = #{value}
 	</delete>
-	
+
+	<delete id="deleteByInfoId">
+		delete from tb_outport_detail where OUTPORT_ID = #{value}
+	</delete>
+
 	<delete id="deleteBatch">
 		delete from tb_outport_detail where ID in 
 		<foreach item="id" collection="array" open="(" separator="," close=")">
@@ -176,21 +186,38 @@
 	</delete>
 
 	<select id="queryMtrByPrdId" resultType="map">
-		select p.id as prdId,p.PRD_CODE as prdCode,p.PRD_NAME as prdName,
-		(select t.TYPE_NAME from tb_type_info t where t.id=p.TYPE_ID) as prdTypeName,
-		m.id as mtrId,m.MTR_CODE as mtrCode,m.MTR_NAME as mtrName,
-		(select t.TYPE_NAME from tb_type_info t where t.id=m.TYPE_ID) as mtrTypeName,
-		m.TAKE_STN_ID,(select t.TYPE_NAME from tb_type_info t where t.id=m.TAKE_STN_ID) as takeStnName,
-		m.WAREHOUSE_ID,(select t.TYPE_NAME from tb_type_info t where t.id=m.WAREHOUSE_ID) as wareHouseName,
-		bd.gross_wgt as mtrGrossWgt,
-		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as outUnit
-		from bom_info bi,bom_detail bd,prd_data p,mtr_data m
-		where bd.mtr_id=m.id and bi.id=bd.bom_id and bi.prd_id and bi.prd_id=p.id
-		and p.id=${prdId}
+		SELECT
+		p.id AS prdId,
+		p.PRD_CODE AS prdCode,
+		p.PRD_NAME AS prdName,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = p.TYPE_ID ) AS prdTypeName,
+		m.id AS mtrId,
+		m.MTR_CODE AS mtrCode,
+		m.MTR_NAME AS mtrName,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TYPE_ID ) AS mtrTypeName,
+		m.TAKE_STN_ID,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TAKE_STN_ID ) AS takeStnName,
+		m.WAREHOUSE_ID,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS wareHouseName,
+		bd.gross_wgt AS mtrGrossWgt,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.MINI_UNIT ) AS outUnit,
+		bd.semi_finished AS semiFinished,
+		m.MINI_RATE as miniRate
+		FROM
+		bom_info bi,
+		bom_detail bd,
+		prd_data p,
+		mtr_data m
+		WHERE
+		bd.mtr_id = m.id
+		AND bi.id = bd.bom_id
+		AND bi.prd_id
+		AND bi.prd_id = p.id
+		AND p.id = ${prdId}
 		<if test="wareHouseId != null and wareHouseId != 0">
 			and m.WAREHOUSE_ID=${wareHouseId}
 		</if>
-		<if test="takeStnId != null and wareHouseId != 0">
+		<if test="takeStnId != null and takeStnId != 0">
 			and m.TAKE_STN_ID=${takeStnId}
 		</if>
 	</select>

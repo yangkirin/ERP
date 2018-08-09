@@ -26,7 +26,7 @@
 		,(SELECT t.type_name FROM tb_type_info t,mtr_data md where t.id=md.take_stn_id and md.id=d.mtr_id) as takeStnIdName
 		,(SELECT t.mtr_name FROM mtr_data t where t.id=d.mtr_id) as mtrIdName
 		,(SELECT t.mtr_code FROM mtr_data t where t.id=d.mtr_id) as mtrCode
-		,(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id) as mtrCutIdName
+		,(select t.type_name from tb_type_info t where t.id=bd.mtr_cut_id) as mtrCutIdName
 		 from bom_detail d where d.id = #{value}
 	</select>
 
@@ -37,7 +37,7 @@
 		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
 		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
-		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
 		from BOM_DETAIL bd where bd.id=#{id};
@@ -51,7 +51,7 @@
 		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
 		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
-		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
 		from bom_detail bd
@@ -80,7 +80,7 @@
 		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
 		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
-		if(bd.semi_finished='0',(select t.CUT from MTR_CUT t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
 		from bom_detail bd,BOM_INFO bi WHERE bd.bom_id=bi.id

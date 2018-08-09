@@ -291,6 +291,8 @@ var vm = new Vue({
 						if(r.code == 0){
 							alert('操作成功', function(index){
 								$("#jqGrid").trigger("reloadGrid");
+								vm.prdData = {};
+								vm.prdNcInfo={};
 							});
 						}else{
 							alert(r.msg);
@@ -337,7 +339,7 @@ var vm = new Vue({
                         },
                         updater: function (obj) {
                             var item = JSON.parse(obj);
-                            vm.q.prdName = item.name;
+                            vm.exportParam.mtrName = item.name;
                             return item.name;
                         }
                     });
@@ -349,7 +351,7 @@ var vm = new Vue({
             $.ajax({
                 type: "POST",
                 url: baseURL + "baseData/typeinfo/select",
-                data:{parentId:null},
+                data:{parentId:48},
                 success: function(r){
                     ztree = $.fn.zTree.init($("#typeInfoTree"), setting, r.typeInfoList);
                     var node = ztree.getNodeByParam("id", vm.typeInfo.parentId);
@@ -373,36 +375,20 @@ var vm = new Vue({
                 btn: ['确定', '取消'],
                 btn1: function (index) {
                     var node = ztree.getSelectedNodes();
-                    if(opeation == 'prdTypeSearch'){
-                        vm.q.prdType = node[0].id;
-                        vm.q.prdTypeName = node[0].typeName;
-                    }else if(opeation == 'orderTypeSearch'){
-                        vm.q.orderType = node[0].id;
-                        vm.q.orderTypeName = node[0].typeName;
-                    }else if(opeation == 'addTypeId'){
-                        vm.addPrdData.typeId = node[0].id;
-                        vm.addPrdData.typeIdName = node[0].typeName;
-                        vm.createNewNo(node[0].id);
-					}else if(opeation == 'addPdcStn'){
-                        vm.addPrdData.pdcStn = node[0].id;
-                        vm.addPrdData.pdcStnName = node[0].typeName;
-                    }else if(opeation == 'editTypeName'){
-                        vm.prdData.typeId = node[0].id;
-                        vm.prdData.typeName = node[0].typeName;
-                    }else if(opeation == 'editPdcStnName'){
+                    if(opeation == 'editpdcStn'){
                         vm.prdData.pdcStn = node[0].id;
+                        // vm.q.prdTypeName = node[0].typeName;
+                        $('#editpdcStn').val(node[0].typeName);
+                        vm.prdData.pdcStnName = node[0].typeName;
+                    }else if(opeation == 'addPdcStn'){
+                        vm.addPrdData.pdcStn = node[0].id;
+                        $('#addPdcStnName').val(node[0].typeName);
                         vm.addPrdData.pdcStnName = node[0].typeName;
-                    }else if(opeation == 'editOrderType'){
-                        vm.prdData.orderType = node[0].id;
-                        vm.prdData.orderTypeName = node[0].typeName;
-                    }else if(opeation == 'editCookType'){
-                        vm.prdData.cookType = node[0].id;
-                        vm.prdData.cookTypeName = node[0].typeName;
                     }
                     layer.close(index);
                 },
                 btn2:function(event){
-                    vm.addPrdData = {};
+                    // vm.addPrdData = {};
                 }
             });
         },
@@ -501,5 +487,5 @@ vm.orderTypeArr = vm.initTypeInfoArr('40');
 // vm.prdTypeArr = vm.initTypeInfoArr('31');
 vm.prdTypeArr_s = vm.initTypeSelect2('31');
 vm.prdTypeArr = vm.initTypeSelect2('31');
-vm.pdcStnArr = vm.initTypeInfoArr('48');
+// vm.pdcStnArr = vm.initTypeInfoArr('48');
 vm.cookTypeArr = vm.initTypeInfoArr('87');

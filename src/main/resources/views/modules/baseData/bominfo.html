@@ -24,21 +24,26 @@
 <div id="rrapp" v-cloak>
 	<div v-show="showList">
 		<div class="row">
-			<div class="grid-btn col-sm-3">
+			<div class="grid-btn col-sm-6">
 				<a v-if="hasPermission('baseData:bominfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
 				<a v-if="hasPermission('baseData:bominfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
-				<!--<a v-if="hasPermission('baseData:bominfo:delete')" class="btn btn-danger" @click="delete"><i class="fa fa-trash-o"></i>&nbsp;删除</a>-->
+				<a v-if="hasPermission('baseData:bominfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
 				<a v-if="hasPermission('baseData:bominfo:detailConfig')" class="btn btn-primary" @click="detailConfig"><i class="fa fa-cog"></i>&nbsp;原料配置</a>
 			</div>
-			<div class="input-group input-group-sm col-sm-2">
+			<div class="input-group input-group-sm col-sm-4">
 				<input type="text" placeholder="名称/拼音码" id="search" class="form-control">
 				<span class="input-group-btn">
 				<button class="btn btn-primary" type="button" @click="search">查询</button>
 				</span>
 			</div>
 		</div>
-	    <table id="jqGrid"></table>
-	    <div id="jqGridPager"></div>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<table id="jqGrid"></table>
+				<div id="jqGridPager"></div>
+			</div>
+		</div>
+
     </div>
     
     <div v-show="addForm" class="panel panel-default">
@@ -139,6 +144,7 @@
 							<input type="text" class="form-control" v-model="bomDetail.mtrCode" placeholder="编号" readonly="readonly"/>
 						</div>
 					</div>
+
 					<div class="form-group">
 
 						<div class="col-sm-2 control-label">净重</div>
@@ -147,10 +153,10 @@
 						</div>
 						<div class="col-sm-2 control-label">领料站点</div>
 						<div class="col-sm-4">
-							<!--<input type="text" class="form-control" v-model="bomDetail.takeStnIdName" id="mtr_takeStnName" placeholder="领料站点" @click="typeInfoTree('add_mtr_takeStnId')"/>-->
-							<select class="form-control" v-model="bomDetail.takeStnId" placeholder="领料站点" readonly="readonly">
-								<option v-for="option in takestnArr" v-bind:value="option.value">{{option.text}}
-							</select>
+							<input type="text" class="form-control" v-model="bomDetail.takeStnIdName" id="mtr_takeStnName" placeholder="领料站点" @click="typeInfoTakeStnTree()"/>
+							<!--<select class="form-control" v-model="bomDetail.takeStnId" placeholder="领料站点" readonly="readonly">-->
+								<!--<option v-for="option in takestnArr" v-bind:value="option.value">{{option.text}}-->
+							<!--</select>-->
 						</div>
 					</div>
 					<div class="form-group">
@@ -171,6 +177,15 @@
 						<div class="col-sm-2 control-label">熟重</div>
 						<div class="col-sm-4">
 							<input type="text" class="form-control" v-model="bomDetail.modiWgt" placeholder="熟重" readonly="readonly"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">切割形状</div>
+						<div class="col-sm-4">
+							<!--<input type="text" class="form-control" v-model="bomDetail.mtrCutIdName" placeholder="切割形状" @input="changeRate"/>-->
+							<select class="form-control" v-model="bomDetail.mtrCutId" placeholder="切割形状" readonly="readonly">
+								<option v-for="option in cutArr" v-bind:value="option.value">{{option.text}}
+							</select>
 						</div>
 					</div>
 					<div class="form-group">
@@ -199,18 +214,27 @@
 						<div class="col-sm-4">
 							<input type="text" class="form-control" v-model="bomDetailPrd.netWgt" @input="countPrdWgt" placeholder="净重"/>
 						</div>
-						<div class="col-sm-2 control-label">熟得率</div>
+						<div class="col-sm-2 control-label">净得率</div>
 						<div class="col-sm-4">
-							<input type="text" class="form-control" v-model="bomDetailPrd.modiRate" @input="countPrdWgt" placeholder="熟得率"/>
+							<input type="text" class="form-control" v-model="bomDetailPrd.netRate" @input="countPrdWgt" placeholder="净得率"/>
 						</div>
 					</div>
 
 					<div class="form-group">
+						<div class="col-sm-2 control-label">熟得率</div>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="bomDetailPrd.modiRate" @input="countPrdWgt" placeholder="熟得率"/>
+						</div>
 						<div class="col-sm-2 control-label">熟重</div>
 						<div class="col-sm-4"><!-- 熟重=净重*熟得率 -->
 							<input type="text" class="form-control" v-model="bomDetailPrd.modiWgt" id="add_prd_modiWgt" placeholder="熟重=净重*熟得率"/>
 						</div>
-
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">毛重</div>
+						<div class="col-sm-4"><!-- 毛重=净重/净得率 -->
+							<input type="text" class="form-control" v-model="bomDetailPrd.grossWgt" id="add_prd_grossWgt"  placeholder="毛重=净重/净得率"/>
+						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-sm-2 control-label">备注</div>
@@ -223,14 +247,15 @@
 		</div>
 
 	</div>
-
-
 </div>
 
 <div id="typeInfoLayer" style="display: none;padding:10px;">
 	<ul id="typeInfoTree" class="ztree"></ul>
 </div>
 
+<div id="typeInfoTakeStnLayer" style="display: none;padding:10px;">
+	<ul id="typeInfoTakeStnTree" class="ztree"></ul>
+</div>
 
 <script src="../../js/modules/baseData/bominfo.js"></script>
 </body>

@@ -4,7 +4,7 @@ $(function () {
         var ss = pageSize();
         $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
         $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
-    }
+    };
 
     $("#jqGrid").jqGrid({
         url: baseURL + 'purchase/orderinfo/list',
@@ -87,6 +87,7 @@ $(function () {
         rownumWidth: 25, 
         autowidth:true,
         multiselect: false,
+        // scroll:true,
         // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -219,6 +220,7 @@ $(function () {
         rownumbers: true,
         rownumWidth: 25,
         autowidth: true,
+        // scroll:true,
         // multiselect: true,
         ondblClickRow:function(id){
             var orderId = $('#jqGrid').jqGrid("getGridParam","selrow");

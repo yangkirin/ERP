@@ -128,10 +128,10 @@
 					</div>
 					<div class="col-sm-2 control-label">生产站点</div>
 					<div class="col-sm-2">
-						<!--<input type="text" class="form-control" v-model="prdData.pdcStnName" placeholder="生产站点" @click="typeInfoTree('editPdcStnName')"/>-->
-						<select class="form-control" v-model="prdData.pdcStn" placeholder="生产站点">
-							<option v-for="option in pdcStnArr" v-bind:value="option.value">{{option.text}}
-						</select>
+						<input type="text" id="editpdcStn" class="form-control" v-model="prdData.pdcStnName" placeholder="生产站点" @click="typeInfoTree('editpdcStn')"/>
+						<!--<select class="form-control" v-model="prdData.pdcStn" placeholder="生产站点">-->
+							<!--<option v-for="option in pdcStnArr" v-bind:value="option.value">{{option.text}}-->
+						<!--</select>-->
 					</div>
 				</div>
 				<div class="form-group">
@@ -343,13 +343,15 @@
 			<div class="form-group">
 				<div class="col-sm-3 control-label">产品类别</div>
 				<div class="col-sm-3">
-					<!--<input type="text" class="form-control" v-model="addPrdData.typeIdName" placeholder="产品类别" @click="typeInfoTree('addTypeId')" readonly="readonly"/>-->
+					<!--<input type="text" id="addPrdType" class="form-control" v-model="addPrdData.typeName" placeholder="产品类别" @click="typeInfoTree('addPrdType')" readonly="readonly"/>-->
 					<!--<select class="form-control" v-model="addPrdData.typeId" id="addPrdType" placeholder="产品分类">-->
 					<select id="addPrdType" class="form-control select2" v-model="addPrdData.typeId" autocomplete="off">
 						<optgroup v-for="option in prdTypeArr" v-bind:value="option.value" v-bind:label="option.text">
 							<option v-for="child in option.child" v-bind:value="child.value">{{child.text}}</option>
 						</optgroup>
 					</select>
+
+					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.typeName" @click="typeInfoTree('editTypeName')" readonly="readonly" placeholder="类别"/>-->
 				</div>
 			   	<div class="col-sm-3 control-label">产品编号</div>
 			   	<div class="col-sm-3">
@@ -369,10 +371,10 @@
 			<div class="form-group">
 				<div class="col-sm-3 control-label">生产站点</div>
 				<div class="col-sm-3">
-					<!--<input type="text" class="form-control" v-model="addPrdData.pdcStnName" placeholder="生产站点" @click="typeInfoTree('addPdcStn')" readonly="readonly"/>-->
-					<select class="form-control" v-model="addPrdData.pdcStn" placeholder="生产站点" readonly="readonly">
-						<option v-for="option in pdcStnArr" v-bind:value="option.value">{{option.text}}
-					</select>
+					<input type="text" id="addPdcStnName" class="form-control" v-model="addPrdData.pdcStnName" placeholder="生产站点" @click="typeInfoTree('addPdcStn')" readonly="readonly"/>
+					<!--<select class="form-control" v-model="addPrdData.pdcStn" placeholder="生产站点" readonly="readonly">-->
+						<!--<option v-for="option in pdcStnArr" v-bind:value="option.value">{{option.text}}-->
+					<!--</select>-->
 				</div>
 				<div class="col-sm-3 control-label">锅重</div>
 				<div class="col-sm-3">

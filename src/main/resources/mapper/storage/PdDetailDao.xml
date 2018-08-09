@@ -26,13 +26,26 @@
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.storage.entity.PdDetailEntity">
-		select * from tb_pd_detail
+		SELECT
+		pd.*,
+		m.MTR_NAME,
+		m.MTR_CODE,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE m.TYPE_ID = t.id ) AS TYPE_NAME,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE m.MINI_UNIT = t.id ) AS MINI_UNIT_NAME
+		FROM
+		tb_pd_detail pd
+		LEFT JOIN mtr_data m ON pd.MTR_ID = m.id
+		<where>
+			<if test="pdInfoId != null">
+				pd.PD_INFO_ID=#{pdInfoId}
+			</if>
+		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
-                order by ${sidx} ${order}
+                order by pd.${sidx} ${order}
             </when>
 			<otherwise>
-                order by ID desc
+                order by pd.CURRENT_COUNT desc
 			</otherwise>
         </choose>
 		<if test="offset != null and limit != null">
@@ -41,25 +54,49 @@
 	</select>
 	
  	<select id="queryTotal" resultType="int">
-		select count(*) from tb_pd_detail 
+		select count(*) from tb_pd_detail pd
+		LEFT JOIN mtr_data m ON pd.MTR_ID = m.id
+		<where>
+			<if test="pdInfoId != null">
+				pd.PD_INFO_ID=#{pdInfoId}
+			</if>
+		</where>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by pd.${sidx} ${order}
+			</when>
+			<otherwise>
+				order by pd.CURRENT_COUNT desc
+			</otherwise>
+		</choose>
 	</select>
 
 
 	<select id="createPdMtrDetail" parameterType="java.util.Map" resultType="map">
-		select m.id,m.MTR_CODE,m.MTR_NAME,(select t.TYPE_NAME from tb_type_info t where m.MINI_UNIT=t.id) as mini_unit_name,(imd.IN_COUNT) as sum_in_count,sum(od.OUT_COUNT) as sum_out_count from mtr_data m
+		SELECT
+			m.id,
+			m.MTR_CODE,
+			m.MTR_NAME,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE m.MINI_UNIT = t.id ) AS mini_unit_name,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE m.TYPE_ID = t.id ) AS type_name,
+			( imd.IN_COUNT ) AS sum_in_count,
+			sum( od.OUT_COUNT ) AS sum_out_count,
+			m.PRICE
+		FROM
+			mtr_data m
 		LEFT JOIN tb_import_detail imd on m.id=imd.MTR_ID
 		LEFT JOIN tb_import i on imd.IMPORT_ID = i.id
-		<if test="pdStartDate != null">
-			 and i.IMPORT_DATE > #{pdStartDate} and i.IMPORT_DATE &lt;= #{pdStartDate}
-		</if>
+			<if test="pdStartDate != null">
+				 and i.IMPORT_DATE > #{pdStartDate} and i.IMPORT_DATE &lt;= #{pdStartDate}
+			</if>
 		LEFT JOIN tb_outport_detail od on m.id=od.MTR_ID
 		LEFT JOIN tb_outport_info o on od.OUTPORT_ID=o.id
-		<if test="pdEndDate != null">
-			 and o.OUTPORT_DATE > #{pdEndDate} and o.OUTPORT_DATE &lt;= #{pdEndDate}
-		</if>
-		<if test="pdOrgId != null">
-			WHERE m.WAREHOUSE_ID=#{pdOrgId}
-		</if>
+			<if test="pdEndDate != null">
+				 and o.OUTPORT_DATE > #{pdEndDate} and o.OUTPORT_DATE &lt;= #{pdEndDate}
+			</if>
+			<if test="pdOrgId != null and pdOrgId != 0">
+				WHERE m.WAREHOUSE_ID=#{pdOrgId}
+			</if>
 		GROUP BY m.id,m.MTR_CODE,m.MTR_NAME,mini_unit_name
 		ORDER BY sum_in_count desc
 	</select>

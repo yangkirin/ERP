@@ -75,6 +75,12 @@ public class ProductionOrderController extends AbstractController {
 	@RequestMapping("/list")
 //	@RequiresPermissions("sales:productionorder:list")
 	public R list(@RequestParam Map<String, Object> params){
+
+		String queryType = params.get("type") == null ? "" : params.get("type").toString();
+		if(queryType.equals("allow_outport")){
+			params.put("status",new String[]{"2"});
+		}
+
 		//查询列表数据
         Query query = new Query(params);
 
@@ -124,7 +130,41 @@ public class ProductionOrderController extends AbstractController {
 
 		return R.ok().put("data",productionOrder);
 	}
-	
+
+	@RequestMapping("/save2")
+//	@RequiresPermissions("sales:productionorder:save")
+	public R save2(@RequestParam Map<String, Object> params){
+		String isDH = params.get("isDH").toString();
+		String customerId = params.get("customerId").toString();
+		String orderTypeId = params.get("orderTypeId").toString();
+		String placeId = params.get("placeId").toString();
+
+		ProductionOrderEntity productionOrder = new ProductionOrderEntity();
+		if(isDH.equals("0")){//不是低值易耗领料
+			TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(Long.valueOf(orderTypeId));
+			productionOrder.setOrderTypeName(typeInfoEntity1.getTypeName());
+
+			TypeInfoEntity typeInfoEntity2 = typeInfoService.queryObject(Long.valueOf(placeId));
+			productionOrder.setPlaceName(typeInfoEntity2.getTypeName());
+
+			CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(Long.valueOf(customerId));
+			productionOrder.setCustomerNo(customerInfoEntity.getCustomerCode());
+			productionOrder.setCustomerName(customerInfoEntity.getCustomerName());
+		}else{
+			productionOrder.setRemakr("低值易耗领料单");
+		}
+
+		SysUserEntity sysUserEntity =  getUser();
+
+		productionOrder.setCreateUser(sysUserEntity.getUsername());
+		productionOrder.setCreateDate(new Date());
+
+		productionOrderService.save(productionOrder);
+
+		return R.ok().put("data",productionOrder);
+	}
+
+
 	/**
 	 * 修改
 	 */

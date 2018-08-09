@@ -52,5 +52,10 @@ public class PdDetailServiceImpl implements PdDetailService {
 	public void deleteBatch(Long[] ids){
 		pdDetailDao.deleteBatch(ids);
 	}
+
+	@Override
+	public List<Map> createPdMtrDetail(Map<String,Object> map){
+		return pdDetailDao.createPdMtrDetail(map);
+	}
 	
 }

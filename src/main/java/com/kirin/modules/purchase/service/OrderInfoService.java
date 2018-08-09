@@ -29,4 +29,6 @@ public interface OrderInfoService {
 	void delete(Long id);
 	
 	void deleteBatch(Long[] ids);
+
+	List<OrderInfoEntity> searchList(Map<String,Object> params);
 }

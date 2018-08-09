@@ -1,10 +1,15 @@
 package com.kirin.modules.common.service.impl;
 
+import com.kirin.common.utils.CommonUtils;
+import com.kirin.modules.baseData.dao.TypeInfoDao;
 import com.kirin.modules.baseData.entity.BomDetailEntity;
+import com.kirin.modules.baseData.entity.BomInfoEntity;
 import com.kirin.modules.baseData.entity.PrdDataEntity;
+import com.kirin.modules.baseData.entity.TypeInfoEntity;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
 import com.kirin.modules.baseData.service.PrdDataService;
+import com.kirin.modules.common.controller.CommonUtil;
 import com.kirin.modules.common.dao.CommonUtilDao;
 import com.kirin.modules.common.service.CommonUtilService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,31 @@ public class CommonUtilServiceImpl implements CommonUtilService{
 
     @Autowired
     private CommonUtilDao commonUtilDao;
+    @Autowired
+    private TypeInfoDao typeInfoDao;
+
+    @Override
+    public String createNewNo(String tableName,String id, String typeInfoId){
+
+
+
+
+
+        //1.一层No
+        Integer maxId = commonUtilDao.getTableMaxId(tableName,id);
+        String idStr = String.format("%05d",maxId);
+
+
+        TypeInfoEntity typeInfoEntity = typeInfoDao.queryObject(Long.valueOf(typeInfoId));
+        idStr = String.format(typeInfoEntity.getTypeCode()+"%s",idStr);
+
+        while (typeInfoEntity.getParentId() != 0){
+            typeInfoEntity = typeInfoDao.queryObject(typeInfoEntity.getParentId());
+            idStr = String.format(typeInfoEntity.getTypeCode()+"%s",idStr);
+        }
+        return idStr;
+    }
+
 
     @Override
     public String getCommbox(String tableName, String[] returnField, String[] searchArr) {
@@ -296,6 +326,70 @@ public class CommonUtilServiceImpl implements CommonUtilService{
         }
         return prdList;
     }
+
+    /**
+     * 查询产品下所有原料的信息。计算所需原料重量
+     * @param prdId
+     * @param orderAmount
+     * @return List<Map>
+     */
+    @Override
+    public List<Map> getMtrListByPrdId(Long prdId, BigDecimal orderAmount){
+        List<Map> mtrList = new ArrayList<>();
+        //根据产品ID获取产品配方明细
+        BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdId);
+        if(bomInfoEntity == null){
+            return null;
+        }
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("bomInfoId",bomInfoEntity.getId());
+        List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(paramMap);
+        if(bomDetailEntityList == null || bomDetailEntityList.size() <= 0){
+            return null;
+        }
+        //循环明细信息，判断原料与半成品
+        for (BomDetailEntity bomDetailEntity:bomDetailEntityList) {
+            BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "0" : bomDetailEntity.getGrossWgt().toString());
+            //半成品则循环进行计算
+            if(bomDetailEntity.getSemiFinished().equals("1")){//半成品
+                BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(bomDetailEntity.getMtrId());
+                BigDecimal detailPrdGrossWgt = new BigDecimal(bomInfo.getSumGrossWgt() == null ? "1" : bomInfo.getSumGrossWgt().toString());
+                //计算所需要半成品的份数
+                //（【产品配方中半成品所需毛重】*【产品所需数量】）/【半成品配方单份毛重】
+                BigDecimal cpoies = (grossWgt.multiply(orderAmount).setScale(4,BigDecimal.ROUND_HALF_UP)).divide(detailPrdGrossWgt,2,BigDecimal.ROUND_HALF_UP);//份数
+                List<Map> mapList = getMtrListByPrdId(bomDetailEntity.getMtrId(),cpoies);
+                if(mapList != null && mapList.size() > 0){
+                    mtrList.addAll(mapList);
+                }
+
+            }else{//原料则直接运算后存入集合
+                Map<String,Object> map = new HashMap<>();
+                map.put("mtrId",bomDetailEntity.getMtrId());
+                map.put("mtrName",bomDetailEntity.getMtrIdName());
+                map.put("grossWgt",bomDetailEntity.getGrossWgt());
+                map.put("netWgt",bomDetailEntity.getNetWgt());
+                map.put("modiWgt",bomDetailEntity.getModiWgt());
+                map.put("netRate",bomDetailEntity.getNetRate());
+                map.put("cost",bomDetailEntity.getCost());
+                map.put("costRate",bomDetailEntity.getCostRate());
+
+                BigDecimal orderWgt = grossWgt.multiply(orderAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+                map.put("orderWgt",orderWgt);
+                mtrList.add(map);
+            }
+        }
+
+
+
+        return mtrList;
+    }
+
+
+    @Override
+    public List<Map> executeSql(String searchSql){
+        return commonUtilDao.executeSql(searchSql);
+    }
+
 
     public static void main(String[] args){
         BigDecimal A = new BigDecimal(100);

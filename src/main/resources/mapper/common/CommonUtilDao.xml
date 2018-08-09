@@ -41,7 +41,7 @@
 	</select>
 
 	<select id="getTableNewNo" resultType="String">
-		SELECT ${noField} FROM ${tableName} t order by t.id DESC limit 1
+		SELECT ${noField} FROM ${tableName}  order by id DESC limit 1
 	</select>
 
 	<select id="getDataToCommbox" resultType="map">
@@ -230,5 +230,10 @@
 			) AS c
 		GROUP BY
 			MTR_ID;
+	</select>
+
+	<select id="executeSql" resultType="map">
+		Select * from(${searchSql}) as a
+
 	</select>
 </mapper>

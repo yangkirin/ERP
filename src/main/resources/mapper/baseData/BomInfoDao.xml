@@ -25,10 +25,23 @@
 		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName from bom_info b where b.prd_id = #{prdId}
 	</select>
 
+	<select id="queryObjectByMtrId" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
+		select bi.* from bom_detail bd,bom_info bi where bi.id=bd.bom_id and bd.mtr_id= #{mtrId} and bd.SEMI_FINISHED='0'
+	</select>
+
 	<select id="queryList" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
 		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName,
-		(select p.SEMI_FINISHED FROM prd_data p WHERE p.id=b.prd_id) as semiFinished
-		from bom_info b where 1=1
+		(select p.SEMI_FINISHED FROM prd_data p WHERE p.id=b.prd_id) as semiFinished,
+		p.PRD_PY,
+		p.PRD_CODE,
+		(Select type_name from tb_type_info where id=p.TYPE_ID) as PRD_TYPE_NAME,
+		(Select type_name from tb_type_info where id=p.PDC_STN) as PDC_STN_NAME,
+		p.POT_WEIGHT,
+		p.BOX_WEIGHT,
+		p.REFERENCE_PRICE as PRICE
+		from bom_info b
+		left join prd_data p on p.id=b.prd_id
+		where 1=1
 		<if test="bomName != null">
 			and b.bom_name like "%${bomName}%"
 		</if>
@@ -63,6 +76,10 @@
 			`prd_id`, 
 			`status`, 
 			`cost`,
+			`sum_modi_wgt`,
+			`sum_net_wgt`,
+			`sum_gross_wgt`,
+			`sum_cost_rate`,
 			`remark`,
 			`create_user`, 
 			`create_date`
@@ -74,6 +91,10 @@
 			#{prdId}, 
 			#{status}, 
 			#{cost},
+			#{sumModiWgt},
+			#{sumNetWgt},
+			#{sumGrossWgt},
+			#{sumCostRate},
 			#{remark},
 			#{createUser}, 
 			#{createDate}
@@ -88,6 +109,10 @@
 			<if test="prdId != null">`prd_id` = #{prdId}, </if>
 			<if test="status != null">`status` = #{status}, </if>
 			<if test="cost != null">`cost` = #{cost}, </if>
+			<if test="sumModiWgt != null">`sum_modi_wgt` = #{sumModiWgt}, </if>
+			<if test="sumNetWgt != null">`sum_net_wgt` = #{sumNetWgt}, </if>
+			<if test="sumGrossWgt != null">`sum_gross_wgt` = #{sumGrossWgt}, </if>
+			<if test="sumCostRate != null">`sum_cost_rate` = #{sumCostRate}, </if>
 			<if test="remark != null">`remark` = #{remark}, </if>
 			<if test="createUser != null">`create_user` = #{createUser}, </if>
 			<if test="createDate != null">`create_date` = #{createDate},</if>

@@ -40,9 +40,9 @@ public class SysRoleController extends AbstractController {
 	@RequiresPermissions("sys:role:list")
 	public R list(@RequestParam Map<String, Object> params){
 		//如果不是超级管理员，则只查询自己创建的角色列表
-		if(getUserId() != Constant.SUPER_ADMIN){
-			params.put("createUserId", getUserId());
-		}
+//		if(getUserId() != Constant.SUPER_ADMIN){
+//			params.put("createUserId", getUserId());
+//		}
 		
 		//查询列表数据
 		Query query = new Query(params);

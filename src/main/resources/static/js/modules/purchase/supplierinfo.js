@@ -1,4 +1,10 @@
 $(function () {
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+        $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    };
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'purchase/supplierinfo/list',
         datatype: "json",
@@ -29,14 +35,15 @@ $(function () {
 			}}
         ],
 		viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        height: "auto",
+        rowNum: 9999999,
 		rowList : [10,30,50],
-        rownumbers: true, 
+        rownumbers: true,
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
-        pager: "#jqGridPager",
+        scroll:true,
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -51,8 +58,64 @@ $(function () {
         gridComplete:function(){
         	//隐藏grid底部滚动条
         	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
+        },
+        subGrid : true,
+        subGridRowExpanded : function(subgrid_id,row_id){
+            var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
+            var url = baseURL + 'purchase/suppiermtr/list?suppierId='+rowData.id;
+            createSubGrid(subgrid_id,row_id,url);
         }
     });
+
+    function createSubGrid(subgrid_id,row_id,url){
+        var subgrid_table_id, pager_id;
+        subgrid_table_id = subgrid_id + "_t";
+        pager_id = "p_" + subgrid_table_id;
+        $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+        jQuery("#" + subgrid_table_id).jqGrid({
+            url : url,
+            datatype : "json",
+            colModel : [
+                { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
+                { label: '供应商', name: 'suppierIdName', index: 'suppier_id_name', width: 150 ,hidden:true},
+                { label: '原料ID', name: 'mtrId', index: 'mtr_id', width: 80 ,hidden:true},
+                { label: '原料名称', name: 'mtrIdName', index: 'mtr_id_name', width: 200 },
+                { label: '采购规格[单位-转换率-单价]', name: 'mtrExtendDesc', index: 'mtr_extend_desc', width: 200 },
+                { label: '采购编码', name: 'purchaseNo', index: 'purchase_no', width: 100 },
+                { label: '采购价', name: 'price', index: 'price', width: 80 },
+                { label: '状态', name: 'status', index: 'status', width: 50 ,formatter: function(value, options, row){
+                    return value === 0 ?
+                        '<span class="label label-danger">禁用</span>' :
+                        '<span class="label label-success">正常</span>';
+                }},
+                { label: '修改人', name: 'lastEditUser', index: 'last_edit_user', width: 80 },
+                { label: '修改日期', name: 'lastEditDate', index: 'last_edit_date', width: 120 }
+            ],
+            rowNum : 999999,
+            // pager : pager_id,
+            height : '100%',
+            rowList : [10,30,50],
+            rownumbers: true,
+            rownumWidth: 25,
+            autowidth:true,
+            multiselect: false,
+            jsonReader : {
+                root: "page.list",
+                page: "page.currPage",
+                total: "page.totalPage",
+                records: "page.totalCount"
+            },
+            prmNames : {
+                page:"page",
+                rows:"limit",
+                order: "order"
+            },
+            gridComplete:function(){
+                //隐藏grid底部滚动条
+                $("#" + subgrid_table_id).closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+            }
+        });
+    }
 
     $("#jqGridMtr").jqGrid({
         url: baseURL + 'purchase/suppiermtr/list',
@@ -63,7 +126,7 @@ $(function () {
             { label: '供应商', name: 'suppierIdName', index: 'suppier_id_name', width: 150 },
             { label: '原料ID', name: 'mtrId', index: 'mtr_id', width: 80 ,hidden:true},
             { label: '原料名称', name: 'mtrIdName', index: 'mtr_id_name', width: 200 },
-            { label: '采购规格', name: 'mtrExtendDesc', index: 'mtr_extend_desc', width: 150 },
+            { label: '采购规格[单位-转换率-单价]', name: 'mtrExtendDesc', index: 'mtr_extend_desc', width: 200 },
             { label: '采购编码', name: 'purchaseNo', index: 'purchase_no', width: 100 },
             { label: '采购价', name: 'price', index: 'price', width: 80 },
             { label: '状态', name: 'status', index: 'status', width: 50 ,formatter: function(value, options, row){
@@ -75,14 +138,15 @@ $(function () {
             { label: '修改日期', name: 'lastEditDate', index: 'last_edit_date', width: 120 }
         ],
         viewrecords: true,
-        height: 385,
-        rowNum: 50,
+        height: "auto",
+        rowNum: 99999999,
         rowList : [50,100,150],
         rownumbers: true,
         rownumWidth: 25,
         autowidth:true,
         multiselect: true,
-        pager: "#jqGridPagerMtr",
+        scroll:true,
+        // pager: "#jqGridPagerMtr",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -229,11 +293,12 @@ var vm = new Vue({
 			});
 		},
 		del: function (event) {
-			var ids = getSelectedRows();
-			if(ids == null){
+			var ids = [];
+            var id = $('#jqGrid').jqGrid("getGridParam","selrow");
+			if(id == null){
 				return ;
 			}
-			
+			ids[0] = id;
 			confirm('确定要删除选中的记录？', function(){
 				$.ajax({
 					type: "POST",
@@ -496,7 +561,6 @@ var vm = new Vue({
             return dataArr;
         },
         search:function(){
-            console.log(vm.orderInfo);
             var postData = {
                 suppierCode: $('#search').val(),
                 suppierName: $('#search').val(),

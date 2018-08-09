@@ -28,4 +28,6 @@ public interface PdDetailService {
 	void delete(Long id);
 	
 	void deleteBatch(Long[] ids);
+
+	public List<Map> createPdMtrDetail(Map<String,Object> map);
 }

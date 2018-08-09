@@ -41,6 +41,29 @@ public class BomInfoEntity implements Serializable {
 	private String semiFinished;
 	private String updateUser;
 	private Date updateDate;
+
+	//总熟重
+	private BigDecimal sumModiWgt;
+	//总净重
+	private BigDecimal sumNetWgt;
+	//总毛重
+	private BigDecimal sumGrossWgt;
+	//成本率
+	private BigDecimal sumCostRate;
+
+	private String prdTypeName;
+
+	private String prdCode;
+
+	private String pdcStnName;
+
+	private String potWgt;
+
+	private String boxWgt;
+
+	private String price;
+
+
 	/**
 	 * 设置：
 	 */
@@ -176,5 +199,85 @@ public class BomInfoEntity implements Serializable {
 
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public BigDecimal getSumModiWgt() {
+		return sumModiWgt;
+	}
+
+	public void setSumModiWgt(BigDecimal sumModiWgt) {
+		this.sumModiWgt = sumModiWgt;
+	}
+
+	public BigDecimal getSumNetWgt() {
+		return sumNetWgt;
+	}
+
+	public void setSumNetWgt(BigDecimal sumNetWgt) {
+		this.sumNetWgt = sumNetWgt;
+	}
+
+	public BigDecimal getSumGrossWgt() {
+		return sumGrossWgt;
+	}
+
+	public void setSumGrossWgt(BigDecimal sumGrossWgt) {
+		this.sumGrossWgt = sumGrossWgt;
+	}
+
+	public BigDecimal getSumCostRate() {
+		return sumCostRate;
+	}
+
+	public void setSumCostRate(BigDecimal sumCostRate) {
+		this.sumCostRate = sumCostRate;
+	}
+
+	public String getPrdTypeName() {
+		return prdTypeName;
+	}
+
+	public void setPrdTypeName(String prdTypeName) {
+		this.prdTypeName = prdTypeName;
+	}
+
+	public String getPrdCode() {
+		return prdCode;
+	}
+
+	public void setPrdCode(String prdCode) {
+		this.prdCode = prdCode;
+	}
+
+	public String getPdcStnName() {
+		return pdcStnName;
+	}
+
+	public void setPdcStnName(String pdcStnName) {
+		this.pdcStnName = pdcStnName;
+	}
+
+	public String getPotWgt() {
+		return potWgt;
+	}
+
+	public void setPotWgt(String potWgt) {
+		this.potWgt = potWgt;
+	}
+
+	public String getBoxWgt() {
+		return boxWgt;
+	}
+
+	public void setBoxWgt(String boxWgt) {
+		this.boxWgt = boxWgt;
+	}
+
+	public String getPrice() {
+		return price;
+	}
+
+	public void setPrice(String price) {
+		this.price = price;
 	}
 }

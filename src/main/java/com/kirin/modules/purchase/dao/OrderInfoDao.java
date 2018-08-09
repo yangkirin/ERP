@@ -5,6 +5,9 @@ import com.kirin.modules.sys.dao.BaseDao;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 订单信息表
  * 
@@ -17,4 +20,5 @@ import org.springframework.stereotype.Repository;
 public interface OrderInfoDao extends BaseDao<OrderInfoEntity> {
 //	Long saveId(OrderInfoEntity orderInfoEntity);
 
+    List<OrderInfoEntity> searchList(Map<String,Object> params);
 }

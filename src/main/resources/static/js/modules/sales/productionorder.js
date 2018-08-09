@@ -3,7 +3,7 @@ $(function () {
         var ss = pageSize();
         $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
         $("#jqGridPRD").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
-    }
+    };
 
     $("#jqGrid").jqGrid({
         url: baseURL + 'sales/productionorder/list',
@@ -103,6 +103,7 @@ $(function () {
         rownumWidth: 25, 
         autowidth:true,
         multiselect: false,
+        // scroll:true,
         // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -130,7 +131,8 @@ $(function () {
         var subgrid_table_id, pager_id;
         subgrid_table_id = subgrid_id + "_t";
         pager_id = "p_" + subgrid_table_id;
-        $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+        // $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+        $("#" + subgrid_id).html("<div style=\"height:100%;width:100%;overflow:auto\"><table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div></div>");
         jQuery("#" + subgrid_table_id).jqGrid({
             url : url,
             datatype : "json",
@@ -215,6 +217,7 @@ $(function () {
         rownumbers: true,
         // rownumWidth: 25,
         autowidth:true,
+        scroll:true,
         // pager: "#jqGridPagerPRD",
         // toolbar:[true,"top"],
         jsonReader : {

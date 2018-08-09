@@ -1,7 +1,13 @@
 package com.kirin.common.utils;
 
+import com.kirin.modules.baseData.entity.BomInfoEntity;
+import com.kirin.modules.baseData.service.BomInfoService;
+import com.kirin.modules.storage.service.OutportDetailService;
+import com.kirin.modules.storage.service.OutportInfoService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class CommonUtils {
@@ -91,6 +97,7 @@ public class CommonUtils {
         }
         return billNo;
     }
+
 
     public static void main(String args[]){
         System.out.println(createBillNo("LL"));

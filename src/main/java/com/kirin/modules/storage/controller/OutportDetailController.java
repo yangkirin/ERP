@@ -1,19 +1,26 @@
 package com.kirin.modules.storage.controller;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.kirin.common.fileUtils.ExcelDataEntity;
+import com.kirin.common.fileUtils.ExcelUtils;
 import com.kirin.common.utils.*;
 import com.kirin.modules.baseData.entity.BomDetailEntity;
 import com.kirin.modules.baseData.entity.BomInfoEntity;
 import com.kirin.modules.baseData.entity.MtrDataEntity;
+import com.kirin.modules.baseData.entity.TypeInfoEntity;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
 import com.kirin.modules.baseData.service.MtrDataService;
+import com.kirin.modules.baseData.service.TypeInfoService;
 import com.kirin.modules.common.controller.CommonUtil;
 import com.kirin.modules.common.service.CommonUtilService;
+import com.kirin.modules.sales.entity.CustomerInfoEntity;
 import com.kirin.modules.sales.entity.ProductionOrderDetailEntity;
 import com.kirin.modules.sales.entity.ProductionOrderEntity;
+import com.kirin.modules.sales.service.CustomerInfoService;
 import com.kirin.modules.sales.service.ProductionOrderDetailService;
 import com.kirin.modules.sales.service.ProductionOrderService;
 import com.kirin.modules.storage.entity.OutportInfoEntity;
@@ -30,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kirin.modules.storage.entity.OutportDetailEntity;
 import com.kirin.modules.storage.service.OutportDetailService;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -65,6 +74,25 @@ public class OutportDetailController extends AbstractController {
 		int total = productionOrderService.queryTotal(query);
 
 		PageUtils pageUtil = new PageUtils(productionOrderEntityList, total, query.getLimit(), query.getPage());
+
+		return R.ok().put("page", pageUtil);
+	}
+
+	/**
+	 * 列表
+	 */
+	@RequestMapping("/outportInfoList")
+//	@RequiresPermissions("storage:outportdetail:list")
+	public R outportInfoList(@RequestParam Map<String, Object> params){
+		//查询列表数据
+		Query query = new Query(params);
+
+		List<OutportInfoEntity> outportInfoEntityList = outportInfoService.queryList(query);
+
+//		List<OutportDetailEntity> outportDetailList = outportDetailService.queryList(query);
+		int total = outportInfoService.queryTotal(query);
+
+		PageUtils pageUtil = new PageUtils(outportInfoEntityList, total, query.getLimit(), query.getPage());
 
 		return R.ok().put("page", pageUtil);
 	}
@@ -110,6 +138,26 @@ public class OutportDetailController extends AbstractController {
 		return R.ok().put("outportInfo", outportInfoEntity);
 	}
 
+	@RequestMapping("/outportInfoByOutId/{id}")
+//	@RequiresPermissions("storage:outportdetail:outportInfo")
+	public R outportInfoByOutId(@PathVariable("id") Long id){
+		OutportInfoEntity outportInfoEntity = outportInfoService.queryObject(id);
+		if(outportInfoEntity.getCustomerId() != null ){
+			CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(Long.valueOf(outportInfoEntity.getCustomerId().toString()));
+			outportInfoEntity.setCustomerName(customerInfoEntity.getCustomerName());
+		}
+		if(outportInfoEntity.getPlaceId() != null ){
+			TypeInfoEntity typeInfoEntity = typeInfoService.queryObject(Long.valueOf(outportInfoEntity.getPlaceId().toString()));
+			outportInfoEntity.setCustomerName(typeInfoEntity.getTypeName());
+		}
+		if(outportInfoEntity.getOrderId() != null ){
+			ProductionOrderEntity productionOrderEntity = productionOrderService.queryObject(outportInfoEntity.getOrderId());
+			outportInfoEntity.setProductionNo(productionOrderEntity.getProductionNo());
+		}
+
+		return R.ok().put("outportInfo", outportInfoEntity);
+	}
+
 	/**
 	 * 保存
 	 */
@@ -124,6 +172,53 @@ public class OutportDetailController extends AbstractController {
 		outportDetailService.save(outportDetail);
 		
 		return R.ok();
+	}
+
+	@Autowired
+	TypeInfoService typeInfoService;
+
+	@Autowired
+	CustomerInfoService customerInfoService;
+
+	@RequestMapping("/save2")
+//	@RequiresPermissions("storage:outportdetail:save")
+	public R save2(@RequestParam Map<String, Object> params){
+
+		String isDH = params.get("isDH").toString();
+		String outportNo = params.get("outportNo").toString();
+		String customerId = params.get("customerId").toString();
+		String orderTypeId = params.get("orderTypeId").toString();
+		String placeId = params.get("placeId").toString();
+
+		OutportInfoEntity outportInfoEntity = new OutportInfoEntity();
+		outportInfoEntity.setOutporrtNo(outportNo);
+		outportInfoEntity.setStatus("1");
+
+		if(isDH.equals("0")){//不是低值易耗领料
+			TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(Long.valueOf(orderTypeId));
+			outportInfoEntity.setOrderTypeId(Long.valueOf(orderTypeId));
+			outportInfoEntity.setOrderTypeName(typeInfoEntity1.getTypeName());
+
+			TypeInfoEntity typeInfoEntity2 = typeInfoService.queryObject(Long.valueOf(placeId));
+			outportInfoEntity.setPlaceId(Long.valueOf(placeId));
+			outportInfoEntity.setPlaceName(typeInfoEntity2.getTypeName());
+
+			CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(Long.valueOf(customerId));
+			outportInfoEntity.setCustomerId(Long.valueOf(customerId));
+			outportInfoEntity.setCustomerNo(customerInfoEntity.getCustomerCode());
+			outportInfoEntity.setCustomerName(customerInfoEntity.getCustomerName());
+		}else{
+			outportInfoEntity.setRemark("低值易耗单");
+		}
+
+		SysUserEntity sysUserEntity =  getUser();
+
+		outportInfoEntity.setCreateUser(sysUserEntity.getUsername());
+		outportInfoEntity.setCreateDate(new Date());
+
+		outportInfoService.save(outportInfoEntity);
+
+		return R.ok().put("data",outportInfoEntity);
 	}
 	
 	/**
@@ -145,6 +240,25 @@ public class OutportDetailController extends AbstractController {
 	public R delete(@RequestBody Long[] ids){
 		outportDetailService.deleteBatch(ids);
 		
+		return R.ok();
+	}
+
+	@RequestMapping("/deleteDetail/{id}")
+//	@RequiresPermissions("storage:outportdetail:delete")
+	public R deleteDetail(@PathVariable("id") Long id){
+		outportDetailService.delete(id);
+		return R.ok();
+	}
+
+	/**
+	 * 删除
+	 */
+	@RequestMapping("/deleteInfo/{id}")
+//	@RequiresPermissions("storage:outportdetail:delete")
+	public R deleteInfo(@PathVariable("id") Long id){
+		outportInfoService.delete(id);
+		outportDetailService.deleteByInfoId(id);
+
 		return R.ok();
 	}
 
@@ -189,8 +303,10 @@ public class OutportDetailController extends AbstractController {
 
 		List<OutportDetailEntity> outportDetailEntityList = new ArrayList<>();
 
-		if(params.get("orderId") == null){
+		if(params.get("orderId").toString().equals("0")){
+
 			Query query = new Query(params);
+			outportDetailEntityList = outportDetailService.queryList(query);
 			PageUtils pageUtil = new PageUtils(outportDetailEntityList, 0, query.getLimit(), query.getPage());
 			return R.ok().put("page", pageUtil);
 		}
@@ -204,13 +320,21 @@ public class OutportDetailController extends AbstractController {
 			outportDetailEntity.setMtrName(temp.get("mtrName").toString());
 			outportDetailEntity.setMtrNo(temp.get("mtrCode").toString());
 			outportDetailEntity.setMtrTypeName(temp.get("mtrTypeName").toString());
-			outportDetailEntity.setOrderCount(new BigDecimal(temp.get("orderCount").toString()));
+
 			outportDetailEntity.setOutUnit(temp.get("outUnit") == null ? "" : temp.get("outUnit").toString());
 
+			BigDecimal miniRate = new BigDecimal(temp.get("miniRate") == null ? "0" : temp.get("miniRate").toString());
+			BigDecimal orderCount = new BigDecimal(temp.get("orderCount") == null ? "0" : temp.get("orderCount").toString());
 			//计算已领数量
-			String outCount = compOutCount(orderId,Long.valueOf(temp.get("mtrId").toString()));
-			outportDetailEntity.setOutCount(new BigDecimal(outCount));
-
+			String outCountTemp = compOutCount(orderId,Long.valueOf(temp.get("mtrId").toString()));
+			BigDecimal outCount = new BigDecimal(outCountTemp == null ? "0" : outCountTemp);
+			if(temp.get("miniRate") == null || temp.get("miniRate").toString().equals("0")){
+				outportDetailEntity.setOrderCount(new BigDecimal("0"));
+				outportDetailEntity.setOutCount(new BigDecimal("0"));
+			}else{
+				outportDetailEntity.setOrderCount(orderCount.divide(miniRate,4,BigDecimal.ROUND_HALF_UP));
+				outportDetailEntity.setOutCount(outCount.divide(miniRate,4,BigDecimal.ROUND_HALF_UP));
+			}
 			outportDetailEntityList.add(outportDetailEntity);
 		}
 		Query query = new Query(params);
@@ -241,9 +365,16 @@ public class OutportDetailController extends AbstractController {
 	 */
 	@RequestMapping("/getOutportDetailList")
 	public R getOutportDetailList(@RequestParam Map<String, Object> params){
-		Long orderId = Long.valueOf(params.get("orderId").toString());
+		Long orderId = null;
+		if(!params.get("orderId").toString().equals("null")){
+			orderId = Long.valueOf(params.get("orderId").toString());
+		}
 		Long mtrId = Long.valueOf(params.get("mtrId").toString());
-		List<Map> map = outportDetailService.getOutportDetailList(orderId,mtrId);
+		Long outportId = Long.valueOf(params.get("outportId").toString());
+
+
+
+		List<Map> map = outportDetailService.getOutportDetailList(orderId,mtrId,outportId);
 
 		Query query = new Query(params);
 
@@ -296,16 +427,26 @@ public class OutportDetailController extends AbstractController {
 	@Autowired
 	ProductionOrderDetailService productionOrderDetailService;
 
+
+	/**
+	 * 根据订单创建原料出库明细
+	 * @param orderId
+	 * @return
+	 */
 	public List<Map> createOutPortDetail(Long orderId){
-		ProductionOrderEntity productionOrderEntity = productionOrderService.queryObject(orderId);
+		ProductionOrderEntity productionOrderEntity = productionOrderService.queryObject(orderId);//订单信息
 		Map<String,Object> objectMap = new HashMap<>();
 		objectMap.put("productionOrderId",orderId);
-		List<ProductionOrderDetailEntity> productionOrderEntityList = productionOrderDetailService.queryList(objectMap);
+		List<ProductionOrderDetailEntity> productionOrderEntityList = productionOrderDetailService.queryList(objectMap);//订单明细信息
 
 		List<Map> mapList = new ArrayList<>();
 		for (ProductionOrderDetailEntity productionOrderDetailEntity:productionOrderEntityList) {
-			List<Map> mapListTemp = findAllMtrByPrd(productionOrderDetailEntity.getPrdId(),null,null);
+//			List<Map> mapListTemp = findAllMtrByPrd(productionOrderDetailEntity.getPrdId(),null,null);//递归查询这个产品所需要的所有原料信息
+			List<Map> mapListTemp = findAllMtrByPrd2(productionOrderDetailEntity.getPrdId(),null,null,new BigDecimal(productionOrderDetailEntity.getAmount().toString()));//递归查询这个产品所需要的所有原料信息
 			mapList.addAll(mapListTemp);
+
+
+
 			//完善客户信息和产品信息与计算数量
 			for (Map mapTemp:mapList) {
 				mapTemp.put("orderId",productionOrderEntity.getId());
@@ -313,47 +454,52 @@ public class OutportDetailController extends AbstractController {
 				mapTemp.put("customerName",productionOrderEntity.getCustomerName());
 				mapTemp.put("customerNo",productionOrderEntity.getCustomerNo());
 
-				BigDecimal mtrGrossWgt = new BigDecimal(mapTemp.get("mtrGrossWgt") == null ? "0" : mapTemp.get("mtrGrossWgt").toString());
-				BigDecimal orderAmount = new BigDecimal(productionOrderDetailEntity.getAmount() == null ? "0" : productionOrderDetailEntity.getAmount().toString());
+//				BigDecimal mtrGrossWgt = new BigDecimal(mapTemp.get("mtrGrossWgt") == null ? "0" : mapTemp.get("mtrGrossWgt").toString());
+//				BigDecimal orderAmount = new BigDecimal(productionOrderDetailEntity.getAmount() == null ? "0" : productionOrderDetailEntity.getAmount().toString());
 
-				BigDecimal mtrAmount = mtrGrossWgt.multiply(orderAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
-				mtrAmount = mtrAmount.divide(new BigDecimal(1000)).setScale(2,BigDecimal.ROUND_HALF_UP);
-				mapTemp.put("orderCount",mtrAmount);
+//				BigDecimal mtrAmount = mtrGrossWgt.multiply(orderAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+//				mtrAmount = mtrAmount.divide(new BigDecimal(1000)).setScale(2,BigDecimal.ROUND_HALF_UP);
+
+
+				mapTemp.put("orderCount",mapTemp.get("orderWgt"));
 			}
 		}
-		List<Map> returnList = new ArrayList<>();
-		for (Map mapTemp:mapList) {
-			if(returnList.size()<=0){
-				returnList.add(mapTemp);
-			}
-			boolean flag = false;
-			for (int i=0;i < returnList.size(); i++) {
-				Map temp = returnList.get(i);
-				if(mapTemp.get("mtrId").toString().equals(temp.get("mtrId").toString())){
-					flag = true;
-					break;
-				}
-			}
-			if(flag){
-				for (int i=0;i < returnList.size(); i++) {
-					Map temp = returnList.get(i);
-					if(mapTemp.get("mtrId").toString().equals(temp.get("mtrId").toString())){
-						BigDecimal newCount = new BigDecimal(temp.get("orderCount").toString());
-						BigDecimal oldCount = new BigDecimal(mapTemp.get("orderCount").toString());
-						BigDecimal sumCount = newCount.add(oldCount).setScale(2,BigDecimal.ROUND_HALF_UP);
-						temp.put("orderCount",sumCount);
-
-						returnList.remove(i);
-						returnList.add(temp);
-					}
-				}
-			}else{
-				returnList.add(mapTemp);
-			}
-
-		}
-
-		return returnList;
+		/**
+		 * 集合去重算法
+		 */
+//		List<Map> returnList = new ArrayList<>();
+//		for (Map mapTemp:mapList) {
+//			if(returnList.size()<=0){
+//				returnList.add(mapTemp);
+//			}
+//			boolean flag = false;
+//			for (int i=0;i < returnList.size(); i++) {
+//				Map temp = returnList.get(i);
+//				if(mapTemp.get("mtrId").toString().equals(temp.get("mtrId").toString())){
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(flag){
+//				for (int i=0;i < returnList.size(); i++) {
+//					Map temp = returnList.get(i);
+//					if(mapTemp.get("mtrId").toString().equals(temp.get("mtrId").toString())){
+//						BigDecimal newCount = new BigDecimal(temp.get("orderCount").toString());
+//						BigDecimal oldCount = new BigDecimal(mapTemp.get("orderCount").toString());
+//						BigDecimal sumCount = newCount.add(oldCount).setScale(2,BigDecimal.ROUND_HALF_UP);
+//						temp.put("orderCount",sumCount);
+//
+//						returnList.remove(i);
+//						returnList.add(temp);
+//					}
+//				}
+//			}else{
+//				returnList.add(mapTemp);
+//			}
+//
+//		}
+//
+		return mapList;
 	}
 
 	@Autowired
@@ -474,11 +620,153 @@ public class OutportDetailController extends AbstractController {
 				mapList.addAll(subMapList);
 			}
 		}
-
 		return mapList;
 	}
 
+	/**
+	 * @Date 2018-07-16
+	 * @param prdId
+	 * @param takeStnId
+	 * @param warehouseId
+	 * @param orderAmount
+	 * @return
+	 */
+	public List<Map> findAllMtrByPrd2(Long prdId,Long takeStnId,Long warehouseId,BigDecimal orderAmount){
+		List<Map> mtrList = new ArrayList<>();
+		BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdId);
+		if(bomInfoEntity == null){
+			return null;
+		}
+
+		List<Map> detailMapList = outportDetailService.queryMtrByPrdId(prdId,takeStnId,warehouseId);
+
+		if(detailMapList != null && detailMapList.size() > 0){
+			for (Map map : detailMapList) {
+				BigDecimal grossWgt = new BigDecimal(map.get("mtrGrossWgt") == null ? "0" : map.get("mtrGrossWgt").toString());
+				//半成品则循环进行计算
+				if(map.get("semiFinished").equals("1")){//半成品
+					BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(Long.valueOf(map.get("mtrId").toString()));
+					BigDecimal detailPrdGrossWgt = new BigDecimal(bomInfo.getSumGrossWgt() == null ? "1" : bomInfo.getSumGrossWgt().toString());
+					//计算所需要半成品的份数
+					//（【产品配方中半成品所需毛重】*【产品所需数量】）/【半成品配方单份毛重】
+					BigDecimal cpoies = (grossWgt.multiply(orderAmount).setScale(4,BigDecimal.ROUND_HALF_UP)).divide(detailPrdGrossWgt,2,BigDecimal.ROUND_HALF_UP);//份数
+					List<Map> mapList = findAllMtrByPrd2(Long.valueOf(map.get("mtrId").toString()),takeStnId,warehouseId,cpoies);
+					if(mapList != null && mapList.size() > 0){
+						mtrList.addAll(mapList);
+					}
+
+				}else{//原料则直接运算后存入集合
+					BigDecimal orderWgt = grossWgt.multiply(orderAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+					map.put("orderWgt",orderWgt);
+					mtrList.add(map);
+				}
+			}
+		}
+		//重复的原料进行累加，形成唯一结果集
+		List<Map> returnList = new ArrayList<>();
+		if(mtrList !=null && mtrList.size() > 0){
+			Object[] objectArr = new CommonUtils().findRepeat(mtrList,"mtrId");
+			if(objectArr != null && objectArr.length > 0) {//存在重复项
+				List<Map> mapListTemp = new CommonUtils().clearRepeat(mtrList, "mtrId");
+
+				for (int i = 0; i < objectArr.length; i++) {
+					Map mapObj = new HashMap();
+					BigDecimal count = new BigDecimal("0");
+					for (Map mapTemp : mtrList) {
+						if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
+							count = count.add(new BigDecimal(mapTemp.get("orderWgt").toString()));
+						}
+					}
+					for (Map mapTemp : mapListTemp) {
+						if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
+							mapTemp.put("orderWgt", count);
+						}
+					}
+				}
+				returnList.addAll(mapListTemp);
+			}else{
+				returnList.addAll(mtrList);
+			}
+		}
+
+		return returnList;
+	}
+
+	@RequestMapping("/export")
+	public void exportExcel(HttpServletResponse response, @RequestParam Map<String, Object> params) throws Exception {
+
+		for(Object key : params.keySet()){
+			System.out.print(key.toString()+"-----"+params.get(key));
+		}
 
 
+		ExcelDataEntity data = new ExcelDataEntity();
+		List<String> titles = new ArrayList();
+
+		data.setSheetName("领料凭证");
+		titles.add("公司");//SX02
+		titles.add("记账日期");//入库日期
+		titles.add("业务日期");//入库日期
+		titles.add("会计期间");//月份
+		titles.add("凭证类型");//记
+		titles.add("凭证号");//028
+		titles.add("分录号");//序号
+		titles.add("摘要");//领料单号-客户订单号
+		titles.add("科目");//5001.01.01代表生产成本食材科目代码 5001.01.02代表生产成本包材科目代码 1403.02.01代表原材料食材科目代码 1403.02.03代表包材科目代码
+		titles.add("币种");//BB01
+		titles.add("汇率");//1
+		titles.add("方向");//2202.01.01.01时为0.其它为1
+		titles.add("原币金额");
+		titles.add("数量");//0
+		titles.add("单价");//0
+		titles.add("借方金额");
+		titles.add("贷方金额");
+		titles.add("制单人");//胡艳芳
+		titles.add("过账人");
+		titles.add("审核人");
+		titles.add("附件数量");//0
+		titles.add("过账标记");//FALSE
+		titles.add("机制凭证模板");
+		titles.add("删除标记");//FALSE
+		titles.add("凭证序号");//1516931982828--0
+		titles.add("单位");
+		titles.add("参考信息");
+		titles.add("是否有现金流量");
+		titles.add("现金流量标记");//0
+		titles.add("业务编号");
+		titles.add("结算方式");
+		titles.add("结算号");
+		titles.add("辅助账摘要");//领料单号-客户订单号
+		for (int i=1;i<=8;i++){
+			titles.add("核算项目"+i);
+			titles.add("编码"+i);
+			titles.add("名称"+i);
+		}
+		titles.add("换票证号");
+		titles.add("发票号");
+		titles.add("客户");
+		titles.add("费用类别");
+		titles.add("收款人");
+		titles.add("物料");
+		titles.add("财务组织");
+		titles.add("供应商");
+		titles.add("辅助账业务日期");//领料日期
+		titles.add("到期日");
+
+		data.setTitles(titles);
+
+		List<List<Object>> rows = new ArrayList();
+
+
+		data.setRows(rows);
+		//生成本地
+		/*File f = new File("c:/test.xlsx");
+		FileOutputStream out = new FileOutputStream(f);
+		ExportExcelUtils.exportExcel(data, out);
+		out.close();*/
+		SimpleDateFormat fdate=new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+		String fileName=fdate.format(new Date())+"-领料凭证.xlsx";
+		ExcelUtils.exportExcel(response,fileName,data);
+	}
 
 }

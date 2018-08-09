@@ -23,6 +23,12 @@ public class PdDetailEntity implements Serializable {
 	private Long mtrId;
 	//物料编号
 	private String mtrCode;
+
+	private String mtrName;
+
+	private String miniUnitName;
+
+	private String typeName;
 	//上期结余数量
 	private BigDecimal lastCount;
 	//上期结余金额
@@ -43,6 +49,8 @@ public class PdDetailEntity implements Serializable {
 	private BigDecimal profttCount;
 	//盘亏数量
 	private BigDecimal lossCount;
+
+	private BigDecimal price;
 
 	/**
 	 * 设置：
@@ -211,5 +219,37 @@ public class PdDetailEntity implements Serializable {
 	 */
 	public BigDecimal getLossCount() {
 		return lossCount;
+	}
+
+	public String getMtrName() {
+		return mtrName;
+	}
+
+	public void setMtrName(String mtrName) {
+		this.mtrName = mtrName;
+	}
+
+	public String getMiniUnitName() {
+		return miniUnitName;
+	}
+
+	public void setMiniUnitName(String miniUnitName) {
+		this.miniUnitName = miniUnitName;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
 	}
 }

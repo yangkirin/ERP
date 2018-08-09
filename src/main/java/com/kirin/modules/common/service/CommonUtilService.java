@@ -1,9 +1,12 @@
 package com.kirin.modules.common.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 public interface CommonUtilService {
+
+    String createNewNo(String tableName,String id, String typeInfoId);
 
     String getCommbox(String tableName,String[] returnField,String[] searchArr);
 
@@ -40,4 +43,15 @@ public interface CommonUtilService {
     List<Map> eachGetPrd(Long prdId,Long orderCount,Map<String,Object> params);
 
     List<Map> distinctListData(List<Map> listData);
+
+    /**
+     * 查询产品下所有原料的信息。计算所需原料重量
+     * @param prdId
+     * @param orderAmount
+     * @return List<Map>
+     */
+    List<Map> getMtrListByPrdId(Long prdId, BigDecimal orderAmount);
+
+    List<Map> executeSql(String searchSql);
+
 }

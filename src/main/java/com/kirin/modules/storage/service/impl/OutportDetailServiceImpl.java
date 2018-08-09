@@ -49,7 +49,12 @@ public class OutportDetailServiceImpl implements OutportDetailService {
 	public void delete(Long id){
 		outportDetailDao.delete(id);
 	}
-	
+
+	@Override
+	public void deleteByInfoId(Long infoId){
+		outportDetailDao.deleteByInfoId(infoId);
+	}
+
 	@Override
 	public void deleteBatch(Long[] ids){
 		outportDetailDao.deleteBatch(ids);
@@ -88,7 +93,7 @@ public class OutportDetailServiceImpl implements OutportDetailService {
 		return outportDetailDao.queryDetailListByOrderId(orderId,mtrId);
 	}
 
-	public List<Map> getOutportDetailList(Long orderId,Long mtrId){
-		return  outportDetailDao.getOutportDetailList(orderId,mtrId);
+	public List<Map> getOutportDetailList(Long orderId,Long mtrId,Long outportId){
+		return  outportDetailDao.getOutportDetailList(orderId,mtrId,outportId);
 	}
 }

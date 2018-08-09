@@ -8,11 +8,11 @@ $(function () {
             { label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120 },
             { label: '原料名称', name: 'mtrName', index: 'mtrName', width: 180 },
             { label: '原料类型', name: 'mtrTypeName', index: 'mtrTypeName', width: 100 },
-            { label: '需求数量', name: 'grossWgt', index: 'grossWgt', width: 80 },
-            { label: '领料单位', name: 'miniUnitName', index: 'miniUnitName', width: 80 },
+            { label: '需求数量', name: 'orderWgt', index: 'orderWgt', width: 80 },
+            { label: '领料单位', name: 'outUnit', index: 'outUnit', width: 80 },
             { label: '件重', name: 'wgtUnit', index: 'wgtUnit', width: 80 },
             { label: '件数', name: 'numberCase', index: 'numberCase', width: 80 },
-            { label: '所属仓库', name: 'warehouseName', index: 'warehouseName', width: 120 }
+            { label: '所属仓库', name: 'wareHouseName', index: 'wareHouseName', width: 120 }
         ],
         viewrecords: true,
         height: "auto",

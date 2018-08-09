@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 
  * 
@@ -17,4 +19,5 @@ import org.springframework.stereotype.Repository;
 @Mapper
 public interface BomInfoDao extends BaseDao<BomInfoEntity> {
 	BomInfoEntity queryObjectByPrdId(@Param("prdId") Long prdId);
+	List<BomInfoEntity> queryObjectByMtrId(@Param("mtrId") Long mtrId);
 }

@@ -25,7 +25,7 @@
 </head>
 <body>
 <div id="rrapp" v-cloak>
-	<div v-show="showList">
+	<div v-show="showMain">
 		<div class="grid-btn">
 			<a v-if="hasPermission('storage:pdinfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
 			<a v-if="hasPermission('storage:pdinfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
@@ -35,7 +35,7 @@
 	    <div id="jqGridPager"></div>
     </div>
     
-    <div v-show="!showList" class="panel panel-default">
+    <div v-show="showInfo" class="panel panel-default">
 		<div class="panel-heading">{{title}}</div>
 		<form class="form-horizontal">
 			<div class="form-group">
@@ -94,6 +94,14 @@
 				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
 			</div>
 		</form>
+	</div>
+
+	<div v-show="showDetail">
+		<div class="grid-btn">
+			<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+		</div>
+		<table id="jqDetailGrid"></table>
+		<div id="jqDetailGridPager"></div>
 	</div>
 </div>
 

@@ -1,46 +1,4 @@
-/*
-$(function () {
-    $("#jqGrid").jqGrid({
-        url: baseURL + 'baseData/typeinfo/list',
-        datatype: "json",
-        colModel: [			
-			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-			{ label: '类型编码', name: 'typeCode', index: 'TYPE_CODE', width: 80 }, 			
-			{ label: '类型名称', name: 'typeName', index: 'TYPE_NAME', width: 80 }, 			
-			{ label: '拼音码', name: 'typePy', index: 'TYPE_PY', width: 80 }, 			
-			{ label: '状态', name: 'status', index: 'STATUS', width: 80 ,formatter: function(value, options, row){
-                return value === 0 ?
-                    '<span class="label label-danger">禁用</span>' :
-                    '<span class="label label-success">正常</span>';
-            }}
-        ],
-		viewrecords: true,
-        height: 385,
-        rowNum: 10,
-		rowList : [10,30,50],
-        rownumbers: true, 
-        rownumWidth: 25, 
-        autowidth:true,
-        multiselect: true,
-        pager: "#jqGridPager",
-        jsonReader : {
-            root: "page.list",
-            page: "page.currPage",
-            total: "page.totalPage",
-            records: "page.totalCount"
-        },
-        prmNames : {
-            page:"page", 
-            rows:"limit", 
-            order: "order"
-        },
-        gridComplete:function(){
-        	//隐藏grid底部滚动条
-        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
-        }
-    });
-});
-*/
+
 
 var setting = {
     data: {
@@ -247,6 +205,7 @@ function getTypeInfoId () {
 }
 
 $(function () {
+
     var colunms = TypeInfo.initColumn();
     var table = new TreeTable(TypeInfo.id, baseURL + "baseData/typeinfo/listAll", colunms);
     table.setExpandColumn(1);

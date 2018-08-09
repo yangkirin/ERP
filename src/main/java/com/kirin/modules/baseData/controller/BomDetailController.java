@@ -24,7 +24,7 @@ import com.kirin.common.utils.PageUtils;
 import com.kirin.common.utils.Query;
 import com.kirin.common.utils.R;
 
-import static java.math.BigDecimal.ROUND_HALF_DOWN;
+import static java.math.BigDecimal.ROUND_HALF_UP;
 
 
 /**
@@ -130,7 +130,7 @@ public class BomDetailController extends AbstractController {
 				}else{
 					grossWgt = grossWgt.add(new BigDecimal(1));
 				}
-				BigDecimal cost = bomInfo.getCost().multiply(netWgt.divide(grossWgt,2,BigDecimal.ROUND_HALF_DOWN)).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+				BigDecimal cost = bomInfo.getCost().multiply(netWgt.divide(grossWgt,2,BigDecimal.ROUND_HALF_UP)).setScale(2,BigDecimal.ROUND_HALF_UP);
 				bomDetail.setCost(cost);
 			}
 			//半成品的单价
@@ -141,7 +141,7 @@ public class BomDetailController extends AbstractController {
 		}else{//原料
 			//计算原料的成本
 			MtrDataEntity mtrDataEntity = mtrDataService.queryObject(bomDetail.getMtrId());
-			//配方里原料的单价=原料的采购单价／原料的采购转换率
+			//配方里原料的单价=（原料的采购单价／原料的采购转换率）/最小转换率
 			BigDecimal mtrPrice =  new BigDecimal(mtrDataEntity.getPrice() == null ? "0" : mtrDataEntity.getPrice());
 			BigDecimal mtrPurchaseRate =  new BigDecimal(mtrDataEntity.getPurchaseRate() == null ? "0" : mtrDataEntity.getPurchaseRate());
 			if(bomDetail.getMtrExtendId() != 0){
@@ -157,7 +157,7 @@ public class BomDetailController extends AbstractController {
 			}
 			bomDetail.setPrice(bomDetailPrice);
 
-			//成本=(配方里原料的单价／原料里配方单位转换率)*配方里原料的净重
+			//成本=(配方里原料的单价／原料里配方单位转换率)*配方里原料的毛重
 			BigDecimal mtrMiniRate =  new BigDecimal(mtrDataEntity.getMiniRate() == null ? "0" : mtrDataEntity.getMiniRate());
 			BigDecimal bomDetailCost = new BigDecimal(0);
 			if(mtrMiniRate.compareTo(BigDecimal.ZERO)!=0){
@@ -169,7 +169,7 @@ public class BomDetailController extends AbstractController {
 			//有效计算
 			BigDecimal newCost = new BigDecimal(0);
 			if(mtrPurchaseRate.compareTo(BigDecimal.ZERO)!=0 && mtrMiniRate.compareTo(BigDecimal.ZERO)!=0 && temp.compareTo(BigDecimal.ZERO)!=0){
-				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_DOWN).divide(mtrMiniRate,10,ROUND_HALF_DOWN).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
+				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_UP).divide(mtrMiniRate,10,ROUND_HALF_UP).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
 			}
 			bomDetail.setCost(newCost);
 		}
@@ -199,6 +199,35 @@ public class BomDetailController extends AbstractController {
 
 		updateCostNew(bomDetail.getBomId());
 
+		return R.ok();
+	}
+
+	@RequestMapping("/newSave")
+//	@RequiresPermissions("baseData:bomdetail:save")
+	public R newSave(@RequestBody BomDetailEntity bomDetail){
+		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomDetail.getBomId());
+		/*
+		 * 更新明细信息
+		 */
+		//计算成本
+		BomDetailEntity newBomDetail = computeCost(bomDetail);//计算成本
+		//成本率=(成本／产品售价)*100%
+//		PrdDataEntity prdDataEntity = prdDataService.queryObject(bomInfoEntity.getPrdId());//获取该配方对应产品的售价
+//		BigDecimal prdPrice = new BigDecimal(prdDataEntity.getReferencePrice() == null ? "0" : prdDataEntity.getReferencePrice());
+//		BigDecimal detailCostRate = new BigDecimal(0);
+//		if(prdPrice.compareTo(BigDecimal.ZERO)!=0){
+//			detailCostRate = bomDetail.getCost().divide(prdPrice,2,BigDecimal.ROUND_HALF_UP).divide(new BigDecimal(100),2,BigDecimal.ROUND_HALF_UP);
+//		}
+//		newBomDetail.setCostRate(detailCostRate);
+		bomDetailService.save(newBomDetail);
+		/*
+		 * 更新配方信息
+		 */
+		//更新配方成本和配方各总重量
+		updateCostNew(bomInfoEntity.getId());
+		/*
+		 * 更新产品信息
+		 */
 		return R.ok();
 	}
 
@@ -235,7 +264,7 @@ public class BomDetailController extends AbstractController {
 					grossWgt = grossWgt.add(new BigDecimal(1));
 				}
 				bomDetail.setGrossWgt(grossWgt.toString());
-				BigDecimal cost = bomInfo.getCost().multiply(netWgt.divide(grossWgt,2,BigDecimal.ROUND_HALF_DOWN)).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+				BigDecimal cost = bomInfo.getCost().multiply(netWgt.divide(grossWgt,2,BigDecimal.ROUND_HALF_UP)).setScale(2,BigDecimal.ROUND_HALF_UP);
 				bomDetail.setCost(cost);
 			}
 			//半成品的单价
@@ -276,11 +305,11 @@ public class BomDetailController extends AbstractController {
 			//有效计算
 //			BigDecimal newCost = new BigDecimal(0);
 //			if(mtrPurchaseRate.compareTo(BigDecimal.ZERO)!=0 && mtrMiniRate.compareTo(BigDecimal.ZERO)!=0 && temp.compareTo(BigDecimal.ZERO)!=0){
-//				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_DOWN).divide(mtrMiniRate,10,ROUND_HALF_DOWN).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
+//				newCost = mtrPrice.divide(mtrPurchaseRate,10,ROUND_HALF_UP).divide(mtrMiniRate,10,ROUND_HALF_UP).multiply(temp).setScale(2,BigDecimal.ROUND_HALF_UP);
 //			}
 			//第三次计算成本 = 单价*毛重
 //			BigDecimal newCost2 = new BigDecimal(0);
-//			newCost2 = bomDetailPrice.multiply(new BigDecimal(bomDetail.getGrossWgt())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
+//			newCost2 = bomDetailPrice.multiply(new BigDecimal(bomDetail.getGrossWgt())).setScale(2,BigDecimal.ROUND_HALF_UP);
 
 			bomDetail.setCost(detailCost);
 
@@ -311,6 +340,42 @@ public class BomDetailController extends AbstractController {
 
 		return R.ok();
 	}
+
+	@RequestMapping("/newUpdate")
+//	@RequiresPermissions("baseData:bomdetail:newUpdate")
+	public R newUpdate(@RequestBody BomDetailEntity bomDetail){
+		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomDetail.getBomId());
+		/*
+		 * 更新明细信息
+		 */
+		//修改规格说明
+
+
+		//计算成本
+		BomDetailEntity newBomDetail = computeCost(bomDetail);//计算成本
+//		//成本率=(成本／产品售价)*100%
+//		PrdDataEntity prdDataEntity = prdDataService.queryObject(bomInfoEntity.getPrdId());//获取该配方对应产品的售价
+//		BigDecimal prdPrice = new BigDecimal(prdDataEntity.getReferencePrice() == null ? "0" : prdDataEntity.getReferencePrice());
+//		BigDecimal detailCostRate = new BigDecimal(0);
+//		if(prdPrice.compareTo(BigDecimal.ZERO)!=0){
+//			detailCostRate = bomDetail.getCost().divide(prdPrice,2,BigDecimal.ROUND_HALF_UP).divide(new BigDecimal(100),2,BigDecimal.ROUND_HALF_UP);
+//		}
+//		newBomDetail.setCostRate(detailCostRate);
+		bomDetailService.update(newBomDetail);
+		/*
+		 * 更新配方信息
+		 */
+		//更新配方成本和配方各总重量
+		updateCostNew(bomInfoEntity.getId());
+
+
+
+		/*
+		 * 更新产品信息
+		 */
+		return R.ok();
+	}
+
 
 	/**
 	 * 删除
@@ -375,8 +440,18 @@ public class BomDetailController extends AbstractController {
 		bomInfoService.update(bomInfoEntity);
 	}
 
+	/**
+	 * 更新配方成本
+	 * @param bomInfoId
+	 */
 	public void updateCostNew(Long bomInfoId){
 		BigDecimal sumCost = new BigDecimal(0);
+
+		BigDecimal sumModiWgt = new BigDecimal(0);
+		BigDecimal sumNetWgt = new BigDecimal(0);
+		BigDecimal sumGrossWgt = new BigDecimal(0);
+		BigDecimal sumCostRate = new BigDecimal(0);
+
 		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomInfoId);
 		Map<String,Object> paramMap = new HashMap<>();
 		paramMap.put("bomInfoId",bomInfoId);
@@ -384,17 +459,92 @@ public class BomDetailController extends AbstractController {
 		if(bomDetailEntityList != null && bomDetailEntityList.size() > 0) {
 			for (BomDetailEntity bomDetailEntity : bomDetailEntityList) {
 				sumCost = sumCost.add(bomDetailEntity.getCost() == null ? new BigDecimal(0) : bomDetailEntity.getCost() );
+
+				sumModiWgt = sumModiWgt.add(bomDetailEntity.getModiWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getModiWgt().toString()));
+				sumNetWgt = sumNetWgt.add(bomDetailEntity.getNetWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getNetWgt().toString()));
+				sumGrossWgt = sumGrossWgt.add(bomDetailEntity.getGrossWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getGrossWgt().toString()));
+//				sumCostRate = sumCostRate.add(bomDetailEntity.getCostRate() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getCostRate().toString()));
 			}
 		}
 		bomInfoEntity.setCost(sumCost);
+		//更新配方各总重量
+		bomInfoEntity.setSumGrossWgt(sumGrossWgt);
+		bomInfoEntity.setSumNetWgt(sumNetWgt);
+		bomInfoEntity.setSumModiWgt(sumModiWgt);
+
+		//更新配方成本率
+		//半成品成本率=（半成品配方成本/半成品的价格）*100%
+		PrdDataEntity prdData = prdDataService.queryObject(bomInfoEntity.getPrdId());
+		if(prdData != null && prdData.getReferencePrice() != null){
+			BigDecimal prdPrice = new BigDecimal(prdData.getReferencePrice().toString());
+			sumCostRate = sumCost.divide(prdPrice,5,BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_UP);
+			bomInfoEntity.setSumCostRate(sumCostRate);
+		}
+
 		bomInfoService.update(bomInfoEntity);
 	}
 
+
+	//计算配方明细的成本
+	//最小单价=(采购单价/采购换算率)/最小转换率，保留4位小数，再四舍五入
+	//成本=毛重*最小单价/最小换算率，保留两位小数
+	//成本率=(成本／产品售价)*100%
+	//------7月26日修改计算公式
+	//最小单价=（采购单价/采购换算率）
+	//成本=毛重*最小单价/最小换算率
+	public BomDetailEntity computeCost(BomDetailEntity bomDetailEntity){
+		if(bomDetailEntity == null){
+			return null;
+		}
+		//判断原料类型
+		if(bomDetailEntity.getSemiFinished().equals("1")){//半成品
+			//计算本成品
+			//半成品成本=（半成品配方成本/半成品配方总毛重）*需求净重
+			BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(bomDetailEntity.getMtrId());
+			PrdDataEntity prdDataEntity = prdDataService.queryObject(bomDetailEntity.getMtrId());
+			BigDecimal bomInfoCost = new BigDecimal(bomInfoEntity.getCost() == null ? "0" : bomInfoEntity.getCost().toString());
+			BigDecimal bomInfoSumGrossWgt = new BigDecimal(prdDataEntity.getSumGrossWgt() == null ? "1" : prdDataEntity.getSumGrossWgt().toString());
+
+			BigDecimal netWgt = new BigDecimal(bomDetailEntity.getNetWgt() == null ? "1" : bomDetailEntity.getNetWgt().toString());
+			BigDecimal cost = bomInfoCost.divide(bomInfoSumGrossWgt,3,BigDecimal.ROUND_HALF_UP).multiply(netWgt);
+			//半成品的单价=售价/毛重，4位小数
+			BigDecimal price = new BigDecimal(prdDataEntity.getReferencePrice() == null ? "0" : prdDataEntity.getReferencePrice());
+			BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "1" : bomDetailEntity.getGrossWgt());
+			BigDecimal miniPrice = price.divide(grossWgt,4,BigDecimal.ROUND_HALF_UP);
+
+			bomDetailEntity.setCost(cost);
+			bomDetailEntity.setPrice(miniPrice);
+		}else{//原料
+			//计算原料的最小单价=采购单价/采购换算率，4位小数
+			MtrDataEntity mtrDataEntity = mtrDataService.queryObject(bomDetailEntity.getMtrId());
+			BigDecimal orderPrice = new BigDecimal(mtrDataEntity.getPrice() == null ? "0" : mtrDataEntity.getPrice().toString());
+			BigDecimal orderRate = new BigDecimal(mtrDataEntity.getPurchaseRate() == null ? "1" : mtrDataEntity.getPurchaseRate().toString());
+			BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "1" : bomDetailEntity.getGrossWgt());
+			BigDecimal miniRate = new BigDecimal(mtrDataEntity.getMiniRate() == null ? "1" : mtrDataEntity.getMiniRate().toString());
+			BigDecimal miniPrice = (orderPrice.divide(orderRate,4,BigDecimal.ROUND_HALF_UP));//.divide(miniRate,4,BigDecimal.ROUND_HALF_UP);
+			//成本=毛重*最小单价/最小换算率，保留两位小数
+			BigDecimal cost = ((grossWgt.multiply(miniPrice)).setScale(2,BigDecimal.ROUND_HALF_UP)).divide(miniRate,2,BigDecimal.ROUND_HALF_UP);
+			bomDetailEntity.setCost(cost);
+			bomDetailEntity.setPrice(miniPrice);
+		}
+		//成本率=(成本／产品售价)*100%
+		BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomDetailEntity.getBomId());
+		PrdDataEntity bomPrdInfo = prdDataService.queryObject(bomInfoEntity.getPrdId());
+		BigDecimal prdPrice = new BigDecimal(bomPrdInfo.getReferencePrice() == null ? "0" : bomPrdInfo.getReferencePrice());
+		BigDecimal costRate = new BigDecimal(0);
+		if(prdPrice.compareTo(BigDecimal.ZERO)!=0){
+			costRate = (bomDetailEntity.getCost().divide(prdPrice,4,BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_UP);
+		}
+		bomDetailEntity.setCostRate(costRate);
+		return bomDetailEntity;
+	}
+
+
 	public static void main(String[] args){
-		BigDecimal a = new BigDecimal(20);
-		BigDecimal b = new BigDecimal(138);
-		BigDecimal c = new BigDecimal(1000);
-		BigDecimal d = new BigDecimal(30);
+		BigDecimal a = new BigDecimal(0);
+		BigDecimal b = new BigDecimal(0);
+		BigDecimal c = new BigDecimal(0);
+		BigDecimal d = new BigDecimal(0);
 
 		System.out.println(b.divide(a).divide(c).setScale(2,BigDecimal.ROUND_HALF_UP));
 		System.out.println(b.divide(a).divide(c).multiply(d).setScale(2,BigDecimal.ROUND_HALF_UP));

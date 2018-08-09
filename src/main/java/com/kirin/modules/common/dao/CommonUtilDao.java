@@ -40,4 +40,6 @@ public interface CommonUtilDao extends BaseDao<Object> {
     String checkNameRepeat(@Param("searchFiled") String searchFiled,@Param("tableName") String tableName,@Param("checkStr")String  checkStr);
 
     List<Map> dataSearchLL(Map<String,Object> params);
+
+    List<Map> executeSql(@Param("searchSql") String searchSql);
 }

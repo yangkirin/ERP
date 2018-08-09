@@ -56,5 +56,9 @@ public class OrderInfoServiceImpl implements OrderInfoService {
 	public void deleteBatch(Long[] ids){
 		orderInfoDao.deleteBatch(ids);
 	}
-	
+
+	@Override
+	public List<OrderInfoEntity> searchList(Map<String,Object> params){
+		return orderInfoDao.searchList(params);
+	}
 }

@@ -26,7 +26,9 @@ public interface OutportDetailService {
 	void update(OutportDetailEntity outportDetail);
 	
 	void delete(Long id);
-	
+
+	void deleteByInfoId(Long infoId);
+
 	void deleteBatch(Long[] ids);
 
 	List<Map> queryMtrByPrdId(Long prdId,Long takeStnId,Long wareHouseId);
@@ -43,5 +45,5 @@ public interface OutportDetailService {
 
 	List<OutportDetailEntity> queryDetailListByOrderId(Long orderId,Long mtrId);
 
-	List<Map> getOutportDetailList(Long orderId,Long mtrId);
+	List<Map> getOutportDetailList(Long orderId,Long mtrId,Long outportId);
 }

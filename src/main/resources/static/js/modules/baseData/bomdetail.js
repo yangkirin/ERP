@@ -1,4 +1,11 @@
 $(function () {
+
+
+    window.onresize = function  _doResize() {
+        var ss = pageSize();
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
+    };
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'baseData/bomdetail/list',
         datatype: "json",
@@ -15,14 +22,14 @@ $(function () {
 			{ label: '是否半成品', name: 'semiFinished', index: 'semi_finished', width: 80 }			
         ],
 		viewrecords: true,
-        height: 385,
-        rowNum: 10,
+        height: "auto",
+        rowNum: 999999,
 		rowList : [10,30,50],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
-        pager: "#jqGridPager",
+        // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",

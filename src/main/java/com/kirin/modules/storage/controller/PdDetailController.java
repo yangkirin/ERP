@@ -3,6 +3,7 @@ package com.kirin.modules.storage.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.kirin.common.annotation.SysLog;
 import com.kirin.modules.storage.entity.PdDetailEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import com.kirin.common.utils.R;
 @RestController
 @RequestMapping("/storage/pddetail")
 public class PdDetailController {
+
+
 	@Autowired
 	private PdDetailService pdDetailService;
 	
@@ -94,5 +97,6 @@ public class PdDetailController {
 		
 		return R.ok();
 	}
-	
+
+
 }

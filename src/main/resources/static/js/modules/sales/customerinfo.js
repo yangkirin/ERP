@@ -33,7 +33,8 @@ $(function () {
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
-        multiselect: false,
+        multiselect: true,
+        scroll:true,
         // pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
@@ -48,9 +49,66 @@ $(function () {
         },
         gridComplete:function(){
         	//隐藏grid底部滚动条
-        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
+        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+        },
+        subGrid : true,
+        subGridRowExpanded : function(subgrid_id,row_id){
+            var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
+            var url = baseURL + 'sales/customerprd/list?customerId='+rowData.id;
+            createSubGrid(subgrid_id,row_id,url);
         }
     });
+
+    function createSubGrid(subgrid_id,row_id,url){
+        var subgrid_table_id, pager_id;
+        subgrid_table_id = subgrid_id + "_t";
+        pager_id = "p_" + subgrid_table_id;
+        $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+        jQuery("#" + subgrid_table_id).jqGrid({
+            url : url,
+            datatype : "json",
+            colModel : [
+                { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
+                { label: '产品名称', name: 'prdName', index: 'PRD_NAME', width: 80 },
+                { label: '产品编号', name: 'prdNo', index: 'PRD_NO', width: 80 },
+                { label: '产品售价', name: 'prdPrice', index: 'PRD_PRICE', width: 80 },
+                { label: '标签规格', name: 'tagSpec', index: 'TAG_SPEC', width: 80 },
+                { label: '标签编号', name: 'tagNo', index: 'TAG_NO', width: 80 },
+                { label: '标签条码', name: 'tagCode', index: 'TAG_CODE', width: 80 },
+                { label: '加热时长', name: 'tagPower', index: 'TAG_POWER', width: 80 },
+                { label: '生产时间', name: 'tagProdTime', index: 'TAG_PROD_TIME', width: 80 },
+                { label: '保质期', name: 'tagQgp', index: 'TAG_QGP', width: 80 },
+                { label: '储存条件', name: 'tagStorage', index: 'TAG_STORAGE', width: 80 },
+                { label: '净含量', name: 'tagNetwgt', index: 'TAG_NETWGT', width: 80 },
+                { label: '标签价格', name: 'tagPrice', index: 'TAG_PRICE', width: 80 },
+                { label: '地址', name: 'tagAddr', index: 'TAG_ADDR', width: 80},
+                { label: '产地', name: 'tagProdAddr', index: 'TAG_PROD_ADDR', width: 80 }
+            ],
+            rowNum : 999999,
+            // pager : pager_id,
+            height : '100%',
+            rowList : [10,30,50],
+            rownumbers: true,
+            rownumWidth: 25,
+            autowidth:true,
+            multiselect: false,
+            jsonReader : {
+                root: "page.list",
+                page: "page.currPage",
+                total: "page.totalPage",
+                records: "page.totalCount"
+            },
+            prmNames : {
+                page:"page",
+                rows:"limit",
+                order: "order"
+            },
+            gridComplete:function(){
+                //隐藏grid底部滚动条
+                $("#" + subgrid_table_id).closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+            }
+        });
+    }
 
     $("#jqGridPrd").jqGrid({
         url: baseURL + 'sales/customerprd/list',
@@ -88,7 +146,8 @@ $(function () {
         rownumbers: true,
         rownumWidth: 25,
         autowidth:true,
-        multiselect: false,
+        multiselect: true,
+        scroll:true,
         // pager: "#jqGridPagerPrd",
         jsonReader : {
             root: "page.list",

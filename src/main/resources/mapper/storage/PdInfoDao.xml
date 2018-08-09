@@ -22,13 +22,13 @@
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.storage.entity.PdInfoEntity">
-		select * from tb_pd_info
+		select pi.*,(select t.TYPE_NAME from tb_type_info t where t.id=pi.PD_ORG_ID) as pdOrgName from tb_pd_info pi
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
-                order by ${sidx} ${order}
+                order by pi.${sidx} ${order}
             </when>
 			<otherwise>
-                order by ID desc
+                order by pi.ID desc
 			</otherwise>
         </choose>
 		<if test="offset != null and limit != null">

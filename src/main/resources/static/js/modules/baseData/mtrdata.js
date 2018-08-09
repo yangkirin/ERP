@@ -413,7 +413,6 @@ var vm = new Vue({
                     vm.addMtrData = {};
                 }
             });
-
         },
 		query: function () {
 			vm.reload();
@@ -534,7 +533,12 @@ var vm = new Vue({
             }).trigger("reloadGrid");
 		},
         getPinying:function(opeation){
-            var word = this.addMtrData.mtrName;
+            var word ;
+		    if(opeation == "add"){
+                word = this.addMtrData.mtrName;
+            }else{
+                word = this.mtrData.mtrName;
+            }
             if(typeof(word)!="undefined"){
                 $.ajax({
                     url: baseURL + "common/commonUtil/word2pinying/"+word,
@@ -542,7 +546,11 @@ var vm = new Vue({
                         if(opeation == "add"){
                             $("#mtrPy").val(r.pinying);
                             vm.addMtrData.mtrPy = r.pinying;
+                        }else if(opeation == "edit"){
+                            $("#editPy").val(r.pinying);
+                            vm.mtrData.mtrPy = r.pinying;
                         }
+
                     }
                 });
             }
