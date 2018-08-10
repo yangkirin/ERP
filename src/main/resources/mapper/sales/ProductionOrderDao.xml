@@ -67,16 +67,13 @@
 					po.PRODUCTION_NO like '%${productionNo}%'
 				</if>
 				<if test="orderTypeName != null">
-					or po.ORDER_TYPE_NAME like '%${orderTypeName}%'
+					and po.ORDER_TYPE_ID like '%${orderTypeName}%'
 				</if>
-				<if test="customerNo != null">
-					or po.CUSTOMER_NO like '%${customerNo}%'
-				</if>
-				<if test="customerName != null">
-					or po.CUSTOMER_NAME like '%${customerName}%'
+				<if test="customer != null">
+					and (po.CUSTOMER_NO like '%${customer}%' OR po.CUSTOMER_NAME like '%${customer}%')
 				</if>
 				<if test="placeName != null">
-					or po.PLACE_NAME like '%${placeName}%'
+					and po.PLACE_ID like '%${placeName}%'
 				</if>
 				)
 			</if>

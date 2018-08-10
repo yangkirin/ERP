@@ -367,7 +367,13 @@ var vm = new Vue({
         customerArr:{},
         placeArr:{},
         selectData:{},
-		prdGridRowData:[]
+		prdGridRowData:[],
+        q:{
+            productionNo: null,
+            orderTypeName: null,
+            customer: null,
+            placeName: null
+        }
 	},
 	methods: {
 		query: function () {
@@ -783,14 +789,44 @@ var vm = new Vue({
 			}
 			return j;
 		},
+        getFieldData:function(){
+            var query = $('#customer').val();
+            $.ajax({
+                type:"POST",
+                url: baseURL + "common/commonUtil/getTableData",
+                data:"tableName=TB_PRODUCTION_ORDER&fieldName=CUSTOMER_NO:CUSTOMER_NAME&searchWord="+query,
+                success: function(r){
+                    var resultList = r.data.map(function (item) {
+                        var aItem = {no: item.CUSTOMER_NO, name: item.CUSTOMER_NAME};
+                        return JSON.stringify(aItem);
+                    });
+                    dataSource = resultList;
+                    $('#customer').typeahead({
+                        source: dataSource,
+                        highlighter: function (obj) {
+                            var item = JSON.parse(obj);
+                            var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+                            var str = item.name + "(" + item.no + ")";
+                            return str.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+                                return '<strong>' + match + '</strong>'
+                            });
+                        },
+                        updater: function (obj) {
+                            var item = JSON.parse(obj);
+                            vm.q.customer = item.name;
+                            return item.name;
+                        }
+                    });
+                }
+            });
+        },
         search:function(){
             console.log(vm.orderInfo);
             var postData = {
-                productionNo: $('#search').val(),
-                orderTypeName: $('#search').val(),
-                customerNo: $('#search').val(),
-                customerName: $('#search').val(),
-                placeName: $('#search').val()
+                productionNo: vm.q.productionNo,
+                orderTypeName: vm.q.orderTypeName==0?null:vm.q.orderTypeName,
+                customer: vm.q.customer,
+                placeName: vm.q.placeName==0?null:vm.q.placeName,
             };
             var page = $("#jqGrid").jqGrid('getGridParam','page');
             $("#jqGrid").jqGrid('setGridParam',{
@@ -821,3 +857,6 @@ var vm = new Vue({
 vm.orderTypeArr = vm.initTypeInfoArr(40);
 vm.placeArr = vm.initTypeInfoArr(82);
 vm.customerArr = vm.initCsutomerInfoArr();
+var dataSource = ["a","b","1","测试","dd","10a","a测","yi","yidaiyilu","shuohua","1touzhu"];
+vm.getFieldData();
+

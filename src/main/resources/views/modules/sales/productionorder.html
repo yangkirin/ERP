@@ -18,23 +18,63 @@
 <script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
 <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
 <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
-	<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
+<script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
 <script src="../../js/common.js"></script>
 </head>
 <body>
 <div id="rrapp" v-cloak>
 	<div v-show="showList">
 		<div class="row">
-			<div class="grid-btn col-lg-3">
+			<div class="grid-btn col-lg-1">
 				<a v-if="hasPermission('sales:productionorder:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
 				<!--<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
 				<!--<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>-->
 			</div>
-			<div class="input-group input-group-sm col-sm-4">
-				<input type="text" placeholder="订单编号/订单类型编号/客户编号/客户名称/售点名称" id="search" class="form-control">
-				<span class="input-group-btn">
-				<button class="btn btn-primary" type="button" @click="search">查询</button>
-				</span>
+			<div class="col-lg-6">
+				<form class="form-horizontal" style="width: 100%;">
+					<div class="form-group">
+						<div class="col-sm-1 control-label">订单编号</div>
+						<div class="col-sm-2">
+							<input type="text" class="form-control"  placeholder="订单编号" id="productionNo" v-model="q.productionNo"/>
+						</div>
+						<div class="col-sm-1 control-label">订单类型</div>
+						<div class="col-sm-2">
+							<!--<input type="text" class="form-control"  placeholder="订单类型" id="orderTypeName" v-model="q.orderTypeName"/>-->
+							<select class="form-control" v-model="q.orderTypeName" placeholder="订单类型">
+								<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-1 control-label">客户</div>
+						<div class="col-sm-2">
+							<input type="text" class="form-control"  placeholder="客户编号/名称" id="customer" v-model="q.customer" @input="getFieldData" data-provide="typeahead" autocomplete="off"/>
+						</div>
+
+						<div class="col-sm-1 control-label">售点名称</div>
+						<div class="col-sm-2" >
+							<!--<input type="text" class="form-control"  placeholder="售点名称" id="placeName" v-model="q.placeName"/>-->
+							<select class="form-control" v-model="q.placeName" placeholder="售点名称">
+								<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
+							</select>
+						</div>
+						<div class="col-sm-3">
+							<button class="btn btn-primary" type="button" @click="search">查询</button>
+						</div>
+						<!--<div class="col-sm-1 control-label">客户名称</div>-->
+						<!--<div class="col-sm-2">-->
+						<!--<input type="text" class="form-control"  placeholder="客户名称" id="s_customerName"/>-->
+						<!--</div>-->
+					</div>
+					<!--<div class="form-group">-->
+					<!--</div>-->
+				</form>
+				<!--<div class="input-group input-group-sm col-sm-4">-->
+				<!--<input type="text" placeholder="订单编号/订单类型编号/客户编号/客户名称/售点名称" id="search" class="form-control">-->
+				<!--<span class="input-group-btn">-->
+				<!--&lt;!&ndash;<button class="btn btn-primary" type="button" @click="search">查询</button>&ndash;&gt;-->
+				<!--</span>-->
+				<!--</div>-->
 			</div>
 		</div>
 	    <table id="jqGrid"></table>
