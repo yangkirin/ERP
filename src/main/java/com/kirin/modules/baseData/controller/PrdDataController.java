@@ -155,6 +155,8 @@ public class PrdDataController extends AbstractController {
 	public R update(@RequestBody PrdDataEntity prdData) {
 
 		PrdDataEntity oldPrdData = prdDataService.queryObject(prdData.getId());
+		BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(prdData.getId());
+
 		String prdName = "";
 		//如果只变更是否半成品，则只需对产品名称的*号进行增减
 		if (oldPrdData.getSemiFinished() == null) {
@@ -221,6 +223,13 @@ public class PrdDataController extends AbstractController {
 		prdData.setUpdateUser(sysUserEntity.getUsername());
 		prdData.setUpdateDate(new Date());
 		prdDataService.update(prdData);
+
+		if (!bomInfo.getBomName().equals(prdName)) {
+			bomInfo.setBomName(prdName);
+			bomInfo.setUpdateUser(sysUserEntity.getUsername());
+			bomInfo.setUpdateDate(new Date());
+			bomInfoService.update(bomInfo);
+		}
 
 		return R.ok();
 	}
