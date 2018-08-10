@@ -5,30 +5,30 @@ $(function () {
         $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     };
 
-    $("#jqGrid").jqGrid({
+    mygrid = $("#jqGrid").jqGrid({
         url: baseURL + 'purchase/supplierinfo/list',
         datatype: "json",
         colModel: [			
-			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
-			{ label: '供应商名称', name: 'suppierName', index: 'suppier_name', width: 120 },
-			{ label: '代码', name: 'suppierCode', index: 'suppier_code', width: 60 },
-			{ label: '简称', name: 'suppierShortName', index: 'suppier_short_name', width: 120 ,hidden:true},
-			{ label: '类型', name: 'typeName', index: 'typeName', width: 80 },
-			{ label: '拼音码', name: 'suppierPy', index: 'suppier_py', width: 80 },
-			{ label: '联系人', name: 'linkMan', index: 'link_man', width: 60 },
-			{ label: '联系电话', name: 'linkPhone', index: 'link_phone', width: 80 }, 			
-			{ label: '固定电话', name: 'linkTell', index: 'link_tell', width: 80 }, 			
-			{ label: '地址', name: 'address', index: 'address', width: 80 }, 			
-			{ label: '税率', name: 'taxRate', index: 'tax_rate', width: 60 },
-			{ label: '账期', name: 'paymentDays', index: 'payment_days', width: 60 },
-			{ label: '状态', name: 'status', index: 'status', width: 60 ,formatter: function(value, options, row){
+			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,  search:false,hidden:true},
+			{ label: '供应商名称', name: 'suppierName', index: 'suppierName', width: 120 },
+			{ label: '代码', name: 'suppierCode', index: 'suppierCode', width: 60 },
+			{ label: '简称', name: 'suppierShortName', index: 'suppierShortName', search:false, width: 120 ,hidden:true},
+			{ label: '类型', name: 'typeName', index: 'typeName', search:false, width: 80 },
+			{ label: '拼音码', name: 'suppierPy', index: 'suppierPy', width: 80 },
+			{ label: '联系人', name: 'linkMan', index: 'link_man', search:false, width: 60 },
+			{ label: '联系电话', name: 'linkPhone', index: 'link_phone', search:false, width: 80 },
+			{ label: '固定电话', name: 'linkTell', index: 'link_tell', search:false, width: 80 },
+			{ label: '地址', name: 'address', index: 'address', search:false, width: 80 },
+			{ label: '税率', name: 'taxRate', index: 'tax_rate', search:false, width: 60 },
+			{ label: '账期', name: 'paymentDays', index: 'payment_days', search:false, width: 60 },
+			{ label: '状态', name: 'status', index: 'status', width: 60 , search:false,formatter: function(value, options, row){
                 return value === 0 ?
                     '<span class="label label-danger">禁用</span>' :
                     '<span class="label label-success">正常</span>';
             }},
-			{ label: '创建人', name: 'createUser', index: 'create_user', width: 80,hidden:true },
-			{ label: '备注', name: 'remark', index: 'remark', width: 80 ,hidden:true},
-			{ label: '操作', name: 'operation', index: 'operation', width: 150 ,formatter:function(value, options, row){
+			{ label: '创建人', name: 'createUser', index: 'create_user', search:false, width: 80,hidden:true },
+			{ label: '备注', name: 'remark', index: 'remark', width: 80 , search:false,hidden:true},
+			{ label: '操作', name: 'operation', index: 'operation', search:false, width: 150 ,formatter:function(value, options, row){
 				var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo("+row.id+")'>修改</button>" +
 				 "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig("+row.id+")'>原料配置</button>";
 				return optionStr;
@@ -44,6 +44,7 @@ $(function () {
         multiselect: true,
         scroll:true,
         // pager: "#jqGridPager",
+        toppager: true,
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -66,6 +67,25 @@ $(function () {
             createSubGrid(subgrid_id,row_id,url);
         }
     });
+
+    $("#jqGrid").jqGrid('navGrid','#jqGrid_toppager', {edit:false,add:false,del:false,search:false,refresh:true});
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager", {
+        caption:"切换",
+        title:"切换搜索工具栏",
+        buttonicon:"ui-icon-search",
+        onClickButton:function(){
+            mygrid[0].toggleToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager",{
+        caption:"清空",
+        title:"清空搜索栏",
+        buttonicon :'ui-icon-refresh',
+        onClickButton:function(){
+            mygrid[0].clearToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('filterToolbar');
 
     function createSubGrid(subgrid_id,row_id,url){
         var subgrid_table_id, pager_id;

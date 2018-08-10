@@ -6,24 +6,29 @@ $(function () {
         $("#jqGridPrd").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     }
 
-    $("#jqGrid").jqGrid({
+    mygrid = $("#jqGrid").jqGrid({
         url: baseURL + 'sales/customerinfo/list',
         datatype: "json",
         colModel: [			
 			{ label: 'id', name: 'id', index: 'ID', width: 50, key: true,hidden:true },
-			{ label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 80 }, 			
-			{ label: '客户代码', name: 'customerCode', index: 'CUSTOMER_CODE', width: 80 }, 			
-			{ label: '拼音码', name: 'customerPy', index: 'CUSTOMER_PY', width: 80 }, 			
-			{ label: '简称', name: 'customerShortName', index: 'CUSTOMER_SHORT_NAME', width: 80 }, 			
-			{ label: '联系人', name: 'linkman', index: 'LINKMAN', width: 80 }, 			
-			{ label: '联系电话', name: 'linkphone', index: 'LINKPHONE', width: 80 }, 			
-			{ label: '地址', name: 'address', index: 'ADDRESS', width: 80 }, 			
-			{ label: '状态', name: 'status', index: 'STATUS', width: 80 ,formatter: function(value, options, row){
+			{ label: '客户名称', name: 'customerName', index: 'customerName', width: 80 },
+			{ label: '客户代码', name: 'customerCode', index: 'customerCode', width: 80 },
+			{ label: '拼音码', name: 'customerPy', index: 'customerPy', width: 80 },
+			{ label: '简称', name: 'customerShortName', index: 'customerShortName', width: 80 },
+			{ label: '联系人', name: 'linkman', index: 'linkman', search:false, width: 80 },
+			{ label: '联系电话', name: 'linkphone', index: 'linkphone', search:false, width: 80 },
+			{ label: '地址', name: 'address', index: 'address', search:false, width: 80 },
+			{ label: '状态', name: 'status', index: 'status', search:false, width: 80 ,formatter: function(value, options, row){
                 return value === 0 ?
                     '<span class="label label-danger">禁用</span>' :
                     '<span class="label label-success">正常</span>';
             }},
-			{ label: '备注', name: 'remark', index: 'REMARK', width: 80 }			
+			{ label: '备注', name: 'remark', index: 'remark', search:false, width: 80 },
+            { label: '操作', name: 'operation', index: 'operation', search:false, width: 150 ,formatter:function(value, options, row){
+                    var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo("+row.id+")'>修改</button>" +
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='prdConfig("+row.id+")'>产品配置</button>";
+                    return optionStr;
+                }}
         ],
 		viewrecords: true,
         // height: 385,
@@ -36,6 +41,7 @@ $(function () {
         multiselect: true,
         scroll:true,
         // pager: "#jqGridPager",
+        toppager:true,
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -58,6 +64,25 @@ $(function () {
             createSubGrid(subgrid_id,row_id,url);
         }
     });
+
+    $("#jqGrid").jqGrid('navGrid','#jqGrid_toppager', {edit:false,add:false,del:false,search:false,refresh:true});
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager", {
+        caption:"切换",
+        title:"切换搜索工具栏",
+        buttonicon:"ui-icon-search",
+        onClickButton:function(){
+            mygrid[0].toggleToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager",{
+        caption:"清空",
+        title:"清空搜索栏",
+        buttonicon :'ui-icon-refresh',
+        onClickButton:function(){
+            mygrid[0].clearToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('filterToolbar');
 
     function createSubGrid(subgrid_id,row_id,url){
         var subgrid_table_id, pager_id;
@@ -167,6 +192,26 @@ $(function () {
     });
 });
 
+function prdConfig(rowid){
+
+    var id = rowid;
+    if(id == null){
+        return ;
+    }
+    vm.showList = false;
+    vm.showForm = false;
+    vm.showListPrd = true;
+    vm.showFormPrd = false;
+    $("#jqGridPrd").jqGrid('setGridParam',{
+        postData:{'customerId': id}
+    }).trigger("reloadGrid");
+}
+
+function editInfo(rowid){
+    vm.update(rowid);
+}
+
+
 var vm = new Vue({
 	el:'#rrapp',
 	data:{
@@ -194,11 +239,11 @@ var vm = new Vue({
                 customerCode:vm.createNewNo()
 			};
 		},
-		update: function (event) {
-			var id = getSelectedRow();
-			if(id == null){
-				return ;
-			}
+		update: function (id) {
+			// var id = getSelectedRow();
+			// if(id == null){
+			// 	return ;
+			// }
 			vm.showList = false;
 			vm.showForm = true;
             vm.showListPrd = false;

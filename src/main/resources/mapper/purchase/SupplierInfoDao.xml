@@ -30,16 +30,16 @@
 		select *,(select TYPE_NAME from tb_type_info t where t.ID=s.suppier_type ) as typeName from tb_supplier_info s
 		<where>
 			<if test="suppierCode != null">
-				or suppier_code like "%${suppierCode}%"
+				and suppier_code like "%${suppierCode}%"
 			</if>
 			<if test="suppierName != null">
-				or suppier_name like "%${suppierName}%"
+				and suppier_name like "%${suppierName}%"
 			</if>
 			<if test="suppierShortName != null">
-				or suppier_short_name like "%${suppierShortName}%"
+				and suppier_short_name like "%${suppierShortName}%"
 			</if>
 			<if test="suppierPy != null">
-				or suppier_py like "%${suppierPy}%"
+				and suppier_py like "%${suppierPy}%"
 			</if>
 		</where>
         <choose>
