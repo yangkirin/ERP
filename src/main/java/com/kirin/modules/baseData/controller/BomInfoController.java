@@ -73,7 +73,25 @@ public class BomInfoController extends AbstractController {
 		
 		return R.ok().put("bomInfo", bomInfo);
 	}
-	
+
+	/**
+	 * 通过原料查找配方信息
+	 */
+	@RequestMapping("/listByMtrId")
+//	@RequiresPermissions("baseData:bominfo:info")
+	public R listbyMtrId(@RequestParam Map<String, Object> params){
+		//查询列表数据
+		Query query = new Query(params);
+
+		List<BomInfoEntity> bomInfoList = bomInfoService.queryObjectByMtrId(Long.valueOf(String.valueOf(query.get("mtrId"))).longValue());
+		int total = bomInfoService.queryTotal(query);
+
+		PageUtils pageUtil = new PageUtils(bomInfoList, total, query.getLimit(), query.getPage());
+
+		return R.ok().put("page", pageUtil);
+	}
+
+
 	/**
 	 * 保存
 	 */

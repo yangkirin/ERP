@@ -26,7 +26,17 @@
 	</select>
 
 	<select id="queryObjectByMtrId" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
-		select bi.* from bom_detail bd,bom_info bi where bi.id=bd.bom_id and bd.mtr_id= #{mtrId} and bd.SEMI_FINISHED='0'
+		select b.*, (select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName,
+		(select p.SEMI_FINISHED FROM prd_data p WHERE p.id=b.prd_id) as semiFinished,
+		p.PRD_PY,
+		p.PRD_CODE,
+		(Select type_name from tb_type_info where id=p.TYPE_ID) as PRD_TYPE_NAME,
+		(Select type_name from tb_type_info where id=p.PDC_STN) as PDC_STN_NAME,
+		p.POT_WEIGHT,
+		p.BOX_WEIGHT,
+		p.REFERENCE_PRICE as PRICE
+		from (select bi.* from bom_detail bd,bom_info bi where bi.id=bd.bom_id and bd.mtr_id= #{mtrId} and bd.SEMI_FINISHED='0') b
+		left join prd_data p on p.id=b.prd_id
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">

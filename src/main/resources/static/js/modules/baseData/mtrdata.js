@@ -38,6 +38,7 @@ $(function () {
             order: "order"
         },
         onSelectRow:function(id){
+            vm.mtrId = id;
 
             $('#addExtend_btn').attr("disabled",false);
             // vm.initExtendArr();
@@ -119,6 +120,176 @@ $(function () {
 
     var operation = '';
     var addId =0;
+
+    $("#bomGrid").jqGrid({
+        url: baseURL + 'baseData/bominfo/listByMtrId',
+        datatype: "json",
+        postData: {mtrId:"0"},
+        colModel: [
+            { label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
+            { label: '配方名称', name: 'bomName', index: 'bom_name', width: 120},
+            { label: '产品ID', name: 'prdId', index: 'prd_id', width: 80 ,hidden:true},
+            { label: '产品名称', name: 'prdIdName', index: 'prd_id_name', width: 120, hidden:true ,formatter:function(value, options, row){
+                    // if(row.semiFinished == '1'){
+                    //     return value.slice(1);
+                    // }else{
+                    return value;
+                    // }
+                }},
+            { label: '产品类别', name: 'prdTypeName', index: 'prdTypeName', width: 80 },
+            { label: '产品编码', name: 'prdCode', index: 'prdCode', width: 80 },
+            { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 80 },
+            { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
+            { label: '售价', name: 'price', index: 'price', width: 60 },
+            { label: '锅重', name: 'potWgt', index: 'potWgt', width: 60  ,hidden:true},
+            { label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 60  ,hidden:true},
+            { label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 60  ,hidden:true},
+            { label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 60  ,hidden:true},
+            { label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 60  ,hidden:true},
+            { label: '配方成本', name: 'cost', index: 'cost', width: 60  ,hidden:true},
+            { label: '成本率', name: 'sumCostRate', index: 'sumCostRate', width: 60 ,hidden:true,formatter:function(value, options, row){
+                    if(value == null){
+                        return "";
+                    }else{
+                        return value+'%';
+                    }
+                } },
+            { label: '状态', name: 'status', index: 'status', width: 40  ,hidden:true,formatter: function(value, options, row){
+                    return value === 0 ?
+                        '<span class="label label-danger">禁用</span>' :
+                        '<span class="label label-success">正常</span>';
+                }},
+            { label: '备注', name: 'remark', index: 'remark', width: 80  ,hidden:true},
+            { label: '创建者', name: 'createUser', index: 'create_user', width: 80 ,hidden:true},
+            { label: '创建日期', name: 'createDate', index: 'create_date', width: 80 ,hidden:true},
+            { label: '修改者', name: 'updateUser', index: 'create_user', width: 80 ,hidden:true},
+            { label: '修改日期', name: 'updateDate', index: 'create_date', width: 80 ,hidden:true,formatter:function(value, options, row){
+                    if(value == null){
+                        return "";
+                    }else{
+                        return value;
+                    }
+                }},
+            { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
+        ],
+        viewrecords: true,
+        height: "auto",
+        rowNum: 999999,
+        rowList : [10,30,50],
+        rownumbers: true,
+        rownumWidth: 25,
+        autowidth:true,
+        multiselect: false,
+        // pager: "#jqGridPager",
+        jsonReader : {
+            root: "page.list",
+            page: "page.currPage",
+            total: "page.totalPage",
+            records: "page.totalCount"
+        },
+        prmNames : {
+            page:"page",
+            rows:"limit",
+            order: "order"
+        },
+        subGrid : true,
+        subGridRowExpanded : function(subgrid_id,row_id){
+            var rowData = $("#bomGrid").jqGrid('getRowData',row_id);
+            var url = baseURL + 'baseData/bomdetail/list?bomInfoId='+row_id;
+            createSubGrid(subgrid_id,row_id,url);
+        },
+        gridComplete:function(){
+            //隐藏grid底部滚动条
+            $("#bomGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+        }
+    });
+    function createSubGrid(subgrid_id,row_id,url){
+        var subgrid_table_id, pager_id;
+        subgrid_table_id = subgrid_id + "_t";
+        pager_id = "p_" + subgrid_table_id;
+        $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+        jQuery("#" + subgrid_table_id).jqGrid({
+            url : url,
+            datatype : "json",
+            colModel : [
+                { label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
+                { label: 'mtrId', name: 'mtrId', index: 'mtrId', width: 50,hidden:true},
+                { label: '原料名称', name: 'mtrIdName', index: 'MTR_ID_NAME', width: 80 ,formatter:function(value, options, row){
+                        if(row.semiFinished == '1'){//0-成品，1-半成品
+                            return '*'+value;
+                        }else{
+                            return value;
+                        }
+                    }},
+                { label: '类别', name: 'typeIdName', index: 'TYPE_ID_NAME', width: 80 ,hidden:false},
+                { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 100 ,hidden:true },
+                { label: '规格说明', name: 'mtrExtendDesc', index: 'MTR_EXTEND_DESC', width: 100 ,hidden:true},
+                { label: '净菜', name: 'netWgt', index: 'NET_WGT', editable:true,width: 40 ,hidden:true },
+                { label: '净菜得率', name: 'netRate', index: 'NET_RATE', editable:true,width: 40 ,hidden:true,formatter:function(value, options, row){
+                        if(value == null){
+                            return 1;
+                        }else{
+                            return value;
+                        }
+                    } },
+                { label: '毛菜', name: 'grossWgt', index: 'GROSS_WGT', editable:true,width: 40 ,hidden:true },
+                { label: '熟菜得率', name: 'modiRate', index: 'MODI_RATE', editable:true,width: 40 ,hidden:true },
+                { label: '熟菜', name: 'modiWgt', index: 'MODI_WGT',editable:true, width: 40 ,hidden:true  },
+                { label: '单价', name: 'price', index: 'PRICE', editable:true,width: 40 ,hidden:true ,formatter:function(value, options, row){
+                        if(value == null){
+                            return Number(0).toFixed(2);
+                        }else{
+                            return Number(value).toFixed(2);
+                        }
+                    } },
+                { label: '成本', name: 'cost', index: 'COST', width: 80 ,hidden:true ,formatter:function(value, options, row){
+                        if(value == null){
+                            return Number(0).toFixed(2);
+                        }else{
+                            return Number(value).toFixed(2);
+                        }
+                    } },
+                { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80,hidden:true,formatter:function(value, options, row){
+                        return value+'%';
+                    } },
+                { label: '备注', name: 'remark', index: 'REMARK', editable:true,width: 80 ,hidden:true },
+                { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
+            ],
+            rowNum : 20,
+            // pager : pager_id,
+            height : '100%',
+            rowList : [10,30,50],
+            rownumbers: true,
+            rownumWidth: 25,
+            autowidth:true,
+            multiselect: false,
+            jsonReader : {
+                root: "page.list",
+                page: "page.currPage",
+                total: "page.totalPage",
+                records: "page.totalCount"
+            },
+            prmNames : {
+                page:"page",
+                rows:"limit",
+                order: "order"
+            },
+            gridComplete:function(){
+                //隐藏grid底部滚动条
+                $("#" + subgrid_table_id).closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+            },
+            subGrid:true,
+            subGridRowExpanded:function(subgrid_id,row_id){
+                var rowData = $("#" + subgrid_table_id).jqGrid('getRowData',row_id);
+                if(rowData.semiFinished == '1'){//0-成品，1-半成品
+                    var url = baseURL + 'baseData/bomdetail/listByPrdId?prdId='+rowData.mtrId;
+                    createSubGrid(subgrid_id,row_id,url);
+                }else{
+                    return false;
+                }
+            }
+        });
+    }
 
     $('#cutGrid').navButtonAdd('#cutGridPager',{
         id:"save_cut_btn",
@@ -326,7 +497,8 @@ var vm = new Vue({
         costArr:{},
         extendArr:{},
         mtrExtend:{},
-        bomCount:0
+        bomCount:0,
+        mtrId:0
 	},
 	methods: {
         getTypeInfoTree:function(){
@@ -740,6 +912,15 @@ var vm = new Vue({
                     layer.close(num);
                 }
             });
+        },
+
+        showBom:function(){
+            if (vm.bomCount == 0)
+                return;
+            $("#bomGrid").jqGrid('setGridParam',{
+                postData:{'mtrId': vm.mtrId},
+            }).trigger("reloadGrid");
+            $("#myModal").modal("show");
         }
 	}
 });
