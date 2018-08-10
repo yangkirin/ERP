@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.finance.dao.FinanceDao">
+
+	<select id="payableSumInfo" resultType="map" parameterType="java.util.Map">
+		SELECT
+			a.SUPPLIER_ID,
+			a.SUPPLIER_NAME,
+			a.SUPPLIER_NO,
+			SUM( a.SUM_ORDER_MONEY ) AS SUM_ORDER_MONEY,
+			SUM( a.SUM_IN_MONEY ) AS SUM_IN_MONEY
+		FROM(
+				SELECT
+					o.SUPPLIER_ID,
+					( SELECT s.suppier_code FROM tb_supplier_info s WHERE s.id = o.SUPPLIER_ID ) AS SUPPLIER_NO,
+					i.SUPPLIER_NAME,
+					id.MTR_ID,
+					id.MTR_NO,
+					m.MTR_NAME,
+					m.TYPE_ID,
+					( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID = m.TYPE_ID ) AS TYPE_NAME,
+					( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID = m.WAREHOUSE_ID ) AS WAREHOUSE_NAME,
+					( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID = m.TAKE_STN_ID ) AS TAKE_STN_NAME,
+					sum( id.ORDER_COUNT ) AS SUM_ORDER_COUNT,
+					sum( id.IN_COUNT ) AS SUM_IN_COUNT,
+					sm.price AS PRICE,
+					CAST( sum( id.ORDER_COUNT ) AS DECIMAL ( 10, 2 ) ) * CAST( sm.price AS DECIMAL ( 10, 2 ) ) AS SUM_ORDER_MONEY,
+					CAST( sum( id.IN_COUNT ) AS DECIMAL ( 10, 2 ) ) * CAST( sm.price AS DECIMAL ( 10, 2 ) ) AS SUM_IN_MONEY
+				FROM
+					tb_import i
+					LEFT JOIN tb_order_info o ON i.ORDER_ID = o.id
+					LEFT JOIN tb_import_detail id ON i.id = id.IMPORT_ID
+					LEFT JOIN tb_suppier_mtr sm ON sm.suppier_id = o.SUPPLIER_ID AND sm.mtr_id = id.MTR_ID
+					LEFT JOIN mtr_data m ON m.id = id.MTR_ID
+					<where>
+						<if test="startDate != null">
+							o.CREATE_DATE &gt; #{startDate}
+						</if>
+						<if test="endDate != null">
+							o.CREATE_DATE &lt;= #{endDate}
+						</if>
+						<if test="supplierId != null">
+							o.SUPPLIER_ID = #{supplierId}
+						</if>
+						<if test="typeId != null">
+							o.TYPE_ID = #{typeId}
+						</if>
+					</where>
+				GROUP BY
+					i.SUPPLIER_ID,
+					id.MTR_ID
+			) AS a
+		GROUP BY
+			a.SUPPLIER_ID;
+	</select>
+
+	<select id="payableSumDetail" resultType="map" parameterType="java.util.Map">
+		SELECT
+		id.MTR_ID,
+		id.MTR_NO,
+		m.MTR_NAME,
+		m.TYPE_ID,
+		(SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID=m.TYPE_ID) as TYPE_NAME,
+		(SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID=m.WAREHOUSE_ID) as WAREHOUSE_NAME,
+		(SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.ID=m.TAKE_STN_ID) as TAKE_STN_NAME,
+		sum(id.ORDER_COUNT) as SUM_ORDER_COUNT,
+		sum(id.IN_COUNT) as SUM_IN_COUNT,
+		sm.price as PRICE,
+		CAST(sum(id.ORDER_COUNT) AS DECIMAL ( 10, 2 ))*CAST(sm.price AS DECIMAL(10,2)) as SUM_ORDER_MONEY,
+		CAST(sum(id.IN_COUNT) AS DECIMAL ( 10, 2 ))*CAST(sm.price AS DECIMAL(10,2)) as SUM_IN_MONEY
+		FROM
+		tb_import i
+		LEFT JOIN tb_order_info o ON i.ORDER_ID = o.id
+		LEFT JOIN tb_import_detail id on i.id=id.IMPORT_ID
+		LEFT JOIN tb_suppier_mtr sm on sm.suppier_id=o.SUPPLIER_ID and sm.mtr_id=id.MTR_ID
+		LEFT JOIN mtr_data m ON m.id=id.MTR_ID
+		<where>
+			<if test="startDate != null">
+				o.CREATE_DATE &gt; #{startDate}
+			</if>
+			<if test="endDate != null">
+				o.CREATE_DATE &lt;= #{endDate}
+			</if>
+			<if test="supplierId != null">
+				o.SUPPLIER_ID = #{supplierId}
+			</if>
+			<if test="typeId != null">
+				o.TYPE_ID = #{typeId}
+			</if>
+		</where>
+		GROUP BY i.SUPPLIER_ID,id.MTR_ID;
+	</select>
+
+	<select id="receivableSumInfo" resultType="map" parameterType="java.util.Map">
+		SELECT a.CUSTOMER_ID,a.CUSTOMER_NO,a.CUSTOMER_NAME, sum(a.ORDER_MONEY) as ORDER_MONEY,sum(a.DISCOUNT_MONEY) as DISCOUNT_MONEY,sum(a.REVENUE_MONEY) as REVENUE_MONEY
+		FROM (SELECT
+			po.CUSTOMER_ID,
+			po.CUSTOMER_NO,
+			po.CUSTOMER_NAME,
+			pod.PRD_ID,
+			pod.PRD_NO,
+			pod.PRD_NAME,
+			pod.PRD_TYPE_NAME,
+			sum( pod.AMOUNT ) AS AMOUNT,
+			pod.PRICE2,
+			cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ) * cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ) AS ORDER_MONEY,
+			if(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ) &gt; cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ),(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) )-cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ))*cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ),0) AS DISCOUNT_MONEY,
+			if(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ) &lt; cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ),(cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) )-cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ))*cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ),0) AS REVENUE_MONEY
+			FROM
+			tb_production_order po
+			LEFT JOIN tb_production_order_detail pod ON po.id = pod.PRODUCTION_ORDER_ID
+			<where>
+				<if test="startDate != null">
+					po.create_date &gt; #{startDate}
+				</if>
+				<if test="endDate != null">
+					po.create_date  &lt;=#{endDate}
+				</if>
+				<if test="customerId != null">
+					po.CUSTOMER_ID=#{customerId}
+				</if>
+				<if test="placeId != null">
+					po.PLACE_ID=#{placeId}
+				</if>
+				<if test="orderTypeId != null">
+					po.ORDER_TYPE_ID=#{orderTypeId}
+				</if>
+			</where>
+			GROUP BY
+			pod.PRD_ID) a
+		GROUP BY
+		a.CUSTOMER_ID ORDER BY a.ORDER_MONEY DESC;
+	</select>
+
+	<select id="receivableSumDetail" resultType="map" parameterType="java.util.Map">
+		SELECT
+			pod.PRD_ID,
+			pod.PRD_NO,
+			pod.PRD_NAME,
+			pod.PRD_TYPE_NAME,
+			po.PLACE_ID,
+			po.PLACE_NAME,
+			po.ORDER_TYPE_ID,
+			po.ORDER_TYPE_NAME,
+			sum( pod.AMOUNT ) AS AMOUNT,
+			pod.PRICE1,
+			pod.PRICE2,
+			cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ) * cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ) AS ORDER_MONEY,
+			if(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ) &gt; cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ),(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) )-cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ))*cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ),0) AS DISCOUNT_MONEY,
+			if(cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ) &lt; cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) ),(cast( pod.PRICE2 AS DECIMAL ( 10, 2 ) )-cast( pod.PRICE1 AS DECIMAL ( 10, 2 ) ))*cast( sum( pod.AMOUNT ) AS DECIMAL ( 10, 2 ) ),0) AS REVENUE_MONEY
+			FROM
+			tb_production_order po
+			LEFT JOIN tb_production_order_detail pod ON po.id = pod.PRODUCTION_ORDER_ID
+			<where>
+				<if test="startDate != null">
+					po.create_date &gt; #{startDate}
+				</if>
+				<if test="endDate != null">
+					po.create_date &lt;=#{endDate}
+				</if>
+				<if test="customerId != null">
+					po.CUSTOMER_ID=#{customerId}
+				</if>
+				<if test="placeId != null">
+					po.PLACE_ID=#{placeId}
+				</if>
+				<if test="orderTypeId != null">
+					po.ORDER_TYPE_ID=#{orderTypeId}
+				</if>
+			</where>
+		GROUP BY pod.PRD_ID;
+	</select>
+
+	<select id="costreportInfo" resultType="map" parameterType="java.util.Map">
+		SELECT
+			a.CUSTOMER_ID,
+			a.CUSTOMER_NO,
+			a.CUSTOMER_NAME,
+			sum( a.sum_cost ) AS SUM_COST,
+			sum( a.sum_sale ) AS SUM_SALE,
+			CONCAT(ROUND( ( sum( a.sum_cost ) ) / ( sum( a.sum_sale ) ) * 100, 2 ),'','%' ) AS SUM_PERCENT
+		FROM
+			(
+				SELECT
+					po.CUSTOMER_ID,
+					po.CUSTOMER_NO,
+					po.CUSTOMER_NAME,
+					sum( pod.AMOUNT ) AS sumcount,
+					bi.cost,
+					pod.PRICE2,
+					( bi.cost * sum( pod.AMOUNT ) ) AS sum_cost,
+					( pod.PRICE2 * sum( pod.AMOUNT ) ) AS sum_sale,
+					CONCAT(ROUND(( bi.cost * sum( pod.AMOUNT ) ) / ( pod.PRICE2 * sum( pod.AMOUNT ) ) * 100,2 ),'','%' ) AS percent
+				FROM
+					tb_production_order po,
+					tb_production_order_detail pod
+					LEFT JOIN prd_data p ON pod.PRD_ID = p.id
+					LEFT JOIN bom_info bi ON pod.PRD_ID = bi.prd_id
+				WHERE
+					po.id = pod.PRODUCTION_ORDER_ID
+					<if test="startDate != null">
+						AND po.create_date &gt;= #{startDate}
+					</if>
+					<if test="endDate != null">
+						AND po.create_date &lt;= #{endDate}
+					</if>
+					<if test="customerId != null">
+						AND po.CUSTOMER_ID=#{customerId}
+					</if>
+				GROUP BY
+					po.CUSTOMER_ID,
+					pod.PRD_ID
+					AND po.CREATE_DATE
+			) AS a
+		GROUP BY
+			a.CUSTOMER_ID;
+	</select>
+
+	<select id="costreportDetail" resultType="map" parameterType="java.util.Map">
+		SELECT
+			a.CREATE_DATE,
+			a.CUSTOMER_ID,
+			a.CUSTOMER_NO,
+			a.CUSTOMER_NAME,
+			sum( a.sum_cost ) AS SUM_COST,
+			sum( a.sum_sale ) AS SUM_SALE,
+			CONCAT(ROUND( ( sum( a.sum_cost ) ) / ( sum( a.sum_sale ) ) * 100, 2 ),'','%' ) AS SUM_PERCENT
+		FROM
+			(
+				SELECT
+					DATE_FORMAT( po.CREATE_DATE, '%Y-%m-%d' ) AS CREATE_DATE,
+					po.CUSTOMER_ID,
+					po.CUSTOMER_NO,
+					po.CUSTOMER_NAME,
+					sum( pod.AMOUNT ) AS sumcount,
+					bi.cost,
+					pod.PRICE2,
+					( bi.cost * sum( pod.AMOUNT ) ) AS sum_cost,
+					( pod.PRICE2 * sum( pod.AMOUNT ) ) AS sum_sale,
+					CONCAT(ROUND(( bi.cost * sum( pod.AMOUNT ) ) / ( pod.PRICE2 * sum( pod.AMOUNT ) ) * 100,2 ),'','%' ) AS percent
+				FROM
+					tb_production_order po,
+					tb_production_order_detail pod
+					LEFT JOIN prd_data p ON pod.PRD_ID = p.id
+					LEFT JOIN bom_info bi ON pod.PRD_ID = bi.prd_id
+				WHERE
+					po.id = pod.PRODUCTION_ORDER_ID
+					<if test="startDate != null">
+						AND po.create_date &gt;= #{startDate}
+					</if>
+					<if test="endDate != null">
+						AND po.create_date &lt;= #{endDate}
+					</if>
+					<if test="customerId != null">
+						AND po.CUSTOMER_ID=#{customerId}
+					</if>
+				GROUP BY
+					po.CUSTOMER_ID,
+					pod.PRD_ID
+			) AS a
+		GROUP BY
+			a.CUSTOMER_ID,
+			a.CREATE_DATE;
+	</select>
+
+	<select id="costreportHead" resultType="map" parameterType="java.util.Map">
+		SELECT
+			b.PRD_TYPE_NAME,
+			sum( b.SUM_AMOUNT ) AS AMOUNT,
+			sum( b.SUM_COST_MONEY ) AS SUMCOST,
+			sum( b.SUM_PRICE2_MONEY ) AS PRICEMONEY,
+			CONCAT(ROUND(( sum( b.SUM_COST_MONEY ) * sum( b.SUM_AMOUNT ) ) / ( sum( b.SUM_PRICE2_MONEY ) * sum( b.SUM_AMOUNT ) ) * 100,2),'','%') AS PERCENT
+		FROM(
+				SELECT
+					a.PRD_ID,
+					a.PRD_NO,
+					a.PRD_NAME,
+					a.PRD_TYPE_ID,
+					a.PRD_TYPE_NAME,
+					( a.AMOUNT ) AS SUM_AMOUNT,
+					sum( a.COST_MONEY ) AS SUM_COST_MONEY,
+					sum( a.PRICE2_MONEY ) AS SUM_PRICE2_MONEY
+				FROM
+					(
+						SELECT
+							pod.PRD_ID,
+							pod.PRD_NAME,
+							pod.PRD_NO,
+							pod.PRD_TYPE_ID,
+							pod.PRD_TYPE_NAME,
+							pod.AMOUNT,
+							ROUND( pod.AMOUNT * bi.cost, 2 ) AS COST_MONEY,
+							ROUND( pod.AMOUNT * pod.PRICE2, 2 ) AS PRICE2_MONEY
+						FROM
+							tb_production_order po,
+							tb_production_order_detail pod
+							LEFT JOIN prd_data p ON pod.PRD_ID = p.id
+							LEFT JOIN bom_info bi ON pod.PRD_ID = bi.prd_id
+						WHERE
+							po.id = pod.PRODUCTION_ORDER_ID
+							<if test="startDate != null">
+								AND po.create_date &gt;= #{startDate}
+							</if>
+							<if test="endDate != null">
+								AND po.create_date &lt;= #{endDate}
+							</if>
+							<if test="customerId != null">
+								AND po.CUSTOMER_ID=#{customerId}
+							</if>
+					) AS a
+				GROUP BY
+					a.PRD_ID
+			) AS b
+		GROUP BY
+			b.PRD_TYPE_ID
+	</select>
+</mapper>

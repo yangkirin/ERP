@@ -5,27 +5,31 @@ $(function () {
         $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     };
 
+
+
+
     $("#jqGrid").jqGrid({
-        url: baseURL + 'storage/outportdetail/outportInfoList',
+        url: baseURL + 'storage/outportdetail/orderList',
         datatype: "json",
         colModel: [
             { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-            { label: '领料单号', name: 'outporrtNo', index: 'OUTPORRT_NO', width: 100},
             { label: '订单编号', name: 'productionNo', index: 'PRODUCTION_NO', width: 100 },
-            { label: '订单ID', name: 'orderId', index: 'ORDER_ID',hidden:true},
+            { label: '领料单号', name: 'outportNo', index: 'outportNo', width: 100},
             { label: '订单类型名称', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 80 },
             { label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 },
             { label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 80 },
             { label: '售点名称', name: 'placeName', index: 'PLACE_NAME', width: 80 },
-            { label: '备注', name: 'remark', index: 'REMARK', width: 80 },
-            { label: '状态', name: 'status', index: 'STATUS', width: 50 ,formatter: function(value, options, row){
+            { label: '备注', name: 'remakr', index: 'REMAKR', width: 80 },
+            { label: '出库单ID', name: 'outportId', index: 'outportId', hidden:true },
+            { label: '出库单状态', name: 'outportStatus', index: 'outportStatus', hidden:true },
+            { label: '状态', name: 'status', index: 'STATUS', width: 80 ,formatter: function(value, options, row){
                 var msg = "";
                 if(value == 0){
                     msg = '<p class="bg-danger">已撤销</p>';
                 }else if(value == 1){
                     msg = '<p class="bg-success">待确认</p>';
                 }else if(value == 2){
-                    msg = '<p class="bg-info">已确认</p>';
+                    msg = '<p class="bg-info">待出库</p>';
                 }else if(value == 3){
                     msg = '<p class="bg-warning">已出库</p>';
                 }else if(value == 4){
@@ -39,7 +43,7 @@ $(function () {
                     return "0";
                 }else if($.trim(value)=="待确认"){
                     return "1";
-                }else if($.trim(value)=="已确认"){
+                }else if($.trim(value)=="待出库"){
                     return "2";
                 }else if($.trim(value)=="已出库"){
                     return "3";
@@ -49,16 +53,42 @@ $(function () {
             }},
             { label: '创建者', name: 'createUser', index: 'CREATE_USER', width: 80 ,hidden:true},
             { label: '创建日期', name: 'createDate', index: 'CREATE_DATE', width: 80 ,hidden:true},
+            { label: '操作', name: 'operation', index: 'operation', width: 200,formatter:function(value, options, row){
+                var operatorStr = "";
 
-            { label: '确认', name: 'operConfirm', index: 'operConfirm', width: 50},
-            { label: '编辑领料', name: 'operEditMtr', index: 'operEditMtr', width: 60},
-            { label: '打印', name: 'operPrint', index: 'operPrint', width: 50},
-            { label: '反确认', name: 'operBack', index: 'operBack', width: 50},
-            { label: '确认出库', name: 'operConfirmOut', index: 'operConfirmOut', width: 50},
-            { label: '完结', name: 'operClose', index: 'operClose', width: 50},
-            { label: '删除', name: 'operDel', index: 'operDel', width: 50}
+                var confirmStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"1\")'>领&nbsp;&nbsp;&nbsp;料</button>&nbsp;&nbsp;";
+                var printStr = "<button type='button' class='btn btn-info btn-xs' onclick='oper("+row.id+",\"2\")'>打&nbsp;&nbsp;&nbsp;印</button>&nbsp;&nbsp;";
+                var saveStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"3\")'>领料确认</button>&nbsp;&nbsp;";
+                var configMtr = "<button type='button' class='btn btn-primary btn-xs' onclick='configMtr("+row.id+")'>领料配置</button>&nbsp;&nbsp;";
+
+                // if(!hasPermission('purchase:orderinfo:update')){
+                //     editStr = "";
+                // }
+                // if(!hasPermission('purchase:orderinfo:delete')){
+                //     confirmStr = "";
+                // }
+                //状态说明：0-撤销，1-待确认，2-已确认，3-已出库，4-已完结
+                //撤销的单据无任何操作；
+                //待确认表示刚刚新建的单据，可以进行反复的修改以及确认
+                //已确认的单据不允许修改，可以被反确认和打印。反确认需要进行逻辑校验
+                //已出库表示单据做了领料出库操作，只能被完结掉。不能做其它操作
+                //已完结表述单据已正常关闭。可以打印。
+                var status = row.status;
+                var outportStatus = row.outportStatus;
+                if(status == '2'){//已确认
+                    operatorStr = confirmStr;
+                }else if(outportStatus == '1'){//出库单状态为新建
+                    operatorStr = configMtr+saveStr;
+                }else if(outportStatus == '2'){//出库单状态为已确认
+                    operatorStr = printStr;
+                }else if(status == '4'){//已完结
+                    operatorStr = printStr;
+                }
+                return operatorStr;
+            }}
         ],
         viewrecords: true,
+        // height: 385,
         height: "auto",
         rowNum: 9999999,
         rowList: [10, 30, 50],
@@ -82,57 +112,10 @@ $(function () {
         gridComplete: function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
-
-
-            var ids = $("#jqGrid").jqGrid('getDataIDs');
-            for ( var i = 0; i < ids.length; i++) {
-                var cl = ids[i];
-                var row = $("#jqGrid").jqGrid("getRowData",cl);
-
-                var del = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"0\")'>删除</button>";
-                var confirmStr = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"1\")'>确认</button>";
-                var printStr = "<button type='button' class='btn btn-info btn-xs' onclick='oper("+row.id+",\"2\")'>打印</button>";
-                var back = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"3\")'>反确认</button>";
-                var over = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"4\")'>完结</button>";
-                var configMtr = "<button type='button' class='btn btn-primary btn-xs' onclick='configMtr("+row.id+")'>编辑领料</button>";
-                var confirmOut = "<button type='button' class='btn btn-primary btn-xs' onclick='oper("+row.id+",\"5\")'>出库确认</button>";
-
-                var status = row.status;
-                if(status == '0'){
-                    operatorStr = "";
-                }else if(status == '1'){
-                    $("#jqGrid").jqGrid('setRowData', ids[i],{
-                        operDel : del,
-                        operConfirm:confirmStr
-                        // operEditMtr:configMtr
-                    });
-                }else if(status == '2'){
-                    $("#jqGrid").jqGrid('setRowData', ids[i],{
-                        operPrint : printStr,
-                        operEditMtr:configMtr,
-                        operConfirmOut:confirmOut,
-                        operBack:back
-                    });
-                }else if(status == '3'){
-                    $("#jqGrid").jqGrid('setRowData', ids[i],{
-                        operPrint : printStr,
-                        operClose:over
-                    });
-                }else if(status == '4'){
-                    $("#jqGrid").jqGrid('setRowData', ids[i],{
-                        operPrint : printStr
-                    });
-                }
-            }
         },
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
-            var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
-            var orderId = rowData.orderId;
-            if(rowData.orderId == null || rowData.orderId == undefined || rowData.orderId == ''){
-                orderId = 0;
-            }
-            var url = baseURL + 'storage/outportdetail/getOrderMtrList?orderId='+orderId+'&outportId='+rowData.id;
+            var url = baseURL + 'storage/outportdetail/getOrderMtrList?orderId='+row_id;
             createSubGrid(subgrid_id,row_id,url);
         }
     });
@@ -146,6 +129,20 @@ $(function () {
             url : url,
             datatype : "json",
             colModel : [
+                // { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
+                // { label: '生产订单ID', name: 'productionOrderId', index: 'PRODUCTION_ORDER_ID', width: 80 ,hidden:true},
+                // { label: '生产订单编号', name: 'productionOrderNo', index: 'PRODUCTION_ORDER_NO', width: 80 ,hidden:true},
+                // { label: '产品ID', name: 'prdId', index: 'PRD_ID', width: 80 ,hidden:true},
+                // { label: '产品编号', name: 'prdNo', index: 'PRD_NO', width: 80 },
+                // { label: '产品名称', name: 'prdName', index: 'PRD_NAME', width: 80 },
+                // { label: '产品类型ID', name: 'prdTypeId', index: 'PRD_TYPE_ID', width: 80 ,hidden:true},
+                // { label: '产品类型名称', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 80 },
+                // { label: '需求数量', name: 'amount', index: 'AMOUNT', width: 80 },
+                // { label: '定价', name: 'price1', index: 'PRICE1', width: 80 ,hidden:true},
+                // { label: '售价', name: 'price2', index: 'PRICE2', width: 80 ,hidden:true},
+                // { label: '成本', name: 'cost', index: 'COST', width: 80 ,hidden:true},
+                // { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 80 ,hidden:true}
+
                 { label: '原料ID', name: 'mtrId', index: 'MTR_ID', key: true  ,hidden:true},
                 { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 100 },
                 { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 200 },
@@ -184,7 +181,6 @@ $(function () {
         datatype: "json",
         colModel: [
             { label: '原料ID', name: 'mtrId', index: 'MTR_ID', key: true  ,hidden:true},
-            { label: '出库明细ID', name: 'id', index: 'id' ,hidden:true},
             { label: '原料编号', name: 'mtrNo', index: 'MTR_NO', width: 120 },
             { label: '原料名称', name: 'mtrName', index: 'MTR_NAME', width: 200 },
             { label: '原料类型', name: 'mtrTypeName', index: 'MTR_TYPE_NAME', width: 150 },
@@ -220,7 +216,7 @@ $(function () {
         },
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
-            var url = baseURL + 'storage/outportdetail/getOutportDetailList?orderId='+vm.outportInfo.orderId+'&mtrId='+row_id+'&outportId='+vm.outportInfo.id;
+            var url = baseURL + 'storage/outportdetail/getOutportDetailList?orderId='+vm.outportInfo.orderId+'&mtrId='+row_id;
             createDetailSubGrid(subgrid_id,row_id,url);
         }
     });
@@ -248,7 +244,6 @@ $(function () {
             rowNum : 9999999,
             // pager : pager_id,
             height : 'auto',
-            width:'500',
             rowList : [10,30,50],
             rownumbers: true,
             rownumWidth: 25,
@@ -271,48 +266,6 @@ $(function () {
             }
         });
     }
-
-    $("#jqGridOrder").jqGrid({
-        url: baseURL + 'sales/productionorder/list',
-        datatype: "json",
-        colModel: [
-            { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
-            { label: '订单编号', name: 'productionNo', index: 'PRODUCTION_NO', width: 120 },
-            { label: '类型', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 50 },
-            { label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 },
-            { label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 120 },
-            { label: '售点名称', name: 'placeName', index: 'PLACE_NAME', width: 120 },
-            { label: '产品总数', name: 'prdMount', index: 'PRD_MOUNT', width: 60,hidden:false },
-            { label: '备注', name: 'remark', index: 'REMARK', width: 120 }
-        ],
-        viewrecords: true,
-        height: 'auto',
-        rowNum: 9999999,
-        rowList : [10,30,50],
-        rownumbers: true,
-        rownumWidth: 25,
-        autowidth:true,
-        width:'700',
-        multiselect: false,
-        // scroll:true,
-        // pager: "#jqGridPager",
-        jsonReader : {
-            root: "page.list",
-            page: "page.currPage",
-            total: "page.totalPage",
-            records: "page.totalCount"
-        },
-        prmNames : {
-            page:"page",
-            rows:"limit",
-            order: "order"
-        },
-        gridComplete:function(){
-            //隐藏grid底部滚动条
-            $("#jqGridOrder").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
-        }
-    });
-
 
     var newDate = new Date();
     var currentDate = newDate.toJSON();
@@ -430,146 +383,87 @@ $(function () {
             vm.addOrder.orderTypeId = '';
             vm.addOrder.placeId = '';
         }
+
     });
 
-    $('#customerName').change(function(){
-        var data = $(this).val();
-        vm.addOrder.customerId = data;
-    });
 
-    $('#orderTypeAdd').change(function(){
-        var data = $(this).val();
-        vm.addOrder.orderTypeId = data;
-    });
-
-    $('#placeAdd').change(function(){
-        var data = $(this).val();
-        vm.addOrder.placeId = data;
-    });
 });
 
 /**
  * Grid操作列事件
  * @param rowid 所选择的操作行数据ID
- * @param type 操作类型：0-撤销，1-确认，2-打印，3-反确认，4-已完结，5-确认出库
+ * @param type 操作类型：0-修改，1-确认，2-反确认，3-完结，4-打印
  */
 function oper(rowId,type){
     //根据所选数据的状态来进行业务判断，5种状态说明：0-撤销，1-待确认，2-已确认，3-已出库，4-已完结
     var rowData = $("#jqGrid").jqGrid('getRowData',rowId);
+    var status = rowData.status;
     var msg = '所选单据状态不满足此操作，请选择合适的单据！';
-    if(type == "0"){
-        $.ajax({
-            type:"POST",
-            async:false,
-            url: baseURL + "storage/outportdetail/deleteInfo/"+rowId,
-            success: function(r){
-                msg = '操作成功';
-                vm.reload();
-            }
-        });
-    }else if(type == "1"){
-        $.ajax({
-            type:"POST",
-            async:false,
-            url: baseURL + "storage/outportdetail/updateOutportInfoStatus",
-            data:{outportId:rowId,status:"2"},
-            success: function(r){
-                msg = '操作成功';
-                alert(msg);
-                vm.reload();
-            }
-        });
-    }else if(type == "2"){
-        msg="领料单打印。";
-        alert(msg);
-    }else if(type == "3"){
-        alert("反确认");
-    }else if(type == "4"){
-        alert("完结");
-        $.ajax({
-            type:"POST",
-            async:false,
-            url: baseURL + "storage/outportdetail/updateOutportInfoStatus",
-            data:{outportId:rowId,status:"4"},
-            success: function(r){
-                msg = '操作成功';
-                alert(msg);
-                vm.reload();
-            }
-        });
-    }else if(type == "5"){
-        alert("出库确认");
-        confirm("确认保存后无法进行修改，是否继续？",function(){
+    switch(type){
+        case '1'://领料操作
+            //1-根据订单来创建领料单信息outportInfo
+            //2-修改订单状态为3-已出库
+            vm.createOutprotInfo(rowId);
+            return;
+            break;
+        case '2'://打印
+            msg="领料单打印。";
+            break;
+        case '3'://领料确认
+            msg = msg + '----Test';
             $.ajax({
                 type:"POST",
                 async:false,
                 url: baseURL + "storage/outportdetail/updateOutportInfoStatus",
-                data:{outportId:rowId,status:"3"},
+                data:{orderId:rowId,status:"2"},
                 success: function(r){
                     msg = '操作成功';
-                    alert(msg);
                     vm.reload();
                 }
             });
-        });
+            break;
+        default:
+            alert('default');
+            break;
     }
+    alert(msg);
 }
 
-function configMtr(rowId){
-    vm.outportInfo={};
-    var rowData = $("#jqGrid").jqGrid("getRowData",rowId);
-    if(rowData.orderId){
-        //根据客户订单Id查询出领料单信息
-        $.ajax({
-            type:"POST",
-            async:false,
-            url: baseURL + "storage/outportdetail/outportInfo/"+rowData.orderId,
-            success: function(r){
-                vm.outportInfo = r.outportInfo;
-            }
-        });
-
-        vm.showList=false;
-        vm.showDetail=true;
-        vm.addDetailMtr=false;
-        vm.editDetailMtr=true;
-        //查询客户订单的原料列表
-        $("#jqGridMtr").jqGrid('setGridParam',{
-            postData:{'orderId': rowData.orderId}
-        }).trigger("reloadGrid");
-    }else{
-
-        $.ajax({
-            type:"POST",
-            async:false,
-            url: baseURL + "storage/outportdetail/outportInfoByOutId/"+rowId,
-            success: function(r){
-                vm.outportInfo = r.outportInfo;
-            }
-        });
-        // if(vm.outportInfo.status == '2'){
-        //     alert('领料单已确认，无法进行领料编辑！');
-        //     return;
-        // }
-
-        vm.showList=false;
-        vm.showDetail=true;
-        vm.addDetailMtr=true;
-        vm.editDetailMtr=false;
-        //查询客户订单的原料列表
-        $("#jqGridMtr").jqGrid('setGridParam',{
-            postData:{'orderId': 0,'outportId':rowData.id}
-        }).trigger("reloadGrid");
+function configMtr(orderId){
+    //根据客户订单Id查询出领料单信息
+    $.ajax({
+        type:"POST",
+        async:false,
+        url: baseURL + "storage/outportdetail/outportInfo/"+orderId,
+        success: function(r){
+            vm.outportInfo = r.outportInfo;
+        }
+    });
+    if(vm.outportInfo.status == '2'){
+        alert('领料单已确认，无法进行领料编辑！');
+        return;
     }
+
+    vm.showList=false;
+    vm.showDetail=true;
+    //查询客户订单的原料列表
+    $("#jqGridMtr").jqGrid('setGridParam',{
+        postData:{'orderId': orderId},
+    }).trigger("reloadGrid");
+
 }
+
+
+
+
+
+
 
 var vm = new Vue({
 	el:'#rrapp',
 	data:{
 		showList: true,
         showDetail: false,
-        editDetailMtr: false,
-        addDetailMtr: false,
 		title: null,
         productionOrder:{},
         outportInfo:{},
@@ -958,30 +852,24 @@ var vm = new Vue({
             //所选原料信息
             var rowId = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
             var rowData = $('#jqGridMtr').jqGrid("getRowData",rowId);
-            var mtrId = rowData.mtrId;
-            if(!mtrId){
-                mtrId = vm.mtrInfo.id;
-            }
-            if(vm.selectData.batchNo != 0){
-                $.ajax({
-                    type: "POST",
-                    async:false,
-                    url: baseURL + "storage/importmtrbatch/getCurrentCount",
-                    // contentType: "application/json",
-                    data: {mtrId:mtrId,batchNo:vm.selectData.batchNo},
-                    success: function(r){
-                        vm.selectData.inventory = r.currentCount;
-                        $('#inventory').val(r.currentCount+'【'+vm.mtrInfo.purchaseUnitName+'】');
 
-                        //最小单位库存计算
-                        //最小单位库存量=库存量*采购转换率*最小转换率
-                        var miniInventory = Number(Number(r.currentCount)*Number(vm.mtrInfo.purchaseRate)*Number(vm.mtrInfo.miniRate),2);
-                        vm.selectData.inventoryMiniUnit = miniInventory;
-                        $('#inventoryMiniUnit').val(miniInventory+'【'+vm.mtrInfo.miniUnitName+'】');
-                    }
-                });
-            }
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "storage/importmtrbatch/getCurrentCount",
+                // contentType: "application/json",
+                data: {mtrId:rowData.mtrId,batchNo:vm.selectData.batchNo},
+                success: function(r){
+                    vm.selectData.inventory = r.currentCount;
+                    $('#inventory').val(r.currentCount+'【'+vm.mtrInfo.purchaseUnitName+'】');
 
+                    //最小单位库存计算
+                    //最小单位库存量=库存量*采购转换率*最小转换率
+                    var miniInventory = Number(Number(r.currentCount)*Number(vm.mtrInfo.purchaseRate)*Number(vm.mtrInfo.miniRate),2);
+                    vm.selectData.inventoryMiniUnit = miniInventory;
+                    $('#inventoryMiniUnit').val(miniInventory+'【'+vm.mtrInfo.miniUnitName+'】');
+                }
+            });
         },
         initMtrBatch:function(){
             var rowId = $('#jqGridMtr').jqGrid("getGridParam", "selrow");
@@ -1005,14 +893,12 @@ var vm = new Vue({
 
             // 实际出库量=领料量/最小转换率/采购转换率
             // 剩余库存量=库存量-实际出库量
-            // var realCount = Number(Number(Number(inputCount)/Number(vm.mtrInfo.miniRate),2)/Number(vm.mtrInfo.purchaseRate),2);
-            var realCount = inputCount;
+            var realCount = Number(Number(Number(inputCount)/Number(vm.mtrInfo.miniRate),2)/Number(vm.mtrInfo.purchaseRate),2);
             vm.selectData.realCount = realCount;
             var residueCount = Number(vm.selectData.inventory)-realCount;
             vm.selectData.residueCount = residueCount.toFixed(2);
             $('#realCount').val(realCount);
             $('#residueCount').val(residueCount.toFixed(2));
-
         },
         clean:function(){
             vm.productionOrder={
@@ -1081,197 +967,26 @@ var vm = new Vue({
         },
         addOutport:function(){
             $("#newOutPort").modal("show");
-            $.ajax({
-                type:"POST",
-                async:false,
-                url: baseURL + "common/commonUtil/createBillNo",
-                data:"billType=2",
-                success: function(r){
-                    vm.addOrder.outportNo = r.newBillNo;
-                    $('#addOutportNo').val(r.newBillNo);
-                }
-            });
         },
         addModalCommit:function(){
+            console.log(vm.addOrder);
+
             //save2
             $.ajax({
                 type: "POST",
-                url: baseURL + "storage/outportdetail/save2?isDH="+vm.addOrder.isDH+"&outportNo="+vm.addOrder.outportNo+"&customerId="+vm.addOrder.customerId+"&orderTypeId="+vm.addOrder.orderTypeId+"&placeId="+vm.addOrder.placeId,
+                url: baseURL + "sales/productionorder/save2?isDH="+vm.addOrder.isDH+"&customerId="+vm.addOrder.customerId+"&orderTypeId="+vm.addOrder.orderTypeId+"&placeId="+vm.addOrder.placeId,
                 contentType: "application/json",
                 data: JSON.stringify(vm.addOrder),
                 success: function(r){
                     if(r.code === 0){
                         alert('操作成功', function(index){
                             $("#newOutPort").modal("hide");
-                            vm.addOrder={};
-                            vm.reload();
                         });
                     }else{
                         alert(r.msg);
                     }
                 }
             });
-        },
-        orderOutport:function(){
-            $("#orderOutportModal").modal("show");
-
-            $('#jqGridOrder').jqGrid('setGridParam',{
-                postData:{'type': 'allow_outport'}
-            }).trigger("reloadGrid");
-        },
-        createOutport:function(){
-            var id = $("#jqGridOrder").jqGrid('getGridParam','selrow');//orderId
-            vm.createOutprotInfo(id);
-            $("#jqGrid").jqGrid('setGridParam',{
-                // page:page
-            }).trigger("reloadGrid");
-
-            $('#orderOutportModal').modal('hide')
-        },
-        getSelectDataMtr:function(){
-            var outprotId = $("#jqGrid").jqGrid('getGridParam','selrow');//outprotId
-            var query = $('#mtrName').val();
-            $.ajax({
-                type:"POST",
-                url: baseURL + "common/commonUtil/getTableData",
-                data:"tableName=MTR_DATA&fieldName=MTR_NAME:MTR_PY&searchWord="+query,
-                success: function(r){
-                    var resultList = r.data.map(function (item) {
-                        var aItem = {id:item.id,py: item.MTR_PY, name: item.MTR_NAME};
-                        return JSON.stringify(aItem);
-                    });
-                    dataSource = resultList;
-                    $('#mtrName').typeahead({
-                        source:dataSource,
-                        highlighter: function (obj) {
-                            var item = JSON.parse(obj);
-                            var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-                            return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
-                                return '<strong>' + match + '</strong>'
-                            });
-                        },
-                        updater: function (obj) {
-                            var item = JSON.parse(obj);
-                            vm.mtrInfo.mtrId = item.id;
-                            vm.mtrInfo.mtrName = item.name;
-                            return item.name;
-                        },
-                        afterSelect:function(obj){
-                            var mtrId = vm.mtrInfo.mtrId;
-                            $.ajax({
-                                type: "POST",
-                                url: baseURL + "baseData/mtrdata/info/"+mtrId,
-                                async:false,
-                                success: function (r) {
-                                    vm.mtrInfo = r.mtrData;
-                                    console.log(vm.mtrInfo);
-                                }
-                            });
-
-                            $.ajax({
-                                type: "POST",
-                                async:false,
-                                url: baseURL + "common/commonUtil/getDataToCommbox",
-                                // contentType: "application/json",
-                                data: {tableName:"tb_import_mtr_batch",search:"MTR_ID="+mtrId,returnField:"BATCH_NO as value,BATCH_NO as text"},
-                                success: function(r){
-                                    vm.batchArr =  r.data;
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        },
-        newAddMtr:function(){
-            $('#mtrName').removeAttr("readonly");
-            vm.getSelectDataMtr();
-
-            var num = layer.open({
-                type: 1,
-                skin: 'layui-layer-molv',
-                title: vm.title,
-                area: ['600px', '480px'],
-                shadeClose: false,
-                content: jQuery("#addLayer"),
-                btn: ['提交', '取消'],
-                btn1: function (event) {
-                    vm.outportDetail.outportId = vm.outportInfo.id;
-                    vm.outportDetail.mtrId = vm.mtrInfo.id;
-                    vm.outportDetail.mtrNo = vm.mtrInfo.mtrCode;
-                    vm.outportDetail.mtrName = vm.mtrInfo.mtrName;
-                    vm.outportDetail.mtrTypeName = vm.mtrInfo.typeName;
-                    vm.outportDetail.outUnit = vm.mtrInfo.miniUnitName;
-
-                    vm.outportDetail.orderCount = vm.selectData.outAmount;
-                    // vm.outportDetail.outCount = vm.selectData.realCount;
-                    vm.outportDetail.outCount = vm.selectData.outAmount;
-                    vm.outportDetail.batchNo = vm.selectData.batchNo;
-
-                    $.ajax({
-                        type: "POST",
-                        async:false,
-                        url: baseURL + "storage/outportdetail/save",
-                        contentType: "application/json",
-                        data: JSON.stringify(vm.outportDetail),
-                        success: function(r){
-                            if(r.code == 0){
-                                alert('操作成功', function(index){
-                                    $("#jqGridMtr").jqGrid('setGridParam',{
-                                        datatype:'json',
-                                        postData:{'outportId': vm.outportInfo.id}
-                                    }).trigger("reloadGrid");
-                                });
-                            }else{
-                                alert(r.msg);
-                            }
-                        }
-                    });
-                    layer.close(num);
-                    vm.outportDetail = {};
-                    vm.mtrInfo = {};
-                    vm.selectData = {};
-                    vm.selectArr = {};
-                },
-                btn2: function (event) {
-                    vm.outportDetail = {};
-                    vm.mtrInfo = {};
-                    layer.close(num);
-                }
-            });
-        },
-        newEditMtr:function(){
-
-        },
-        newDeleteMtr:function(){
-            var id = $("#jqGridMtr").jqGrid('getGridParam','selrow');//outprotId
-            if(!id){
-                alert('请选择要删除的信息！');
-                return;
-            }
-            var rowData = $("#jqGridMtr").jqGrid("getRowData",id);//计划单信息
-            $.ajax({
-                type: "POST",
-                async:false,
-                url: baseURL + "storage/outportdetail/deleteDetail/"+rowData.id,
-                contentType: "application/json",
-                // data: JSON.stringify(vm.outportDetail),
-                success: function(r){
-                    if(r.code == 0){
-                        alert('操作成功', function(index){
-                            $("#jqGridMtr").jqGrid('setGridParam',{
-                                datatype:'json',
-                                postData:{'outportId': vm.outportInfo.id}
-                            }).trigger("reloadGrid");
-                        });
-                    }else{
-                        alert(r.msg);
-                    }
-                }
-            });
-        },
-        newSaveOrUpdate:function(){
-
         }
 	}
 });

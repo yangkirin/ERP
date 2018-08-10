@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kirin.modules.storage.dao.OutportInfoDao">
+
+	<select id="queryObject" resultType="com.kirin.modules.storage.entity.OutportInfoEntity">
+		select
+			o.*
+		from
+			tb_outport_info o
+		WHERE o.ID = #{value}
+	</select>
+
+	<select id="queryObjectByOrderId" resultType="com.kirin.modules.storage.entity.OutportInfoEntity">
+		SELECT
+			po.ORDER_TYPE_NAME AS orderTypeName,
+			po.PLACE_NAME AS placeName,
+			po.PRODUCTION_NO AS productionNo,
+			c.CUSTOMER_NAME AS customerName,
+			c.CUSTOMER_CODE AS customerNo,
+			o.*
+		FROM
+			tb_outport_info o,
+			tb_customer_info c,
+			tb_production_order po
+		WHERE
+			o.CUSTOMER_ID = c.id
+			AND po.id = o.ORDER_ID
+			AND o.ORDER_ID =#{orderId}
+	</select>
+
+	<select id="queryList" resultType="com.kirin.modules.storage.entity.OutportInfoEntity">
+		select
+			(select t.type_name from tb_type_info t where t.id=o.ORDER_TYPE_ID) AS orderTypeName,
+			(select t.type_name from tb_type_info t where t.id=o.PLACE_ID) AS placeName,
+			po.PRODUCTION_NO AS productionNo,
+			c.CUSTOMER_NAME AS customerName,
+			c.CUSTOMER_CODE AS customerNo,
+			o.*
+		from
+			tb_outport_info o
+			left join tb_customer_info c on o.CUSTOMER_ID = c.id
+			left join tb_production_order po on po.id = o.ORDER_ID or o.ORDER_ID is NULL
+		WHERE
+			o.CUSTOMER_ID = c.id
+			AND po.id = o.ORDER_ID or o.ORDER_ID is NULL
+			<if test="outportId != null">
+				AND o.ID = #{outportId}
+			</if>
+			<if test="outportNo != null">
+				AND o.OUTPORRT_NO = #{outportNo}
+			</if>
+			<if test="orderId != null">
+				AND o.ORDER_ID = #{orderId}
+			</if>
+			<if test="customerId != null">
+				AND o.CUSTOMER_ID = #{customerId}
+			</if>
+			<if test="productionNo != null">
+				AND po.PRODUCTION_NO = #{productionNo}
+			</if>
+		GROUP BY o.ID
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by ID desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_outport_info 
+	</select>
+	 
+	<insert id="save" parameterType="com.kirin.modules.storage.entity.OutportInfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_outport_info
+		(
+			`OUTPORRT_NO`,
+			`ORDER_ID`,
+			`CUSTOMER_ID`,
+			`ORDER_TYPE_ID`,
+			`PLACE_ID`,
+			`OUTPORT_DATE`,
+			`REMARK`,
+			`STATUS`,
+			`CREATE_USER`,
+			`CREATE_DATE`,
+			`UPDATE_DATE`
+		)
+		values
+		(
+			#{outporrtNo},
+			#{orderId},
+			#{customerId},
+			#{orderTypeId},
+			#{placeId},
+			#{outportDate},
+			#{remark},
+			#{status},
+			#{createUser},
+			#{createDate},
+			#{updateDate}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.kirin.modules.storage.entity.OutportInfoEntity">
+		update tb_outport_info 
+		<set>
+			<if test="outporrtNo != null">`OUTPORRT_NO` = #{outporrtNo}, </if>
+			<if test="orderId != null">`ORDER_ID` = #{orderId}, </if>
+			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>
+			<if test="orderTypeId != null">`ORDER_TYPE_ID` = #{orderTypeId}, </if>
+			<if test="placeId != null">`PLACE_ID` = #{placeId}, </if>
+			<if test="outportDate != null">`OUTPORT_DATE` = #{outportDate}, </if>
+			<if test="remark != null">`REMARK` = #{remark}, </if>
+			<if test="status != null">`STATUS` = #{status}, </if>
+			<if test="createUser != null">`CREATE_USER` = #{createUser},</if>
+			<if test="createDate != null">`CREATE_DATE` = #{createDate},</if>
+			<if test="updateDate != null">`UPDATE_DATE` = #{updateDate}</if>
+		</set>
+		where ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_outport_info where ID = #{value}
+	</delete>
+	
+</mapper>

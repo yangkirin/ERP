@@ -333,7 +333,9 @@ public class OutportDetailController extends AbstractController {
 				outportDetailEntity.setOutCount(new BigDecimal("0"));
 			}else{
 				outportDetailEntity.setOrderCount(orderCount.divide(miniRate,4,BigDecimal.ROUND_HALF_UP));
-				outportDetailEntity.setOutCount(outCount.divide(miniRate,4,BigDecimal.ROUND_HALF_UP));
+//				outportDetailEntity.setOutCount(outCount.divide(miniRate,4,BigDecimal.ROUND_HALF_UP));
+//				outportDetailEntity.setOrderCount(orderCount);
+				outportDetailEntity.setOutCount(outCount);
 			}
 			outportDetailEntityList.add(outportDetailEntity);
 		}
@@ -383,11 +385,16 @@ public class OutportDetailController extends AbstractController {
 	}
 
 	@RequestMapping("/updateOutportInfoStatus")
-	public R updateOutportInfoStatus(@RequestParam("orderId")Long orderId,@RequestParam("status")String status){
-		OutportInfoEntity outportInfoEntity = outportInfoService.queryObjectByOrderId(orderId);
+	public R updateOutportInfoStatus(@RequestParam("outportId")Long outportId,@RequestParam("status")String status){
+		OutportInfoEntity outportInfoEntity = outportInfoService.queryObject(outportId);
+//		OutportInfoEntity outportInfoEntity = outportInfoService.queryObjectByOrderId(orderId);
 		outportInfoEntity.setStatus(status);
 
 		outportInfoService.update(outportInfoEntity);
+		if(status.equals("")){
+
+		}
+
 		return R.ok();
 	}
 

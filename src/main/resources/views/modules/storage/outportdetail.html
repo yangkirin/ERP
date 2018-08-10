@@ -76,24 +76,27 @@
     </div>
     
     <div v-show="showDetail" class="panel panel-default">
-		<div class="grid-btn">
-			<div v-show="editDetailMtr">
-				<a  class="btn btn-primary" id="addMtr_btn" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;选择批号</a>
-				<!--<a  class="btn btn-primary" id="editMtr_btn" @click="editMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>-->
-				<a  class="btn btn-primary" id="delMtr_btn" @click="deleteMtr"><i class="fa fa-close"></i>&nbsp;删除原料</a>
-				<!--<a  class="btn btn-primary" id="saveMtr_btn" @click="saveOrUpdate"><i class="fa fa-save"></i>&nbsp;保存</a>-->
-				<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
-			</div>
-			<div v-show="addDetailMtr">
-				<a  class="btn btn-primary" id="newAddMtr_btn" @click="newAddMtr"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
-				<!--<a  class="btn btn-primary" id="newEditMtr_btn" @click="newEditMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>-->
-				<a  class="btn btn-primary" id="newDelMtr_btn" @click="newDeleteMtr"><i class="fa fa-close"></i>&nbsp;删除原料</a>
-				<!--<a  class="btn btn-primary" id="newSaveMtr_btn" @click="newSaveOrUpdate"><i class="fa fa-save"></i>&nbsp;保存</a>-->
-				<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
-			</div>
-
-		</div>
 		<form class="form-horizontal" style="width: 100%;">
+			<div class="form-group">
+				<div class="col-sm-12">
+					<div class="grid-btn">
+						<div v-show="editDetailMtr">
+							<a  class="btn btn-primary" id="addMtr_btn" @click="addMtr"><i class="fa fa-plus"></i>&nbsp;选择批号</a>
+							<!--<a  class="btn btn-primary" id="editMtr_btn" @click="editMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>-->
+							<!--<a  class="btn btn-primary" id="delMtr_btn" @click="deleteMtr"><i class="fa fa-close"></i>&nbsp;删除原料</a>-->
+							<!--<a  class="btn btn-primary" id="saveMtr_btn" @click="saveOrUpdate"><i class="fa fa-save"></i>&nbsp;保存</a>-->
+							<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+						</div>
+						<div v-show="addDetailMtr">
+							<a  class="btn btn-primary" id="newAddMtr_btn" @click="newAddMtr"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
+							<!--<a  class="btn btn-primary" id="newEditMtr_btn" @click="newEditMtr"><i class="fa fa-pencil"></i>&nbsp;编辑</a>-->
+							<a  class="btn btn-primary" id="newDelMtr_btn" @click="newDeleteMtr"><i class="fa fa-close"></i>&nbsp;删除原料</a>
+							<!--<a  class="btn btn-primary" id="newSaveMtr_btn" @click="newSaveOrUpdate"><i class="fa fa-save"></i>&nbsp;保存</a>-->
+							<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+						</div>
+					</div>
+				</div>
+			</div>
 			<!-- 计划单信息 -->
 			<div class="form-group">
 				<div class="col-sm-1 control-label">客户名称</div>
@@ -124,8 +127,8 @@
 				</div>
 			</div>
 		</form>
-		<table id="jqGridMtr" style="width: 100%;"></table>
-		<div id="jqGridPagerMtr" style="width: 100%;"></div>
+		<table id="jqGridMtr"></table>
+		<div id="jqGridPagerMtr"></div>
 	</div>
 
 	<div id="addLayer" style="display: none;">
