@@ -106,10 +106,11 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<div class="col-sm-2 control-label">最小单位</div>
+                        <div class="col-sm-2 control-label">基本单位</div><!--最小单位名称换成基本单位-->
 						<div class="col-sm-4">
 							<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="mtrData.miniUnitName" @click="typeInfoTree('editMiniUnitName')" readonly="readonly" placeholder="最小单位"/>-->
-							<select class="form-control" v-model="mtrData.miniUnit" placeholder="最小单位" readonly="readonly">
+                            <select class="form-control" v-model="mtrData.miniUnit" placeholder="基本单位"
+                                    readonly="readonly"><!--最小单位名称换成基本单位-->
 								<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
 							</select>
 						</div>
@@ -305,10 +306,10 @@
 			    </div>
 			</div>
 			<div class="form-group">
-			   	<div class="col-sm-2 control-label"><label style="color: red">*</label>最小单位</div>
+                <div class="col-sm-2 control-label"><label style="color: red">*</label>基本单位</div><!--最小单位名称换成基本单位-->
 			   	<div class="col-sm-3">
 					<!--<input type="text" class="form-control" style="cursor:pointer;" v-model="addMtrData.miniUnitName" @click="typeInfoTree('miniUnit')" readonly="readonly" placeholder="最小单位"/>-->
-					<select class="form-control" v-model="addMtrData.miniUnit" placeholder="最小单位">
+                    <select class="form-control" v-model="addMtrData.miniUnit" placeholder="基本单位"><!--最小单位名称换成基本单位-->
 						<option v-for="option in unitArr" v-bind:value="option.value">{{option.text}}
 					</select>
 			    </div>
