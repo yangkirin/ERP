@@ -52,11 +52,18 @@
 		from bom_info b
 		left join prd_data p on p.id=b.prd_id
 		where 1=1
-		<if test="bomName != null">
-			and b.bom_name like "%${bomName}%"
+		<if test="bomName != null and bomPy != null">
+			and(
+			<if test="bomName != null">
+				b.bom_name like "%${bomName}%"
+			</if>
+			<if test="bomPy != null">
+				or b.bom_py like "%${bomPy}%"
+			</if>
+			)
 		</if>
-		<if test="bomPy != null">
-			or b.bom_py like "%${bomPy}%"
+		<if test="semifinished != null and semifinished!='-1'">
+			and p.SEMI_FINISHED = "${semifinished}"
 		</if>
 		<!--<if test="prdIdName != null">-->
 			<!--or prdIdName like "%${prd_name}%"-->

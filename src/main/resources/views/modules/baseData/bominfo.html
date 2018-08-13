@@ -24,13 +24,20 @@
 <div id="rrapp" v-cloak>
 	<div v-show="showList">
 		<div class="row">
-			<div class="grid-btn col-sm-6">
+			<div class="grid-btn col-sm-4">
 				<a v-if="hasPermission('baseData:bominfo:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
 				<a v-if="hasPermission('baseData:bominfo:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
 				<a v-if="hasPermission('baseData:bominfo:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
 				<a v-if="hasPermission('baseData:bominfo:detailConfig')" class="btn btn-primary" @click="detailConfig"><i class="fa fa-cog"></i>&nbsp;原料配置</a>
 			</div>
-			<div class="input-group input-group-sm col-sm-4">
+			<div class="col-sm-1">
+				<select class=" btn btn-primary" v-model="isFinished">
+					<option value="-1">全部</option>
+					<option value="0">成品</option>
+					<option value="1">半成品</option>
+				</select>
+			</div>
+			<div class="input-group input-group-sm col-sm-3">
 				<input type="text" placeholder="名称/拼音码" id="search" class="form-control">
 				<span class="input-group-btn">
 				<button class="btn btn-primary" type="button" @click="search">查询</button>

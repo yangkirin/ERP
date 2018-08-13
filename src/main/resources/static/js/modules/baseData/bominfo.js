@@ -404,7 +404,8 @@ var vm = new Vue({
         cutArr:{},
         mtrExtendArr:{},
         tempDataMtr:null,
-        tempDataPrd:null
+        tempDataPrd:null,
+        isFinished:'-1'
 	},
     created:function(){
         this.$data.tempDataMtr = JSON.parse(JSON.stringify(this.$data.bomDetail));
@@ -500,7 +501,8 @@ var vm = new Vue({
                 vm.bomInfo = r.bomInfo;
             });
         },
-		add: function(){//新增配方
+		add: function(){
+            //新增配方
             // 新增配方时，需要将配方名称编辑框设置为可编辑状态
             $('#addPrdIdName').attr('readonly', false);
 			vm.showList = false;
@@ -511,7 +513,8 @@ var vm = new Vue({
 			};
             vm.getFieldData2();
 		},
-        update: function (event) {//修改配方
+        update: function (event) {
+            //修改配方
             // var id = vm.bomInfo.id;
             var id = $("#jqGrid").jqGrid('getGridParam','selrow');
             if(id == null){
@@ -571,9 +574,11 @@ var vm = new Vue({
         },
         search:function(){
             console.log(vm.orderInfo);
+
             var postData = {
                 bomName: $('#search').val(),
-                bomPy: $('#search').val()
+                bomPy: $('#search').val(),
+                semifinished:vm.isFinished
                 // prdIdName: $('#search').val()
             };
             var page = $("#jqGrid").jqGrid('getGridParam','page');

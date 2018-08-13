@@ -246,8 +246,15 @@ var vm = new Vue({
 			    	if(r.code === 0){
                         vm.updatePrdNcInfo();
 						alert('操作成功', function(index){
-							vm.reload();
+
                             vm.prdData = {};
+                            vm.q = {};
+                            vm.q.prdName=null;
+                            // $('#searchName').val();
+                            console.log($('#searchName').val());
+
+                            vm.reload();
+                            // vm.getFieldData();
 						});
 					}else{
 						alert(r.msg);
@@ -328,6 +335,7 @@ var vm = new Vue({
                         return JSON.stringify(aItem);
                     });
                     dataSource = resultList;
+                    // console.log(dataSource);
                     $('#searchName').typeahead({
                         source:dataSource,
                         highlighter: function (obj) {
@@ -339,7 +347,7 @@ var vm = new Vue({
                         },
                         updater: function (obj) {
                             var item = JSON.parse(obj);
-                            vm.exportParam.mtrName = item.name;
+                            vm.q.prdName = item.name;
                             return item.name;
                         }
                     });
