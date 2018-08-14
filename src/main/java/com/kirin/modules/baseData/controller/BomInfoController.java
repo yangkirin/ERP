@@ -5,8 +5,10 @@ import java.util.*;
 
 import com.kirin.modules.baseData.entity.BomDetailEntity;
 import com.kirin.modules.baseData.entity.MtrDataEntity;
+import com.kirin.modules.baseData.entity.PrdDataEntity;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.MtrDataService;
+import com.kirin.modules.baseData.service.PrdDataService;
 import com.kirin.modules.sys.controller.AbstractController;
 import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -41,6 +43,8 @@ public class BomInfoController extends AbstractController {
 
 	@Autowired
 	private BomDetailService bomDetailService;
+    @Autowired
+    private PrdDataService prdDataService;
 	
 	/**
 	 * 列表
@@ -111,6 +115,7 @@ public class BomInfoController extends AbstractController {
 		}
 
 		bomInfoService.save(bomInfo);
+        updatePrdStatus(bomInfo.getPrdId(), bomInfo.getStatus());
 		
 		return R.ok();
 	}
@@ -144,6 +149,7 @@ public class BomInfoController extends AbstractController {
 		bomInfo.setBoxWgt(oldbomInfo.getBoxWgt());
 		bomInfo.setPrice(oldbomInfo.getPrice());
 		bomInfoService.save(bomInfo);
+        updatePrdStatus(bomInfo.getPrdId(), bomInfo.getStatus());
 
 		//复制配方
 		Map<String, Object> params = new HashMap<>();
@@ -183,6 +189,7 @@ public class BomInfoController extends AbstractController {
 		bomInfo.setUpdateDate(new Date());
 
 		bomInfoService.update(bomInfo);
+        updatePrdStatus(bomInfo.getPrdId(), bomInfo.getStatus());
 		
 		return R.ok();
 	}
@@ -204,8 +211,15 @@ public class BomInfoController extends AbstractController {
 		return R.ok();
 	}
 
-
-
+    //修改产品status
+    public void updatePrdStatus(Long prdId, String status) {
+        PrdDataEntity prdInfo = prdDataService.queryObject(prdId);
+        if (prdInfo.getStatus().equals(status)) {
+            return;
+        }
+        prdInfo.setStatus(status);
+        prdDataService.update(prdInfo);
+    }
 
 
 }
