@@ -70,8 +70,8 @@ $(function () {
 
     $("#jqGrid").jqGrid('navGrid','#jqGrid_toppager', {edit:false,add:false,del:false,search:false,refresh:true});
     $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager", {
-        caption:"切换",
-        title:"切换搜索工具栏",
+        caption: "隐藏",
+        title: "隐藏搜索工具栏",
         buttonicon:"ui-icon-search",
         onClickButton:function(){
             mygrid[0].toggleToolbar()

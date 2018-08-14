@@ -5,7 +5,7 @@ $(function () {
         $("#bomDetailGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     };
 
-    $("#jqGrid").jqGrid({
+    mygrid = $("#jqGrid").jqGrid({
         url: baseURL + 'baseData/bominfo/list',
         datatype: "json",
         colModel: [			
@@ -23,37 +23,82 @@ $(function () {
             { label: '产品编码', name: 'prdCode', index: 'prdCode', width: 80 },
             { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 80 },
             { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
-            { label: '售价', name: 'price', index: 'price', width: 60 },
-            { label: '锅重', name: 'potWgt', index: 'potWgt', width: 60 },
-            { label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 60 },
-            { label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 60 },
-            { label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 60 },
-            { label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 60 },
-            { label: '配方成本', name: 'cost', index: 'cost', width: 60 },
-            { label: '成本率', name: 'sumCostRate', index: 'sumCostRate', width: 60,formatter:function(value, options, row){
+            {label: '售价', name: 'price', index: 'price', width: 60, search: false},
+            {label: '锅重', name: 'potWgt', index: 'potWgt', width: 60, search: false},
+            {label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 60, search: false},
+            {label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 60, search: false},
+            {label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 60, search: false},
+            {label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 60, search: false},
+            {label: '配方成本', name: 'cost', index: 'cost', width: 60, search: false},
+            {
+                label: '成本率',
+                name: 'sumCostRate',
+                index: 'sumCostRate',
+                width: 60,
+                search: false,
+                formatter: function (value, options, row) {
                 if(value == null){
                     return "";
                 }else{
                     return value+'%';
                 }
             } },
-			{ label: '状态', name: 'status', index: 'status', width: 40 ,formatter: function(value, options, row){
-                return value === 0 ?
-                    '<span class="label label-danger">禁用</span>' :
-                    '<span class="label label-success">正常</span>';
+            {
+                label: '状态',
+                name: 'status',
+                index: 'status',
+                width: 60,
+                stype: 'select',
+                align: 'center',
+                searchoptions: {value: "-1:全部;1:正常;2:编辑;0:禁用"},
+                formatter: function (value, options, row) {
+                    if (value == 0) {
+                        return '<span class="label label-danger">禁用</span>';
+                    } else if (value == 2) {
+                        return '<span class="label label-info">编辑</span>';
+                    } else {
+                        return '<span class="label label-success">正常</span>';
+                    }
             }},
-			{ label: '备注', name: 'remark', index: 'remark', width: 80 }, 			
-			{ label: '创建者', name: 'createUser', index: 'create_user', width: 80 ,hidden:true},
-			{ label: '创建日期', name: 'createDate', index: 'create_date', width: 80 ,hidden:true},
-            { label: '修改者', name: 'updateUser', index: 'create_user', width: 80 ,hidden:true},
-            { label: '修改日期', name: 'updateDate', index: 'create_date', width: 80 ,hidden:true,formatter:function(value, options, row){
+            {label: '备注', name: 'remark', index: 'remark', width: 80, hidden: true, search: false},
+            {label: '创建者', name: 'createUser', index: 'create_user', width: 80, hidden: true, search: false},
+            {label: '创建日期', name: 'createDate', index: 'create_date', width: 80, hidden: true, search: false},
+            {label: '修改者', name: 'updateUser', index: 'create_user', width: 80, hidden: true, search: false},
+            {
+                label: '修改日期',
+                name: 'updateDate',
+                index: 'create_date',
+                width: 80,
+                hidden: true,
+                search: false,
+                formatter: function (value, options, row) {
                 if(value == null){
                     return "";
                 }else{
                     return value;
                 }
             }},
-            { label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable:true,width: 80 ,hidden:true}
+            {
+                label: '是否半成品',
+                name: 'semiFinished',
+                index: 'SEMIFINISHED',
+                editable: true,
+                width: 80,
+                search: false,
+                hidden: true
+            },
+            {
+                label: '操作',
+                name: 'operation',
+                index: 'operation',
+                search: false,
+                width: 150,
+                formatter: function (value, options, row) {
+                    var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo(" + row.id + ")'>修改</button>" +
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig(" + row.id + ")'>原料配置</button>";
+                    return optionStr;
+                }
+            }
         ],
 		viewrecords: true,
         height: 'auto',
@@ -65,6 +110,9 @@ $(function () {
         multiselect: false,
         // scroll:true,
         // pager: "#jqGridPager",
+
+        toppager: true,
+        pagerpos: 'hide',
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -95,6 +143,31 @@ $(function () {
             createSubGrid(subgrid_id,row_id,url);
         }
     });
+
+    $("#jqGrid").jqGrid('navGrid', '#jqGrid_toppager', {
+        edit: false,
+        add: false,
+        del: false,
+        search: false,
+        refresh: true
+    });
+    $("#jqGrid").jqGrid('navButtonAdd', "#jqGrid_toppager", {
+        caption: "隐藏",
+        title: "隐藏搜索工具栏",
+        buttonicon: "ui-icon-search",
+        onClickButton: function () {
+            mygrid[0].toggleToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('navButtonAdd', "#jqGrid_toppager", {
+        caption: "清空",
+        title: "清空搜索栏",
+        buttonicon: 'ui-icon-refresh',
+        onClickButton: function () {
+            mygrid[0].clearToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('filterToolbar');
 
     $("#bomDetailGrid").jqGrid({
         url: baseURL + 'baseData/bomdetail/list',
@@ -314,9 +387,20 @@ $(function () {
         vm.bomDetail.mtrExtendDesc = $.trim(text);
 
     });
+    $("#selectbind").bind("change", function () {
+        vm.search();
+    });
 });
 
 var activeTab;
+
+function editInfo(rowid) {
+    vm.update(rowid);
+}
+
+function mtrConfig(rowid) {
+    vm.detailConfig(rowid);
+}
 
 var setting = {
     data: {
@@ -340,6 +424,8 @@ var vm = new Vue({
 	data:{
 		showList: true,
         addForm:false,
+        confirmShow: true,
+        next: false,
         showDetailList:false,
 		title: null,
         prdInfo:null,
@@ -352,6 +438,7 @@ var vm = new Vue({
             prdIdName:null
         },
         editBomName:'',
+        editBomNamecopy: '',
         editBomInfo:{
             prdId:null,
             prdIdName:null
@@ -505,23 +592,48 @@ var vm = new Vue({
             //新增配方
             // 新增配方时，需要将配方名称编辑框设置为可编辑状态
             $('#addPrdIdName').attr('readonly', false);
+            vm.confirmShow = true;
+            vm.next = false;
 			vm.showList = false;
 			vm.addForm = true;
 			vm.title = "新增";
 			vm.bomInfo = {
-                status:1
-			};
+                status: 2
+            };
             vm.getFieldData2();
-		},
+        },
+        addbycopy: function () {
+            var id = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+            if (id == null) {
+                alert("请选择配方进行复制！");
+                return;
+            }
+            //复制配方
+            // 新增配方时，需要将配方名称编辑框设置为可编辑状态
+            $('#addPrdIdName').attr('readonly', false);
+            vm.confirmShow = false;
+            vm.next = true;
+            vm.showList = false;
+            vm.addForm = true;
+            vm.title = "复制";
+            vm.bomInfo = {
+                status: 2,
+                oldBomId: null
+            };
+            vm.getFieldData2();
+        },
         update: function (event) {
             //修改配方
             // var id = vm.bomInfo.id;
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+            // var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+            var id = event;
             if(id == null){
                 return ;
             }
             // 为确保一个产品只和一个配料关联，在修改配方时，不允许修改产品名称
             $('#addPrdIdName').attr('readonly', true);
+            vm.confirmShow = true;
+            vm.next = false;
             vm.showList = false;
             vm.addForm = true;
             vm.showDetailList = false;
@@ -566,6 +678,33 @@ var vm = new Vue({
                         alert('操作成功', function(index){
                             vm.reload();
                         });
+                    } else {
+                        alert(r.msg);
+                    }
+                }
+            });
+        },
+        copySave: function (event) {//保存 复制配方信息
+            var rowid = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+            var url = "baseData/bominfo/copysave/" + rowid;
+            // + $("#jqGrid").jqGrid('getGridParam','selrow');
+            // var rowData = $("#jqGrid").jqGrid('getRowData',id);
+
+            $.ajax({
+                type: "POST",
+                url: baseURL + url,
+                contentType: "application/json",
+                data: JSON.stringify(vm.bomInfo),
+                success: function (r) {
+                    if (r.code === 0) {
+                        //复制成功，开始编辑配方
+                        // alert('操作成功', function(index){
+                        //     vm.reload();
+                        // });
+                        vm.reload();
+                        vm.editBomNamecopy = r.bomname;
+                        vm.detailConfig(r.bomId);
+
                     }else{
                         alert(r.msg);
                     }
@@ -591,8 +730,9 @@ var vm = new Vue({
 
 
         //原料配置
-        detailConfig:function(){
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+        detailConfig: function (rowid) {
+            // var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+            var id = rowid;
             if(id == null){
             	alert("请选择配方进行维护！");
                 return ;
@@ -601,8 +741,9 @@ var vm = new Vue({
             vm.showList = false;
             vm.addForm = false;
             vm.showDetailList = true;
+            console.log(id);
             var rowData = $("#jqGrid").jqGrid('getRowData',id);
-            vm.editBomName = rowData.bomName;
+            vm.editBomName = rowData.bomName == null ? vm.editBomNamecopy : rowData.bomName;
 
             vm.getFieldDataMTR();
             vm.getFieldDataPRD();

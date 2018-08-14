@@ -1,10 +1,7 @@
 package com.kirin.modules.baseData.controller;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.kirin.modules.baseData.entity.BomDetailEntity;
 import com.kirin.modules.baseData.entity.MtrDataEntity;
@@ -117,7 +114,63 @@ public class BomInfoController extends AbstractController {
 		
 		return R.ok();
 	}
-	
+
+
+	/**
+	 * 复制
+	 */
+	@RequestMapping("/copysave/{id}")
+	@RequiresPermissions("baseData:bominfo:save")
+	public R copysave(@RequestBody BomInfoEntity bomInfo, @PathVariable("id") String oldbomid) {
+		SysUserEntity sysUserEntity = getUser();
+
+		bomInfo.setCreateUser(sysUserEntity.getUsername());
+		bomInfo.setCreateDate(new Date());
+
+//		判断配方是否重复（一个产品只能关联一个配方）
+		BomInfoEntity entity = bomInfoService.queryObjectByPrdId(bomInfo.getPrdId());
+		if (entity != null) {
+			return R.error("一个产品只能关联一个配方");
+		}
+
+		//保存配方
+		BomInfoEntity oldbomInfo = bomInfoService.queryObject(Long.valueOf(oldbomid));
+		bomInfo.setCost(oldbomInfo.getCost());
+		bomInfo.setSumModiWgt(oldbomInfo.getSumModiWgt());
+		bomInfo.setSumCostRate(oldbomInfo.getSumCostRate());
+		bomInfo.setSumGrossWgt(oldbomInfo.getSumGrossWgt());
+		bomInfo.setSumNetWgt(oldbomInfo.getSumNetWgt());
+		bomInfo.setPotWgt(oldbomInfo.getPotWgt());
+		bomInfo.setBoxWgt(oldbomInfo.getBoxWgt());
+		bomInfo.setPrice(oldbomInfo.getPrice());
+		bomInfoService.save(bomInfo);
+
+		//复制配方
+		Map<String, Object> params = new HashMap<>();
+		params.put("bomInfoId", oldbomid);
+		params.put("page", "1");
+		params.put("limit", "999999");
+		Query query = new Query(params);
+		List<BomDetailEntity> bomDetailList = bomDetailService.queryList(query);
+		System.out.println(bomDetailList.size());
+		Iterator<BomDetailEntity> iterator = bomDetailList.iterator();
+		while (iterator.hasNext()) {
+			BomDetailEntity current = iterator.next();
+			current.setId(null);
+			current.setBomId(bomInfo.getId());
+			current.setCreateUser(bomInfo.getCreateUser());
+			current.setCreateDate(bomInfo.getCreateDate());
+			current.setUpdateUser(null);
+			current.setUpdateDate(null);
+			bomDetailService.save(current);
+		}
+
+		BomInfoEntity newBomInfo = bomInfoService.queryObjectByPrdId(bomInfo.getPrdId());
+
+		return R.ok().put("bomId", newBomInfo.getId()).put("bomname", newBomInfo.getBomName());
+	}
+
+
 	/**
 	 * 修改
 	 */

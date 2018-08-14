@@ -127,6 +127,7 @@ $(function () {
         vm.addPrdData.typeId = data;
         vm.createNewNo(data);
     });
+    $("#accordion").accordion({active: false, collapsible: true});
 });
 
 var vm = new Vue({
