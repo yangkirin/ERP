@@ -399,6 +399,7 @@ function editInfo(rowid) {
 }
 
 function mtrConfig(rowid) {
+    vm.editid = rowid;
     vm.detailConfig(rowid);
 }
 
@@ -439,6 +440,7 @@ var vm = new Vue({
         },
         editBomName:'',
         editBomNamecopy: '',
+        editid: null,
         editBomInfo:{
             prdId:null,
             prdIdName:null
@@ -703,10 +705,33 @@ var vm = new Vue({
                         // });
                         vm.reload();
                         vm.editBomNamecopy = r.bomname;
+                        vm.editid = r.bomId;
                         vm.detailConfig(r.bomId);
 
                     }else{
                         alert(r.msg);
+                    }
+                }
+            });
+        },
+        changestatus: function (newstatus, rowid) {
+            var url = "baseData/bominfo/update";
+            var rowData = $("#jqGrid").jqGrid('getRowData', rowid);
+            var info = {
+                prdId: rowData.prdId,
+                id: rowid,
+                status: newstatus
+            }
+            $.ajax({
+                type: "POST",
+                url: baseURL + url,
+                contentType: "application/json",
+                data: JSON.stringify(info),
+                success: function (r) {
+                    if (r.code === 0) {
+                        console.log("状态已更改");
+                    } else {
+                        console.log("更改失败");
                     }
                 }
             });
@@ -754,6 +779,7 @@ var vm = new Vue({
             }).trigger("reloadGrid");
 		},
         addMtr:function(){//新增原料
+            vm.changestatus(2, vm.editid);
             var id = $("#jqGrid").jqGrid('getGridParam','selrow');
             if(id == null){
                 return ;
@@ -771,6 +797,7 @@ var vm = new Vue({
             if(id == null){
                 return ;
             }
+            vm.changestatus(2, vm.editid);
             var rowData = $("#bomDetailGrid").jqGrid('getRowData',id);
             if(rowData.semiFinished == '0'){
                 vm.mtrExtendArr = vm.initMtrExtendArr(rowData.mtrId);
@@ -819,6 +846,7 @@ var vm = new Vue({
         },
 
         delMtr: function (event) {
+            vm.changestatus(2, vm.editid);
             var id = $("#bomDetailGrid").jqGrid('getGridParam','selrow');
             if(id == null){
                 return ;
@@ -844,6 +872,12 @@ var vm = new Vue({
 				});
 			});
 		},
+
+        complete: function (event) {
+            console.log(vm.editid);
+            vm.changestatus(1, vm.editid);
+            vm.reload();
+        },
         getDetailInfo:function(id){
             $.get(baseURL + "baseData/bomdetail/detailInfo/"+id, function(r){
 
