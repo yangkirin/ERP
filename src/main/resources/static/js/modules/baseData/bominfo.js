@@ -727,6 +727,7 @@ var vm = new Vue({
                 url: baseURL + url,
                 contentType: "application/json",
                 data: JSON.stringify(info),
+                async: false,
                 success: function (r) {
                     if (r.code === 0) {
                         console.log("状态已更改");
@@ -846,12 +847,12 @@ var vm = new Vue({
         },
 
         delMtr: function (event) {
-            vm.changestatus(2, vm.editid);
             var id = $("#bomDetailGrid").jqGrid('getGridParam','selrow');
             if(id == null){
                 return ;
             }
-			
+
+            vm.changestatus(2, vm.editid);
 			confirm('确定要删除选中的记录？', function(){
 				$.ajax({
 					type: "get",
@@ -904,7 +905,7 @@ var vm = new Vue({
 			$("#jqGrid").jqGrid('setGridParam',{ 
                 page:page
             }).trigger("reloadGrid");
-
+            console.log("reload");
             vm.bomInfo={};
             vm.bomDetail={};
             vm.addMtrData={};

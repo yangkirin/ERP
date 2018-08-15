@@ -113,7 +113,8 @@ public class CommonUtilServiceImpl implements CommonUtilService{
 
     @Override
     public String compBomCount(Long id,String type){
-        if(type != null || type.equals("MTR")){
+        System.out.println(type);
+        if (type != null && type.equals("MTR")) {
             return commonUtilDao.compBomMtrCount(id);
         }else{
             return commonUtilDao.compBomPrdCount(id);
