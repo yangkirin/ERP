@@ -35,7 +35,7 @@
 		p.POT_WEIGHT,
 		p.BOX_WEIGHT,
 		p.REFERENCE_PRICE as PRICE
-		from (select bi.* from bom_detail bd,bom_info bi where bi.id=bd.bom_id and bd.mtr_id= #{mtrId} and bd.SEMI_FINISHED='0') b
+		from (select bi.* from bom_detail bd,bom_info bi where bi.id=bd.bom_id and bd.mtr_id= #{mtrId} and bd.SEMI_FINISHED= #{semifinished}) b
 		left join prd_data p on p.id=b.prd_id
 	</select>
 

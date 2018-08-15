@@ -660,6 +660,7 @@ var vm = new Vue({
             }
             var ids = new Array();
             ids[0] = id;
+            console.log(ids);
             confirm('确定要删除选中的记录？', function(){
                 $.ajax({
                     type: "POST",

@@ -84,7 +84,12 @@ public class BomInfoController extends AbstractController {
 		//查询列表数据
 		Query query = new Query(params);
 
-		List<BomInfoEntity> bomInfoList = bomInfoService.queryObjectByMtrId(Long.valueOf(String.valueOf(query.get("mtrId"))).longValue());
+        List<BomInfoEntity> bomInfoList;
+        if (query.get("mtrId") != null) {
+            bomInfoList = bomInfoService.queryObjectByMtrId(Long.valueOf(String.valueOf(query.get("mtrId"))).longValue(), "0");
+        } else {
+            bomInfoList = bomInfoService.queryObjectByMtrId(Long.valueOf(String.valueOf(query.get("prdId"))).longValue(), "1");
+        }
 		int total = bomInfoService.queryTotal(query);
 
 		PageUtils pageUtil = new PageUtils(bomInfoList, total, query.getLimit(), query.getPage());
@@ -200,6 +205,16 @@ public class BomInfoController extends AbstractController {
 	@RequestMapping("/delete")
 	@RequiresPermissions("baseData:bominfo:delete")
 	public R delete(@RequestBody Long[] ids){
+        for (Long bomid : ids) {//删除bomdetail里面的记录
+            Map<String, Object> query = new HashMap<>();
+            query.put("bomInfoId", bomid);
+            List<BomDetailEntity> bomDetailList = bomDetailService.queryList(query);
+            Long[] bdList = new Long[bomDetailList.size()];
+            for (int i = 0; i < bomDetailList.size(); i++) {
+                bdList[i] = bomDetailList.get(i).getId();
+            }
+            bomDetailService.deleteBatch(bdList);
+        }
 		bomInfoService.deleteBatch(ids);
 		
 		return R.ok();

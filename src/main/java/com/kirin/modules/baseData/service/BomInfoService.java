@@ -30,5 +30,5 @@ public interface BomInfoService {
 
 	BomInfoEntity queryObjectByPrdId(Long prdId);
 
-	List<BomInfoEntity> queryObjectByMtrId(Long mtrId);
+	List<BomInfoEntity> queryObjectByMtrId(Long mtrId, String semifinished);
 }

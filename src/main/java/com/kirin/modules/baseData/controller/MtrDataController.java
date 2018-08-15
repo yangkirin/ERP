@@ -147,7 +147,7 @@ public class MtrDataController extends AbstractController {
 	//原料信息修改时，重新计算引用该原料的配方信息
 	public void recomputeBomInfo(Long mtrId){
 		//查询引用该原料的配方信息进行重新计算
-		List<BomInfoEntity> bomInfoEntityList = bomInfoService.queryObjectByMtrId(mtrId);
+		List<BomInfoEntity> bomInfoEntityList = bomInfoService.queryObjectByMtrId(mtrId, "0");
 		//重新计算该原料作为半成品配方信息
 		if(bomInfoEntityList!=null && bomInfoEntityList.size() > 0){
 			Map map = new HashMap();

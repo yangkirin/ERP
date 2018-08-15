@@ -344,7 +344,9 @@
 			<div class="form-group">
 				<div class="col-sm-1 control-label"></div>
 				<div class="col-sm-8">
-					<div class="alert alert-info" role="alert">*此产品用于<a href="#"> <font  style="color: red;font-size: 18px;">&nbsp;&nbsp;{{bomCount}}&nbsp;&nbsp;</font></a>笔配方中</div>
+					<div class="alert alert-info" role="alert">*此产品用于<a @click="showBom"> <font
+							style="color: red;font-size: 18px;">&nbsp;&nbsp;{{bomCount}}&nbsp;&nbsp;</font></a>笔配方中
+					</div>
 				</div>
 			</div>
 		</div>
@@ -420,6 +422,47 @@
 			<!--</div>-->
 		</form>
 	</div>
+
+	<!-- 模态框（Modal） -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+		 data-backdrop="false">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						该产品用于：
+					</h4>
+				</div>
+				<div class="modal-body">
+					<table id="bomGrid"></table>
+					<!--<form class="form-horizontal" style="width:100%;">-->
+					<!--<div class="form-group">-->
+					<!--<div class="col-sm-2 control-label">开始日期</div>-->
+					<!--<div class="col-sm-3">-->
+					<!--<input type="text" class="form-control form_datetime" readonly="readonly" id="exportStartDate" placeholder="开始日期"/>-->
+					<!--</div>-->
+					<!--<div class="col-sm-2 control-label">截止日期</div>-->
+					<!--<div class="col-sm-3">-->
+					<!--<input type="text" class="form-control form_datetime" readonly="readonly" id="exportEndDate" placeholder="截止日期"/>-->
+					<!--</div>-->
+					<!--</div>-->
+					<!--</form>-->
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						关闭
+					</button>
+					<!--<button type="button" class="btn btn-primary" @click="modalCommit">-->
+					<!--提交-->
+					<!--</button>-->
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+
 </div>
 
 <div id="typeInfoLayer" style="display: none;padding:10px;">

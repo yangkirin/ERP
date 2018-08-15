@@ -19,5 +19,6 @@ import java.util.List;
 @Mapper
 public interface BomInfoDao extends BaseDao<BomInfoEntity> {
 	BomInfoEntity queryObjectByPrdId(@Param("prdId") Long prdId);
-	List<BomInfoEntity> queryObjectByMtrId(@Param("mtrId") Long mtrId);
+
+	List<BomInfoEntity> queryObjectByMtrId(@Param("mtrId") Long mtrId, @Param("semifinished") String semifinished);
 }

@@ -58,8 +58,8 @@ public class BomInfoServiceImpl implements BomInfoService {
 	}
 
 	@Override
-	public List<BomInfoEntity> queryObjectByMtrId(Long mtrId){
-		return bomInfoDao.queryObjectByMtrId(mtrId);
+	public List<BomInfoEntity> queryObjectByMtrId(Long mtrId, String semifinished) {
+		return bomInfoDao.queryObjectByMtrId(mtrId, semifinished);
 	}
 
 }
