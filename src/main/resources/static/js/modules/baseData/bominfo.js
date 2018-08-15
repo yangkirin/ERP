@@ -95,7 +95,9 @@ $(function () {
                 width: 150,
                 formatter: function (value, options, row) {
                     var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo(" + row.id + ")'>修改</button>" +
-                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig(" + row.id + ")'>原料配置</button>";
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig(" + row.id + ")'>原料配置</button>" +
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='bomcopy(" + row.id + ")'>复制</button>" +
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='delbom(" + row.id + ")'>删除</button>";
                     return optionStr;
                 }
             }
@@ -403,6 +405,14 @@ function mtrConfig(rowid) {
     vm.detailConfig(rowid);
 }
 
+function bomcopy(rowid) {
+    vm.addbycopy(rowid);
+}
+
+function delbom(rowid) {
+    vm.del(rowid);
+}
+
 var setting = {
     data: {
         simpleData: {
@@ -604,8 +614,8 @@ var vm = new Vue({
             };
             vm.getFieldData2();
         },
-        addbycopy: function () {
-            var id = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+        addbycopy: function (rowid) {
+            var id = rowid;
             if (id == null) {
                 alert("请选择配方进行复制！");
                 return;
@@ -643,8 +653,8 @@ var vm = new Vue({
             vm.getFieldData();
             vm.getInfo(id);
         },
-        del:function(){
-            var id = $("#jqGrid").jqGrid('getGridParam','selrow');
+        del: function (rowid) {
+            var id = rowid;
             if(id == null){
                 return ;
             }

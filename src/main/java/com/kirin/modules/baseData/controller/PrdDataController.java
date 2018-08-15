@@ -234,6 +234,27 @@ public class PrdDataController extends AbstractController {
 		return R.ok();
 	}
 
+    /**
+     * 修改状态
+     */
+    @RequestMapping("/changestatus")
+    public R changestatus(@RequestBody Map<String, Object> params) {
+        Long prdId = Long.valueOf(String.valueOf(params.get("prdId")));
+        String status = String.valueOf(params.get("status"));
+        System.out.println(prdId + status);
+        PrdDataEntity prdDataEntity = prdDataService.queryObject(prdId);
+        if (prdDataEntity.getStatus().equals(status)) {
+            return R.error("error");
+        }
+        prdDataEntity.setStatus(status);
+        SysUserEntity sysUserEntity = getUser();
+        prdDataEntity.setUpdateUser(sysUserEntity.getUsername());
+        prdDataEntity.setUpdateDate(new Date());
+        prdDataService.update(prdDataEntity);
+        updateBomStatus(prdId, status);//同时修改配方状态
+        return R.ok();
+    }
+
 	/**
 	 * 删除
 	 */
@@ -245,31 +266,42 @@ public class PrdDataController extends AbstractController {
 		return R.ok();
 	}
 
-	public Map<String, Object> countBomInfo(Long bomId) {
-		Double sumGrossWgt = new Double(0);//总毛重
-		Double sumNetWgt = new Double(0);//总净重
-		Double sumCookedWgt = new Double(0);//总熟重
-		Map<String, Object> param = new HashMap<>();
-		param.put("bomInfoId", bomId);
-		List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(param);
-		if (bomDetailEntityList != null && bomDetailEntityList.size() > 0) {
-			for (BomDetailEntity bomDetail : bomDetailEntityList) {
-				if (bomDetail.getSemiFinished().equals("1")) {//半成品
-					BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(bomDetail.getMtrId());
-					countBomInfo(bomInfoEntity.getId());
-				} else {
-					sumGrossWgt += (bomDetail.getGrossWgt() == null ? 0 : Double.valueOf(bomDetail.getGrossWgt()));
-					sumNetWgt += (bomDetail.getNetWgt() == null ? 0 : Double.valueOf(bomDetail.getNetWgt()));
-					sumCookedWgt += (bomDetail.getModiWgt() == null ? 0 : Double.valueOf(bomDetail.getModiWgt()));
-				}
-			}
-		}
-		Map<String, Object> returnMap = new HashMap<>();
-		returnMap.put("sumGrossWgt", sumGrossWgt);
-		returnMap.put("sumNetWgt", sumNetWgt);
-		returnMap.put("sumCookedWgt", sumCookedWgt);
-		return returnMap;
-	}
+    public Map<String, Object> countBomInfo(Long bomId) {
+        Double sumGrossWgt = new Double(0);//总毛重
+        Double sumNetWgt = new Double(0);//总净重
+        Double sumCookedWgt = new Double(0);//总熟重
+        Map<String, Object> param = new HashMap<>();
+        param.put("bomInfoId", bomId);
+        List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(param);
+        if (bomDetailEntityList != null && bomDetailEntityList.size() > 0) {
+            for (BomDetailEntity bomDetail : bomDetailEntityList) {
+                if (bomDetail.getSemiFinished().equals("1")) {//半成品
+                    BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(bomDetail.getMtrId());
+                    countBomInfo(bomInfoEntity.getId());
+                } else {
+                    sumGrossWgt += (bomDetail.getGrossWgt() == null ? 0 : Double.valueOf(bomDetail.getGrossWgt()));
+                    sumNetWgt += (bomDetail.getNetWgt() == null ? 0 : Double.valueOf(bomDetail.getNetWgt()));
+                    sumCookedWgt += (bomDetail.getModiWgt() == null ? 0 : Double.valueOf(bomDetail.getModiWgt()));
+                }
+            }
+        }
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("sumGrossWgt", sumGrossWgt);
+        returnMap.put("sumNetWgt", sumNetWgt);
+        returnMap.put("sumCookedWgt", sumCookedWgt);
+        return returnMap;
+    }
+
+    public void updateBomStatus(Long prdId, String status) {
+        BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdId);
+        if (bomInfoEntity != null) {
+            bomInfoEntity.setStatus(status);
+            SysUserEntity sysUserEntity = getUser();
+            bomInfoEntity.setUpdateUser(sysUserEntity.getUsername());
+            bomInfoEntity.setUpdateDate(new Date());
+            bomInfoService.update(bomInfoEntity);
+        }
+    }
 
 
 	public static void main(String[] args) {

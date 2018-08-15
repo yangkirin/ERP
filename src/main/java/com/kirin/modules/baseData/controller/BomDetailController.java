@@ -505,8 +505,11 @@ public class BomDetailController extends AbstractController {
 			BigDecimal bomInfoCost = new BigDecimal(bomInfoEntity.getCost() == null ? "0" : bomInfoEntity.getCost().toString());
 			BigDecimal bomInfoSumGrossWgt = new BigDecimal(prdDataEntity.getSumGrossWgt() == null ? "1" : prdDataEntity.getSumGrossWgt().toString());
 
-			BigDecimal netWgt = new BigDecimal(bomDetailEntity.getNetWgt() == null ? "1" : bomDetailEntity.getNetWgt().toString());
-			BigDecimal cost = bomInfoCost.divide(bomInfoSumGrossWgt,3,BigDecimal.ROUND_HALF_UP).multiply(netWgt);
+
+            BigDecimal netWgt = new BigDecimal(bomDetailEntity.getNetWgt() == null ? "1" : bomDetailEntity.getNetWgt().toString());
+//			System.out.println(bomInfoCost + " " +bomInfoSumGrossWgt + " " + netWgt +bomInfoCost.multiply(netWgt).divide(bomInfoSumGrossWgt,3,BigDecimal.ROUND_HALF_UP));
+
+            BigDecimal cost = bomInfoCost.multiply(netWgt).divide(bomInfoSumGrossWgt, 3, BigDecimal.ROUND_HALF_UP);
 			//半成品的单价=售价/毛重，4位小数
 			BigDecimal price = new BigDecimal(prdDataEntity.getReferencePrice() == null ? "0" : prdDataEntity.getReferencePrice());
 			BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "1" : bomDetailEntity.getGrossWgt());

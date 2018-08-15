@@ -143,6 +143,7 @@ var vm = new Vue({
             orderType:null,
             orderTypeName:null,
             cookType:null,
+            status: 2,
             cookTypeName:null
 		},
         prdNcInfo:{
@@ -288,7 +289,7 @@ var vm = new Vue({
 			if(id == null){
 				return ;
 			}
-			
+
 			confirm('确定要删除选中的记录？', function(){
 				$.ajax({
 					// type: "POST",
@@ -309,6 +310,52 @@ var vm = new Vue({
 				});
 			});
 		},
+        startPrd: function () {
+            var id = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+            if (id == null) {
+                return;
+            }
+            confirm('确定要启用该产品？', function (index) {
+                vm.changestatus(1, id);
+
+            });
+        },
+        stopPrd: function () {
+            var id = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+            if (id == null) {
+                return;
+            }
+            confirm('确定要禁用该产品？', function () {
+                vm.changestatus(0, id);
+            });
+        },
+        changestatus: function (newstatus, prdId) {
+            var url = "baseData/prddata/changestatus";
+            var info = {
+                prdId: prdId,
+                status: newstatus
+            }
+            $.ajax({
+                type: "POST",
+                url: baseURL + url,
+                contentType: "application/json",
+                data: JSON.stringify(info),
+                // async: false,
+                success: function (r) {
+                    if (r.code === 0) {
+                        alert('操作成功', function (index) {
+                            console.log("状态已更改！");
+
+                            $("#jqGrid").trigger("reloadGrid");
+                            vm.prdData = {};
+                            vm.prdNcInfo = {};
+                        });
+                    } else {
+                        alert(r.msg);
+                    }
+                }
+            });
+        },
 		getInfo: function(id){
 			$.get(baseURL + "baseData/prddata/info/"+id, function(r){
                 vm.prdData = r.prdData;
