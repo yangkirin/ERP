@@ -26,6 +26,7 @@ import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
 import com.kirin.modules.baseData.service.MtrDataService;
 import com.kirin.modules.baseData.service.TypeInfoService;
+import com.kirin.modules.common.service.CommonUtilService;
 import com.kirin.modules.sales.entity.CustomerInfoEntity;
 import com.kirin.modules.sales.entity.ProductionOrderDetailEntity;
 import com.kirin.modules.sales.service.CustomerInfoService;
@@ -69,6 +70,9 @@ public class ProductionOrderController extends AbstractController {
 	@Autowired
 	private TypeInfoService typeInfoService;
 
+    @Autowired
+    private CommonUtilService commonUtilService;
+
 	/**
 	 * 列表
 	 */
@@ -110,6 +114,8 @@ public class ProductionOrderController extends AbstractController {
 	@RequestMapping("/save")
 //	@RequiresPermissions("sales:productionorder:save")
 	public R save(@RequestBody ProductionOrderEntity productionOrder){
+
+        productionOrder.setProductionNo(commonUtilService.createBillNo("3"));
 
 		TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(productionOrder.getOrderTypeId());
 		productionOrder.setOrderTypeName(typeInfoEntity1.getTypeName());
@@ -172,8 +178,9 @@ public class ProductionOrderController extends AbstractController {
 //	@RequiresPermissions("sales:productionorder:save")
     public R copyOrder(@RequestBody Map<String, Object> params) {
         Long oldId = Long.valueOf(String.valueOf(params.get("oldId")));
-        String productionNo = String.valueOf(params.get("productionNo"));
 
+//        String productionNo = String.valueOf(params.get("productionNo"));
+        String productionNo = commonUtilService.createBillNo("3");
 //		System.out.println(oldId + " " + productionNo);
 
         ProductionOrderEntity productionOrder = productionOrderService.queryObject(oldId);

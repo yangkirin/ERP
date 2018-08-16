@@ -54,4 +54,6 @@ public interface CommonUtilService {
 
     List<Map> executeSql(String searchSql);
 
+    String createBillNo(String billType);
+
 }

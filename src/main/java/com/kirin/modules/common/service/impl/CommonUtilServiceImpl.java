@@ -1,6 +1,7 @@
 package com.kirin.modules.common.service.impl;
 
 import com.kirin.common.utils.CommonUtils;
+import com.kirin.common.utils.DateUtils;
 import com.kirin.modules.baseData.dao.TypeInfoDao;
 import com.kirin.modules.baseData.entity.BomDetailEntity;
 import com.kirin.modules.baseData.entity.BomInfoEntity;
@@ -16,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("commonUtilService")
 public class CommonUtilServiceImpl implements CommonUtilService{
@@ -391,6 +389,77 @@ public class CommonUtilServiceImpl implements CommonUtilService{
         return commonUtilDao.executeSql(searchSql);
     }
 
+    @Override
+    public String createBillNo(String billType) {
+        StringBuffer newBillNo = new StringBuffer("");
+        String currentMaxNo = getTableMaxBillNo(billType);
+        String newNo = "0000";
+        String currentDateStr = DateUtils.format(new Date(), "yyyyMMdd");
+        if (currentMaxNo != null && !currentMaxNo.equals("")) {
+            Long maxNo = Long.valueOf(currentMaxNo.substring(10));
+            Long seq = Long.valueOf(maxNo) + 1;
+            newNo = String.format("%04d", seq);
+        }
+
+        String billCode = "";
+        //根据单据类型来获取对应单据的最新单据号，生成新的单据号
+        //单据号生成规则：单据简称+8位YYYYMMDD+4位顺序号
+        switch (billType) {
+            case "0":
+                billCode = "CG";
+                break;
+            case "1":
+                billCode = "RK";
+                break;
+            case "2":
+                billCode = "CK";
+                break;
+            case "3":
+                billCode = "XS";
+                break;
+            case "4":
+                billCode = "PD";
+                break;
+            default:
+                break;
+        }
+        newBillNo.append(billCode);
+        newBillNo.append(currentDateStr);
+        newBillNo.append(newNo.toString());
+        return newBillNo.toString();
+    }
+
+    public String getTableMaxBillNo(String billType) {
+        String likeDateStr = DateUtils.format(new Date(), "yyyyMMdd");
+        String returnFiled = "";
+        String tableName = "";
+        switch (billType) {
+            case "0":
+                returnFiled = "ORDER_NO";
+                tableName = "tb_order_info";
+                break;
+            case "1":
+                returnFiled = "IMPORT_NO";
+                tableName = "tb_import";
+                break;
+            case "2":
+                returnFiled = "OUTPORRT_NO";
+                tableName = "tb_outport_info";
+                break;
+            case "3":
+                returnFiled = "PRODUCTION_NO";
+                tableName = "tb_production_order";
+                break;
+            case "4":
+                returnFiled = "STOCKTAKING_NO";
+                tableName = "tb_stocktaking";
+                break;
+            default:
+                break;
+        }
+        String currentMaxNo = getTableMaxNo(returnFiled, tableName, likeDateStr);
+        return currentMaxNo;
+    }
 
     public static void main(String[] args){
         BigDecimal A = new BigDecimal(100);

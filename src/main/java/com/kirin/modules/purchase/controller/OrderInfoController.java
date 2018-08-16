@@ -33,6 +33,7 @@ import com.itextpdf.layout.renderer.IRenderer;
 import com.itextpdf.layout.renderer.ParagraphRenderer;
 import com.kirin.common.print.PdfUtil;
 import com.kirin.common.utils.DateUtils;
+import com.kirin.modules.common.service.CommonUtilService;
 import com.kirin.modules.purchase.entity.OrderDetailEntity;
 import com.kirin.modules.purchase.entity.SuppierMtrEntity;
 import com.kirin.modules.purchase.entity.SupplierInfoEntity;
@@ -92,6 +93,9 @@ public class OrderInfoController extends AbstractController {
 	@Autowired
 	private ImportDetailService importDetailService;
 
+    @Autowired
+    private CommonUtilService commonUtilService;
+
 	/**
 	 * 列表
 	 */
@@ -143,6 +147,8 @@ public class OrderInfoController extends AbstractController {
 	@RequestMapping("/save")
 	@RequiresPermissions("purchase:orderinfo:save")
 	public R save(@RequestBody OrderInfoEntity orderInfo){
+
+        orderInfo.setOrderNo(commonUtilService.createBillNo("0"));
 
 		SysUserEntity sysUserEntity =  getUser();
 
