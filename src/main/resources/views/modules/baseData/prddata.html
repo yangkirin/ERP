@@ -334,9 +334,9 @@
 					<!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="saveOrUpdate" value="保存更改"/>-->
 					&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
 					&nbsp;&nbsp;<a v-if="hasPermission('baseData:prddata:update')" class="btn btn-primary" @click="saveOrUpdate"><i class="fa fa-pencil-square-o"></i>&nbsp;保存更改</a>
-					&nbsp;&nbsp;<a v-if="prdData.status!=1 && prdData.prdName" class="btn btn-success"
-								   @click="startPrd">启用</a>
-					&nbsp;&nbsp;<a v-if="prdData.status!=0 && prdData.prdName" class="btn btn-danger" @click="stopPrd">禁用</a>
+                    &nbsp;&nbsp;<a v-if="prdData.status!=1 && prdData.prdName" class="btn btn-success"
+                                   @click="startPrd">启用</a>
+                    <a v-if="prdData.status!=0 && prdData.prdName" class="btn btn-danger" @click="stopPrd">禁用</a>
 				</div>
 			</div>
 			<br>

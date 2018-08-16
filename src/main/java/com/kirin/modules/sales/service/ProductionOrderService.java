@@ -15,6 +15,8 @@ import java.util.Map;
 public interface ProductionOrderService {
 	
 	ProductionOrderEntity queryObject(Long id);
+
+    ProductionOrderEntity queryObjectByPONo(String productionNo);
 	
 	List<ProductionOrderEntity> queryList(Map<String, Object> map);
 	

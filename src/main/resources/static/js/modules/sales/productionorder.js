@@ -67,6 +67,8 @@ $(function () {
 
                 var configPrd = "<button type='button' class='btn btn-primary btn-xs' onclick='configPrd("+row.id+")'>产品配置</button>&nbsp;&nbsp;";
 
+                    var copyStr = "<button type='button' class='btn btn-primary btn-xs' onclick='copyOrder(" + row.id + ")'>复制</button>&nbsp;&nbsp;";
+
                 // if(!hasPermission('purchase:orderinfo:update')){
                 //     editStr = "";
                 // }
@@ -91,7 +93,7 @@ $(function () {
                 }else if(status == '4'){//已完结
                     operatorStr = printStr;
                 }
-
+                    operatorStr += copyStr;
                 return operatorStr;
             }}
         ],
@@ -354,6 +356,13 @@ function orderConfirm(rowId){
     vm.saveOrder(rowId);
 }
 
+function copyOrder(rowid) {
+    alert("确定复制该订单？", function () {
+        console.log("复制订单");
+        vm.copyOrder(rowid);
+    });
+}
+
 var vm = new Vue({
 	el:'#rrapp',
 	data:{
@@ -416,24 +425,46 @@ var vm = new Vue({
             vm.productionOrder = {};
             vm.getInfo(id);
 		},
-		saveOrUpdate: function (event) {
-			var url = vm.productionOrder.id == null ? "sales/productionorder/save" : "sales/productionorder/update";
-			$.ajax({
-				type: "POST",
-			    url: baseURL + url,
+        saveOrUpdate: function (event) {
+            var url = vm.productionOrder.id == null ? "sales/productionorder/save" : "sales/productionorder/update";
+            $.ajax({
+                type: "POST",
+                url: baseURL + url,
                 contentType: "application/json",
-			    data: JSON.stringify(vm.productionOrder),
-			    success: function(r){
-			    	if(r.code === 0){
-						alert('操作成功', function(index){
-							vm.reload();
-						});
-					}else{
-						alert(r.msg);
-					}
-				}
-			});
-		},
+                data: JSON.stringify(vm.productionOrder),
+                success: function (r) {
+                    if (r.code === 0) {
+                        alert('操作成功', function (index) {
+                            vm.reload();
+                        });
+                    } else {
+                        alert(r.msg);
+                    }
+                }
+            });
+        },
+        copyOrder: function (rowid) {
+            var url = "sales/productionorder/copyOrder";
+            var data = {
+                productionNo: vm.createNewNo(),
+                oldId: rowid,
+            };
+            $.ajax({
+                type: "POST",
+                url: baseURL + url,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (r) {
+                    if (r.code === 0) {
+                        alert('新订单的编号是' + r.productionNo, function (index) {
+                            vm.reload();
+                        });
+                    } else {
+                        alert(r.msg);
+                    }
+                }
+            });
+        },
 		del: function (event) {
 			var ids = getSelectedRows();
 			if(ids == null){

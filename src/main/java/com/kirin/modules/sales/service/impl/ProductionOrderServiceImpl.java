@@ -16,12 +16,17 @@ import com.kirin.modules.sales.service.ProductionOrderService;
 public class ProductionOrderServiceImpl implements ProductionOrderService {
 	@Autowired
 	private ProductionOrderDao productionOrderDao;
-	
+
 	@Override
 	public ProductionOrderEntity queryObject(Long id){
 		return productionOrderDao.queryObject(id);
 	}
-	
+
+    @Override
+    public ProductionOrderEntity queryObjectByPONo(String productionNo) {
+        return productionOrderDao.queryObjectByPONo(productionNo);
+    }
+
 	@Override
 	public List<ProductionOrderEntity> queryList(Map<String, Object> map){
 		return productionOrderDao.queryList(map);

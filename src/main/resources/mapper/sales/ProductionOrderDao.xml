@@ -32,7 +32,11 @@
 		select * from tb_production_order where ID = #{value}
 	</select>
 
-	<select id="queryList" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
+    <select id="queryObjectByPONo" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
+		select * from tb_production_order where PRODUCTION_NO = #{productionNo}
+	</select>
+
+    <select id="queryList" resultType="com.kirin.modules.sales.entity.ProductionOrderEntity">
 		SELECT
 			po.*,
 			oi.id AS outportId,

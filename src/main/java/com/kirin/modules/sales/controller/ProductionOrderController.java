@@ -103,7 +103,7 @@ public class ProductionOrderController extends AbstractController {
 		
 		return R.ok().put("productionOrder", productionOrder);
 	}
-	
+
 	/**
 	 * 保存
 	 */
@@ -114,7 +114,7 @@ public class ProductionOrderController extends AbstractController {
 		TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(productionOrder.getOrderTypeId());
 		productionOrder.setOrderTypeName(typeInfoEntity1.getTypeName());
 
-		TypeInfoEntity typeInfoEntity2 = typeInfoService.queryObject(productionOrder.getOrderTypeId());
+        TypeInfoEntity typeInfoEntity2 = typeInfoService.queryObject(productionOrder.getPlaceId());
 		productionOrder.setPlaceName(typeInfoEntity2.getTypeName());
 
 		CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(productionOrder.getCustomerId());
@@ -163,6 +163,49 @@ public class ProductionOrderController extends AbstractController {
 
 		return R.ok().put("data",productionOrder);
 	}
+
+
+    /**
+     * 复制订单
+     */
+    @RequestMapping("/copyOrder")
+//	@RequiresPermissions("sales:productionorder:save")
+    public R copyOrder(@RequestBody Map<String, Object> params) {
+        Long oldId = Long.valueOf(String.valueOf(params.get("oldId")));
+        String productionNo = String.valueOf(params.get("productionNo"));
+
+//		System.out.println(oldId + " " + productionNo);
+
+        ProductionOrderEntity productionOrder = productionOrderService.queryObject(oldId);
+        productionOrder.setId(null);
+        productionOrder.setProductionNo(productionNo);
+        productionOrder.setStatus("1");
+
+
+        productionOrder.setUpdateDate(null);
+        productionOrder.setUpdateUser(null);
+
+        SysUserEntity sysUserEntity = getUser();
+
+        productionOrder.setCreateUser(sysUserEntity.getUsername());
+        productionOrder.setCreateDate(new Date());
+
+        productionOrderService.save(productionOrder);
+        ProductionOrderEntity newOrder = productionOrderService.queryObjectByPONo(productionNo);
+        Map<String, Object> newparams = new HashMap<>();
+        newparams.put("productionOrderId", oldId);
+        List<ProductionOrderDetailEntity> productionOrderDetailList = productionOrderDetailService.queryList(newparams);
+        for (ProductionOrderDetailEntity productionOrderEntity : productionOrderDetailList) {
+            productionOrderEntity.setId(null);
+            productionOrderEntity.setProductionOrderId(newOrder.getId());
+            productionOrderEntity.setProductionOrderNo(productionNo);
+            productionOrderDetailService.save(productionOrderEntity);
+        }
+
+//
+//		return R.ok().put("data",productionOrder);
+        return R.ok().put("productionNo", productionNo);
+    }
 
 
 	/**
