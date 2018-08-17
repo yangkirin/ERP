@@ -25,6 +25,17 @@ $(function () {
             { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80,hidden:true },
             { label: '折扣成本比', name: 'discountCostRate', index: 'DISCOUNT_COST_RATE', width: 80,hidden:true },
             { label: '备注', name: 'remakr', index: 'REMAKR', width: 100 },
+            {
+                label: '预订单', name: 'typeId', index: 'TYPE_ID', width: 40, formatter: function (value) {
+                    if (value == 0) {
+                        return "否";
+                    } else if (value == 1) {
+                        return "是";
+                    } else {
+                        return "null";
+                    }
+                }
+            },
             { label: '状态', name: 'status', index: 'STATUS', width: 40, formatter: function (value, options, row) {
                 var msg = "";
                 if(value == 0){
@@ -357,10 +368,12 @@ function orderConfirm(rowId){
 }
 
 function copyOrder(rowid) {
-    alert("确定复制该订单？", function () {
-        console.log("复制订单");
-        vm.copyOrder(rowid);
-    });
+    // alert("确定复制该订单？", function () {
+    //     console.log("复制订单");
+    //     vm.copyOrder(rowid);
+    // });
+
+    vm.copy(rowid);
 }
 
 var vm = new Vue({
@@ -382,7 +395,9 @@ var vm = new Vue({
             orderTypeName: null,
             customer: null,
             placeName: null
-        }
+        },
+        copyBtn: false,
+        addOrUpdate: false
 	},
 	methods: {
 		query: function () {
@@ -402,15 +417,19 @@ var vm = new Vue({
             return no;
         },
 		add: function(){
-			vm.showList = false;
-			vm.showForm = false;
-			vm.addOrderForm = true;
-			vm.title = "新增";
+            // vm.showList = false;
+            // vm.showForm = false;
+            // vm.addOrderForm = true;
 			vm.productionOrder = {
                 productionNo:vm.createNewNo(),
-                status:1
+                status: 1,
+                typeId: 0
 			};
 
+            vm.addOrUpdate = true;
+            vm.copyBtn = false;
+            vm.title = "新增";
+            $("#myModal").modal("show");
             // $('#jqGridPRD').jqGrid("clearGridData");
 		},
 		update: function (rowId) {
@@ -418,12 +437,15 @@ var vm = new Vue({
 			if(id == null){
 				return ;
 			}
-            vm.showList = false;
-            vm.showForm = false;
-            vm.addOrderForm = true;
-            vm.title = "修改";
-            vm.productionOrder = {};
+            // vm.showList = false;
+            // vm.showForm = false;
+            // vm.addOrderForm = true;
+            // vm.productionOrder = {};
             vm.getInfo(id);
+            vm.addOrUpdate = true;
+            vm.copyBtn = false;
+            vm.title = "修改";
+            $("#myModal").modal("show");
 		},
         saveOrUpdate: function (event) {
             var url = vm.productionOrder.id == null ? "sales/productionorder/save" : "sales/productionorder/update";
@@ -435,6 +457,7 @@ var vm = new Vue({
                 success: function (r) {
                     if (r.code === 0) {
                         alert('操作成功', function (index) {
+                            vm.productionOrder = {};
                             vm.reload();
                         });
                     } else {
@@ -443,20 +466,37 @@ var vm = new Vue({
                 }
             });
         },
-        copyOrder: function (rowid) {
-            var url = "sales/productionorder/copyOrder";
-            var data = {
+        copy: function (rowId) {
+            var oldOrder = $("#jqGrid").jqGrid('getRowData', rowId);
+            vm.productionOrder = {
+                orderTypeId: oldOrder.orderTypeId,
+                customerId: oldOrder.customerId,
+                placeId: oldOrder.placeId,
                 productionNo: vm.createNewNo(),
-                oldId: rowid,
+                status: 1,
+                oldId: rowId,
+                typeId: 0
             };
+            vm.title = '复制';
+            vm.addOrUpdate = false;
+            vm.copyBtn = true;
+            $("#myModal").modal("show");
+        },
+        copyOrder: function () {
+            var url = "sales/productionorder/copyOrder";
+            // var data = {
+            //     productionNo: vm.createNewNo(),
+            //     oldId: rowid,
+            // };
             $.ajax({
                 type: "POST",
                 url: baseURL + url,
                 contentType: "application/json",
-                data: JSON.stringify(data),
+                data: JSON.stringify(vm.productionOrder),
                 success: function (r) {
                     if (r.code === 0) {
                         alert('新订单的编号是' + r.productionNo, function (index) {
+                            vm.productionOrder = {};
                             vm.reload();
                         });
                     } else {
@@ -492,6 +532,9 @@ var vm = new Vue({
 		getInfo: function(id){
 			$.get(baseURL + "sales/productionorder/info/"+id, function(r){
                 vm.productionOrder = r.productionOrder;
+
+                // console.log(r.productionOrder);
+                // console.log(vm.productionOrder);
             });
 		},
 		reload: function (event) {
@@ -698,39 +741,42 @@ var vm = new Vue({
             });
 		},
         selectVal:function(type){
-            var i=0;
-            var typeInfo;
-            var customerNo;
-            var customerName;
-            var placeInfo;
-            if(type == 'orderTypeId'){
-                i=1;
+            // var i=0;
+            // var typeInfo;
+            // var customerNo;
+            // var customerName;
+            // var placeInfo;
+            if (type == 'orderTypeId' && vm.productionOrder.orderTypeId != null) {
+                // i=1;
                 $.get(baseURL + "baseData/typeinfo/info/"+vm.productionOrder.orderTypeId, function(r){
-                    typeInfo = r.typeInfo;
+                    console.log(r);
+                    vm.productionOrder.orderTypeName = r.typeInfo.typeName;
 				});
-            }else if(type == 'customerId'){
-                i=2;
+            } else if (type == 'customerId' && vm.productionOrder.customerId != null) {
+                // i=2;
                 $.get(baseURL + "sales/customerinfo/info/"+vm.productionOrder.customerId, function(r){
-                    customerNo = r.customerInfo;
-                    customerName = r.customerName;
+                    console.log(r);
+                    vm.productionOrder.customerNo = r.customerInfo.customerNo;
+                    vm.productionOrder.customerName = r.customerInfo.customerName;
                 });
-            }else if(type == 'placeId'){
-                i=3;
+            } else if (type == 'placeId' && vm.productionOrder.placeId != null) {
+                // i=3;
                 $.get(baseURL + "baseData/typeinfo/info/"+vm.productionOrder.placeId, function(r){
-                    placeInfo = r.typeInfo;
+                    console.log(r);
+                    vm.productionOrder.placeName = r.typeInfo.typeName;
                 });
             }
-            if(i == 3){
-                vm.productionOrder.orderTypeName = typeInfo;
-                vm.productionOrder.customerNo = customerNo;
-                vm.productionOrder.customerName = customerName;
-                vm.productionOrder.placeName = placeInfo;
-
-                $('#addPrd_btn').attr("disabled",false);
-                $('#editPrd_btn').attr("disabled",false);
-                $('#delPrd_btn').attr("disabled",false);
-                $('#savePrd_btn').attr("disabled",false);
-            }
+            // if(i == 3){
+            //     vm.productionOrder.orderTypeName = typeInfo;
+            //     vm.productionOrder.customerNo = customerNo;
+            //     vm.productionOrder.customerName = customerName;
+            //     vm.productionOrder.placeName = placeInfo;
+            //
+            //     $('#addPrd_btn').attr("disabled",false);
+            //     $('#editPrd_btn').attr("disabled",false);
+            //     $('#delPrd_btn').attr("disabled",false);
+            //     $('#savePrd_btn').attr("disabled",false);
+            // }
 		},
         initCsutomerInfoArr:function(){
             var dataArr = "";
@@ -882,7 +928,7 @@ var vm = new Vue({
                 return flag;
             }
             return flag;
-        }
+        },
 	}
 });
 vm.orderTypeArr = vm.initTypeInfoArr(40);

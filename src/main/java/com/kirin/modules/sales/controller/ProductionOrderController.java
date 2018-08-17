@@ -180,14 +180,35 @@ public class ProductionOrderController extends AbstractController {
         Long oldId = Long.valueOf(String.valueOf(params.get("oldId")));
 
 //        String productionNo = String.valueOf(params.get("productionNo"));
-        String productionNo = commonUtilService.createBillNo("3");
 //		System.out.println(oldId + " " + productionNo);
 
+        //查找被复制订单
         ProductionOrderEntity productionOrder = productionOrderService.queryObject(oldId);
+        //设置新订单id为空
         productionOrder.setId(null);
-        productionOrder.setProductionNo(productionNo);
-        productionOrder.setStatus("1");
 
+        //设置订单类型
+        productionOrder.setOrderTypeId(Long.valueOf(String.valueOf(params.get("orderTypeId"))));
+        TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(productionOrder.getOrderTypeId());
+        productionOrder.setOrderTypeName(typeInfoEntity1.getTypeName());
+
+        //设置客户信息
+        productionOrder.setCustomerId(Long.valueOf(String.valueOf(params.get("customerId"))));
+        CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(productionOrder.getCustomerId());
+        productionOrder.setCustomerNo(customerInfoEntity.getCustomerCode());
+        productionOrder.setCustomerName(customerInfoEntity.getCustomerName());
+
+        //设置售点信息
+        productionOrder.setPlaceId(Long.valueOf(String.valueOf(params.get("placeId"))));
+        TypeInfoEntity typeInfoEntity2 = typeInfoService.queryObject(productionOrder.getPlaceId());
+        productionOrder.setPlaceName(typeInfoEntity2.getTypeName());
+
+        String tmp = String.valueOf(params.get("remakr"));
+        productionOrder.setRemakr(tmp == "null" ? "" : tmp);
+
+
+        productionOrder.setStatus(String.valueOf(params.get("status")));
+        productionOrder.setTypeId(Long.valueOf(String.valueOf(params.get("typeId"))));
 
         productionOrder.setUpdateDate(null);
         productionOrder.setUpdateUser(null);
@@ -197,7 +218,13 @@ public class ProductionOrderController extends AbstractController {
         productionOrder.setCreateUser(sysUserEntity.getUsername());
         productionOrder.setCreateDate(new Date());
 
+
+        //生成新的订单编号
+        String productionNo = commonUtilService.createBillNo("3");
+        productionOrder.setProductionNo(productionNo);
+        //保存新订单
         productionOrderService.save(productionOrder);
+
         ProductionOrderEntity newOrder = productionOrderService.queryObjectByPONo(productionNo);
         Map<String, Object> newparams = new HashMap<>();
         newparams.put("productionOrderId", oldId);

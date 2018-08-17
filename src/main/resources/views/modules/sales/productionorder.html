@@ -82,85 +82,92 @@
     </div>
 
 	<div v-show="addOrderForm" class="panel panel-default">
-		<form class="form-horizontal" style="width: 100%;">
-			<div class="form-group">
-				<div class="col-sm-1 control-label">类型</div>
-				<div class="col-sm-2">
-					<select class="form-control" @change="selectVal('orderTypeId')" v-model="productionOrder.orderTypeId" placeholder="类型" readonly="readonly">
-						<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
-					</select>
-				</div>
-				<div class="col-sm-1 control-label">客户</div>
-				<div class="col-sm-2">
-					<select class="form-control" @change="selectVal('customerId')" v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">
-						<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
-					</select>
-				</div>
-				<div class="col-sm-1 control-label">售点</div>
-				<div class="col-sm-2">
-					<select class="form-control" @change="selectVal('placeId')" v-model="productionOrder.placeId" placeholder="售点" readonly="readonly">
-						<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-1 control-label">编号</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.productionNo" placeholder="单号"/>
-				</div>
-				<div class="col-sm-1 control-label">备注</div>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" v-model="productionOrder.remakr" placeholder="备注"/>
-				</div>
-				<div class="col-sm-1 control-label">状态</div>
-				<div class="col-sm-2">
-					<select class="form-control" v-model="productionOrder.status" placeholder="请选择状态">
-						<option value="1">启用</option>
-						<option value="0">禁用</option>
-					</select>
-				</div>
-			</div>
-			<!---->
+        <!--<form class="form-horizontal" style="width: 100%;">-->
 			<!--<div class="form-group">-->
-				<!--<div class="col-sm-1 control-label">成本</div>-->
+        <!--<div class="col-sm-1 control-label">类型</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.prdCost" placeholder="成本"/>-->
+        <!--<select class="form-control" @change="selectVal('orderTypeId')" v-model="productionOrder.orderTypeId" placeholder="类型" readonly="readonly">-->
+        <!--<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}-->
+        <!--</select>-->
 				<!--</div>-->
-				<!--<div class="col-sm-1 control-label">收入</div>-->
+        <!--<div class="col-sm-1 control-label">客户</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.prdIncome" placeholder="收入"/>-->
+        <!--<select class="form-control" @change="selectVal('customerId')" v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">-->
+        <!--<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}-->
+        <!--</select>-->
 				<!--</div>-->
-				<!--<div class="col-sm-1 control-label">折后收入</div>-->
+        <!--<div class="col-sm-1 control-label">售点</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.discountIncome" placeholder="折后收入"/>-->
+        <!--<select class="form-control" @change="selectVal('placeId')" v-model="productionOrder.placeId" placeholder="售点" readonly="readonly">-->
+        <!--<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}-->
+        <!--</select>-->
 				<!--</div>-->
 			<!--</div>-->
-			<!---->
 			<!--<div class="form-group">-->
-				<!--<div class="col-sm-1 control-label">产品总数</div>-->
+        <!--<div class="col-sm-1 control-label">编号</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.prdMount" placeholder="产品总数"/>-->
+        <!--<input type="text" class="form-control" v-model="productionOrder.productionNo" placeholder="单号"/>-->
 				<!--</div>-->
-				<!--<div class="col-sm-1 control-label">成本率</div>-->
+        <!--<div class="col-sm-1 control-label">备注</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.costRate" placeholder="成本率"/>-->
+        <!--<input type="text" class="form-control" v-model="productionOrder.remakr" placeholder="备注"/>-->
 				<!--</div>-->
-				<!--<div class="col-sm-1 control-label">折扣成本比</div>-->
+        <!--<div class="col-sm-1 control-label">状态</div>-->
 				<!--<div class="col-sm-2">-->
-					<!--<input type="text" class="form-control" v-model="productionOrder.discountCostRate" placeholder="折扣成本比"/>-->
-				<!--</div>-->
-				<!--<div class="col-sm-1 control-label"></div>-->
+        <!--<select class="form-control" v-model="productionOrder.status" placeholder="请选择状态">-->
+        <!--<option value="1">启用</option>-->
+        <!--<option value="0">禁用</option>-->
+        <!--</select>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--<div class="form-group">-->
+        <!--<div class="col-sm-1 control-label">预订单</div>-->
+        <!--<div class="col-sm-2">-->
+        <!--<select class="form-control" v-model="productionOrder.typeId" placeholder="是否是预订单">-->
+        <!--<option value="1">是</option>-->
+        <!--<option value="0">否</option>-->
+        <!--</select>-->
+        <!--</div>-->
+        <!--<div class="col-sm-2 control-label"></div>-->
+        <!--<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>-->
+        <!--&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>-->
+        <!--</div>-->
+        <!--&lt;!&ndash;&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">成本</div>&ndash;&gt;-->
 				<!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
-				<!--&lt;!&ndash;<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>&ndash;&gt;-->
-				<!--&lt;!&ndash;&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.prdCost" placeholder="成本"/>&ndash;&gt;-->
 				<!--&lt;!&ndash;</div>&ndash;&gt;-->
-			<!--</div>-->
-			<div class="form-group">
-				<div class="col-sm-2 control-label"></div>
-				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
-				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
-			</div>
-		</form>
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">收入</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.prdIncome" placeholder="收入"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">折后收入</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.discountIncome" placeholder="折后收入"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">产品总数</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.prdMount" placeholder="产品总数"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">成本率</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.costRate" placeholder="成本率"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label">折扣成本比</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="text" class="form-control" v-model="productionOrder.discountCostRate" placeholder="折扣成本比"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--&lt;!&ndash;<div class="col-sm-1 control-label"></div>&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<div class="col-sm-2">&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;<input type="button" class="btn btn-primary" id="saveOrUpdateDetail" @click="saveOrUpdateDetail" value="确定"/>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;&lt;!&ndash;</div>&ndash;&gt;&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--</form>-->
 	</div>
 
 	<div v-show="showForm" class="panel panel-default">
@@ -216,6 +223,94 @@
 			</div>
 		</form>
 	</div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+         data-backdrop="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        {{title}}订单
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" style="width: 100%;">
+                        <div class="form-group">
+                            <div class="col-sm-1 control-label">类型</div>
+                            <div class="col-sm-3">
+                                <select class="form-control" @change="selectVal('orderTypeId')"
+                                        v-model="productionOrder.orderTypeId" placeholder="类型" readonly="readonly">
+                                    <option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
+                                </select>
+                            </div>
+                            <div class="col-sm-1 control-label">客户</div>
+                            <div class="col-sm-3">
+                                <select class="form-control" @change="selectVal('customerId')"
+                                        v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">
+                                    <option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
+                                </select>
+                            </div>
+                            <div class="col-sm-1 control-label">售点</div>
+                            <div class="col-sm-3">
+                                <select class="form-control" @change="selectVal('placeId')"
+                                        v-model="productionOrder.placeId" placeholder="售点" readonly="readonly">
+                                    <option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-1 control-label">编号</div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="productionOrder.productionNo"
+                                       placeholder="单号"/>
+                            </div>
+                            <div class="col-sm-1 control-label">备注</div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="productionOrder.remakr"
+                                       placeholder="备注"/>
+                            </div>
+                            <div class="col-sm-1 control-label">状态</div>
+                            <div class="col-sm-3">
+                                <select class="form-control" v-model="productionOrder.status" placeholder="请选择状态">
+                                    <option value="1">启用</option>
+                                    <option value="0">禁用</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-1 control-label">预订单</div>
+                            <div class="col-sm-3">
+                                <select class="form-control" v-model="productionOrder.typeId" placeholder="是否是预订单">
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" @click="saveOrUpdate"
+                            v-show="addOrUpdate">
+                        确定
+                    </button>&nbsp;&nbsp;
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" @click="copyOrder"
+                            v-show="copyBtn">
+                        复制
+                    </button>&nbsp;&nbsp;
+                    <button type="button" class="btn btn-warning" data-dismiss="modal" @click="reload">
+                        返回
+                    </button>
+                    <!--<button type="button" class="btn btn-primary" @click="modalCommit">-->
+                    <!--提交-->
+                    <!--</button>-->
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 
 </div>
 

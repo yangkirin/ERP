@@ -15,6 +15,7 @@
         <result property="placeId" column="PLACE_ID"/>
         <result property="placeName" column="PLACE_NAME"/>
         <result property="remakr" column="REMAKR"/>
+        <result property="typeId" column="TYPE_ID"/>
         <result property="status" column="STATUS"/>
         <result property="createUser" column="CREATE_USER"/>
         <result property="createDate" column="CREATE_DATE"/>
@@ -110,7 +111,8 @@
 			`CUSTOMER_NAME`, 
 			`PLACE_ID`, 
 			`PLACE_NAME`, 
-			`REMAKR`, 
+			`REMAKR`,
+			`TYPE_ID`,
 			`STATUS`, 
 			`CREATE_USER`, 
 			`CREATE_DATE`,
@@ -133,7 +135,8 @@
 			#{customerName}, 
 			#{placeId}, 
 			#{placeName}, 
-			#{remakr}, 
+			#{remakr},
+			#{typeId},
 			#{status}, 
 			#{createUser}, 
 			#{createDate},
@@ -160,6 +163,7 @@
 			<if test="placeId != null">`PLACE_ID` = #{placeId}, </if>
 			<if test="placeName != null">`PLACE_NAME` = #{placeName}, </if>
 			<if test="remakr != null">`REMAKR` = #{remakr}, </if>
+            <if test="typeId != null">`TYPE_ID` = #{typeId},</if>
 			<if test="status != null">`STATUS` = #{status}, </if>
 			<if test="createUser != null">`CREATE_USER` = #{createUser}, </if>
 			<if test="createDate != null">`CREATE_DATE` = #{createDate}, </if>

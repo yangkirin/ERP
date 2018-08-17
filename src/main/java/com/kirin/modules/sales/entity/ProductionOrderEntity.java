@@ -39,6 +39,8 @@ public class ProductionOrderEntity implements Serializable {
 	private String placeName;
 	//备注
 	private String remakr;
+	//是否是预订单,1-预订单，0-实际订单
+	private Long typeId;
 	//状态
 	private String status;
 	//创建者
@@ -213,6 +215,21 @@ public class ProductionOrderEntity implements Serializable {
 	public String getRemakr() {
 		return remakr;
 	}
+
+	/**
+	 * 设置：typeId
+	 */
+	public void setTypeId(Long typeId) {
+		this.typeId = typeId;
+	}
+
+	/**
+	 * 获取：typeId
+	 */
+	public Long getTypeId() {
+		return typeId;
+	}
+
 	/**
 	 * 设置：状态
 	 */
