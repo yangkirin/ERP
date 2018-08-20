@@ -35,6 +35,7 @@ import com.kirin.common.utils.R;
 public class CustomerPrdController {
 	@Autowired
 	private CustomerPrdService customerPrdService;
+
 	
 	/**
 	 * 列表
@@ -72,9 +73,28 @@ public class CustomerPrdController {
 	@RequestMapping("/save")
 	@RequiresPermissions("sales:customerprd:save")
 	public R save(@RequestBody CustomerPrdEntity customerPrd){
-		customerPrdService.save(customerPrd);
-		
-		return R.ok();
+
+        Long prdId = customerPrd.getPrdId();
+        if (prdId == null) {
+            return R.error("请填写产品信息！");
+        }
+
+        PrdDataEntity prdDataEntity = prdDataService.queryObject(prdId);
+        String status = prdDataEntity.getStatus();
+        switch (status) {
+            case "1":    //启用
+                customerPrdService.save(customerPrd);
+                return R.ok();
+            case "0":    //禁用
+                return R.error("产品已被禁用！");
+            case "2":    //编辑
+                return R.error("产品处于编辑状态！");
+            default:
+                return R.error("产品状态未知");
+
+        }
+
+
 	}
 	
 	/**
