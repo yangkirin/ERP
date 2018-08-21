@@ -324,11 +324,13 @@
 				<div class="modal-body">
 					<form class="form-horizontal" id="addOrderForm" style="width:100%;">
 						<div class="form-group">
-							<div class="col-sm-2 control-label">低值易耗品</div>
+							<div class="col-sm-2 control-label">类别</div>
 							<div class="col-sm-3">
 								<select class="form-control" id="isDH" v-model="addOrder.isDH" placeholder="低值易耗品">
-									<option value="0">否</option>
-									<option value="1">是</option>
+									<option value="0">其它</option>
+									<option value="1">低值易耗</option>
+									<option value="2">调料</option>
+									<option value="3">研发</option>
 								</select>
 							</div>
 							<div class="col-sm-2 control-label">需求日期</div>

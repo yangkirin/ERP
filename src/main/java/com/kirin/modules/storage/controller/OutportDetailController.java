@@ -209,9 +209,15 @@ public class OutportDetailController extends AbstractController {
 			outportInfoEntity.setCustomerId(Long.valueOf(customerId));
 			outportInfoEntity.setCustomerNo(customerInfoEntity.getCustomerCode());
 			outportInfoEntity.setCustomerName(customerInfoEntity.getCustomerName());
-		}else{
-			outportInfoEntity.setRemark("低值易耗单");
-		}
+        } else if (isDH.equals("1")) {
+            outportInfoEntity.setRemark("低值易耗单");
+        } else if (isDH.equals("2")) {
+            outportInfoEntity.setRemark("调料单");
+        } else if (isDH.equals("3")) {
+            outportInfoEntity.setRemark("研发单");
+        } else {
+            outportInfoEntity.setRemark("未知");
+        }
 
 		SysUserEntity sysUserEntity =  getUser();
 
