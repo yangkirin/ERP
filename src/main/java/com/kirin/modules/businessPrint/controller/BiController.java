@@ -96,11 +96,11 @@ public class BiController {
      */
     @RequestMapping(value="/DataSearchLL")
     public R DataSearchLL(@RequestParam Map<String, Object> params){
-        String createDate = "";
-        if(params.get("createDate") == null || params.get("createDate").toString().equals("")){
-            createDate = DateUtils.format(new Date(),DateUtils.DATE_PATTERN);
-            params.put("createDate",createDate);
-        }
+//        String createDate = "";
+//        if(params.get("createDate") == null || params.get("createDate").toString().equals("")){
+//            createDate = DateUtils.format(new Date(),DateUtils.DATE_PATTERN);
+//            params.put("createDate",createDate);
+//        }
 
         List<Map> mtrList = new ArrayList<>();
         List<Map> returnList = new ArrayList<>();
@@ -109,12 +109,12 @@ public class BiController {
         List<ProductionOrderEntity> productionOrderEntityList = productionOrderService.queryList(params);
         if(productionOrderEntityList != null && productionOrderEntityList.size() > 0){
             Map<String,Object> queryMap = new HashMap<>();
-            for (ProductionOrderEntity productionOrderEntity:productionOrderEntityList) {
+            for (ProductionOrderEntity productionOrderEntity : productionOrderEntityList) {   //遍历订单
                 queryMap.clear();
                 queryMap.put("productionOrderId",productionOrderEntity.getId());
-                queryMap.put("takeStn",params.get("takeStn"));
+                queryMap.put("takeStn", params.get("takeStn"));  //领料站点
                 List<ProductionOrderDetailEntity> productionOrderDetailEntityList = productionOrderDetailService.queryList(queryMap);
-                for (ProductionOrderDetailEntity orderDetailEntity:productionOrderDetailEntityList){
+                for (ProductionOrderDetailEntity orderDetailEntity : productionOrderDetailEntityList) {    //遍历一个订单中的所有原料（包括半成品）
 //                    List<Map> listData = commonUtilService.eachGetPrdMtr(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
 //                    allMtrList.addAll(listData);
                     List<Map> mapListTemp = findAllMtrByPrd2(orderDetailEntity.getPrdId(),Long.valueOf(params.get("takeStn").toString()),null,new BigDecimal(orderDetailEntity.getAmount()));//单各产品所需要的原料重量
@@ -135,12 +135,12 @@ public class BiController {
                         BigDecimal count = new BigDecimal("0");
                         for (Map mapTemp : mtrList) {
                             if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
-                                count = count.add(new BigDecimal(mapTemp.get("orderWgt").toString()));
+                                count = count.add(new BigDecimal(mapTemp.get("bomWgt").toString()));
                             }
                         }
                         for (Map mapTemp : mapListTemp) {
                             if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
-                                mapTemp.put("orderWgt", count);
+                                mapTemp.put("bomWgt", count);
                             }
                         }
                     }
@@ -148,6 +148,27 @@ public class BiController {
                 }else{
                     returnList.addAll(mtrList);
                 }
+                //TODO --统计个原料当前库存数，换算重量
+                for (Map tmp : returnList) {
+                    Long mtrId = Long.valueOf(tmp.get("mtrId").toString());
+                    List<Map> listMap = commonUtilService.inventorySearch(mtrId);
+                    Object storeCount = listMap.get(0).get("STORE_COUNT");
+                    tmp.put("storeCount", storeCount == null ? "0" : storeCount);
+                    String formulaUnit = listMap.get(0).get("FORMULA_UNIT").toString();
+                    tmp.put("formulaUnit", formulaUnit);
+
+
+                    BigDecimal miniRate = new BigDecimal(tmp.get("miniRate") == null ? "1" : tmp.get("miniRate").toString());
+                    BigDecimal orderWgt = new BigDecimal(tmp.get("bomWgt").toString());
+                    orderWgt = orderWgt.divide(miniRate, 2, BigDecimal.ROUND_HALF_UP);
+                    tmp.put("orderWgt", orderWgt);
+
+                    BigDecimal purchaseRate = new BigDecimal(tmp.get("purchaseRate") == null ? "1" : tmp.get("purchaseRate").toString());
+                    BigDecimal purchaseWgt = new BigDecimal(tmp.get("bomWgt").toString());
+                    purchaseWgt = purchaseWgt.divide(miniRate.multiply(purchaseRate), 4, BigDecimal.ROUND_HALF_UP);
+                    tmp.put("purchaseWgt", purchaseWgt);
+                }
+
             }
         }
 //        if(allMtrList.size() > 0){
@@ -189,9 +210,11 @@ public class BiController {
 
                 }else{//原料则直接运算后存入集合
                     BigDecimal miniRate = new BigDecimal(map.get("miniRate")==null ? "1":map.get("miniRate").toString());
-                    BigDecimal orderWgt = (grossWgt.multiply(orderAmount).setScale(4,BigDecimal.ROUND_HALF_UP)).divide(miniRate,2,BigDecimal.ROUND_HALF_UP);
+                    BigDecimal bomWgt = (grossWgt.multiply(orderAmount).setScale(4, BigDecimal.ROUND_HALF_UP));  //.divide(miniRate,2,BigDecimal.ROUND_HALF_UP);
                     //需求重量需要转换为库存单位重量，需求重量=重量/原料最小转换率
-                    map.put("orderWgt",orderWgt);
+//                    System.out.println(bomWgt);
+                    //配方重量
+                    map.put("bomWgt", bomWgt);
                     mtrList.add(map);
                 }
             }
@@ -208,12 +231,12 @@ public class BiController {
                     BigDecimal count = new BigDecimal("0");
                     for (Map mapTemp : mtrList) {
                         if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
-                            count = count.add(new BigDecimal(mapTemp.get("orderWgt").toString()));
+                            count = count.add(new BigDecimal(mapTemp.get("bomWgt").toString()));
                         }
                     }
                     for (Map mapTemp : mapListTemp) {
                         if (mapTemp.get("mtrId").toString().equals(objectArr[i].toString())) {
-                            mapTemp.put("orderWgt", count);
+                            mapTemp.put("bomWgt", count);
                         }
                     }
                 }

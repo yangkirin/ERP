@@ -71,10 +71,15 @@
 		m.PURCHASE_RATE,m.MINI_RATE,
 		(select t.TYPE_NAME from tb_type_info t where t.id=m.MINI_UNIT) as MINI_UNIT,
 		(select t.TYPE_NAME from tb_type_info t where t.id=m.FORMULA_UNIT) as FORMULA_UNIT,
-		(select sum(im.IN_COUNT) from tb_import_detail im where m.id=im.mtr_id) as IN_COUNT,
-		(select sum(od.OUT_COUNT) from tb_outport_detail od where m.id=od.mtr_id) as OUT_COUNT,
-		((select sum(im.IN_COUNT) from tb_import_detail im where m.id=im.mtr_id)-(select sum(od.OUT_COUNT) from tb_outport_detail od where m.id=od.mtr_id)) as STORE_COUNT
-		from mtr_data m ORDER BY in_count desc;
+		(select ifnull(sum(im.IN_COUNT), 0) from tb_import_detail im where m.id=im.mtr_id) as IN_COUNT,
+		(select ifnull(sum(od.OUT_COUNT), 0) from tb_outport_detail od where m.id=od.mtr_id) as OUT_COUNT,
+		((select ifnull(sum(im.IN_COUNT), 0) from tb_import_detail im where m.id=im.mtr_id)-(select
+		ifnull(sum(od.OUT_COUNT), 0) from tb_outport_detail od where m.id=od.mtr_id)) as STORE_COUNT
+		from mtr_data m
+		<if test="mtrId != null">
+			WHERE m.ID = #{mtrId}
+		</if>
+		ORDER BY in_count desc;
 	</select>
 
 	<select id="batchInventorySearch" resultType="map">

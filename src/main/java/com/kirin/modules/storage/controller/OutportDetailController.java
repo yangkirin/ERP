@@ -189,10 +189,12 @@ public class OutportDetailController extends AbstractController {
 		String customerId = params.get("customerId").toString();
 		String orderTypeId = params.get("orderTypeId").toString();
 		String placeId = params.get("placeId").toString();
+		String demandDate = params.get("demandDate").toString();
 
 		OutportInfoEntity outportInfoEntity = new OutportInfoEntity();
 		outportInfoEntity.setOutporrtNo(outportNo);
 		outportInfoEntity.setStatus("1");
+		outportInfoEntity.setDemandDate(demandDate);
 
 		if(isDH.equals("0")){//不是低值易耗领料
 			TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(Long.valueOf(orderTypeId));

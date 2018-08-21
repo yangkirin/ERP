@@ -34,6 +34,8 @@ public class OutportInfoEntity implements Serializable {
 	private Long orderTypeId;
 	//订单类型名称
 	private String orderTypeName;
+	//需求日期
+	private String demandDate;
 	//出库日期
 	private String outportDate;
 	//状态
@@ -149,6 +151,21 @@ public class OutportInfoEntity implements Serializable {
 	public Long getPrdId() {
 		return prdId;
 	}
+
+	/**
+	 * 设置：需求日期
+	 */
+	public void setDemandDate(String demandDate) {
+		this.demandDate = demandDate;
+	}
+
+	/**
+	 * 获取需求日期
+	 */
+	public String getDemandDate() {
+		return demandDate;
+	}
+
 	/**
 	 * 设置：出库日期
 	 */

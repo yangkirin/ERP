@@ -42,23 +42,29 @@
 			left join tb_customer_info c on o.CUSTOMER_ID = c.id
 			left join tb_production_order po on po.id = o.ORDER_ID or o.ORDER_ID is NULL
 		WHERE
-			o.CUSTOMER_ID = c.id
-			AND po.id = o.ORDER_ID or o.ORDER_ID is NULL
-			<if test="outportId != null">
+        (o.CUSTOMER_ID = c.id or o.CUSTOMER_ID is NULL )
+        AND (po.id = o.ORDER_ID or o.ORDER_ID is NULL)
+        <if test="outportId != null and outportId != ''">
 				AND o.ID = #{outportId}
 			</if>
-			<if test="outportNo != null">
+        <if test="outportNo != null and outportNo != ''">
 				AND o.OUTPORRT_NO = #{outportNo}
 			</if>
-			<if test="orderId != null">
+        <if test="orderId != null and orderId != ''">
 				AND o.ORDER_ID = #{orderId}
 			</if>
-			<if test="customerId != null">
+        <if test="customerId != null and customerId != ''">
 				AND o.CUSTOMER_ID = #{customerId}
 			</if>
-			<if test="productionNo != null">
+        <if test="productionNo != null and productionNo != ''">
 				AND po.PRODUCTION_NO = #{productionNo}
 			</if>
+        <if test="createDate != null and createDate != ''">
+            AND o.CREATE_DATE like "%${createDate}%"
+        </if>
+        <if test="demandDate != null and demandDate != ''">
+            AND o.DEMAND_DATE like "%${demandDate}%"
+        </if>
 		GROUP BY o.ID
         <choose>
             <when test="sidx != null and sidx.trim() != ''">
@@ -85,6 +91,7 @@
 			`CUSTOMER_ID`,
 			`ORDER_TYPE_ID`,
 			`PLACE_ID`,
+			`DEMAND_DATE`,
 			`OUTPORT_DATE`,
 			`REMARK`,
 			`STATUS`,
@@ -99,6 +106,7 @@
 			#{customerId},
 			#{orderTypeId},
 			#{placeId},
+			#{demandDate},
 			#{outportDate},
 			#{remark},
 			#{status},
@@ -116,6 +124,7 @@
 			<if test="customerId != null">`CUSTOMER_ID` = #{customerId}, </if>
 			<if test="orderTypeId != null">`ORDER_TYPE_ID` = #{orderTypeId}, </if>
 			<if test="placeId != null">`PLACE_ID` = #{placeId}, </if>
+            <if test="demandDate != null">`DEMAND_DATE` = #{demandDate},</if>
 			<if test="outportDate != null">`OUTPORT_DATE` = #{outportDate}, </if>
 			<if test="remark != null">`REMARK` = #{remark}, </if>
 			<if test="status != null">`STATUS` = #{status}, </if>

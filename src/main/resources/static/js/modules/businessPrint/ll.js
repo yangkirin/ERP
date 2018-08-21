@@ -8,10 +8,17 @@ $(function () {
             { label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120 },
             { label: '原料名称', name: 'mtrName', index: 'mtrName', width: 180 },
             { label: '原料类型', name: 'mtrTypeName', index: 'mtrTypeName', width: 100 },
+            {label: '配方重量', name: 'bomWgt', index: 'bomWgt', width: 80, hidden: true},
+            {label: '配方单位', name: 'formulaUnit', index: 'formulaUnit', width: 80, hidden: true},
+            {label: '采购重量', name: 'purchaseWgt', index: 'purchaseWgt', width: 80},
+            {label: '采购单位', name: 'purchaseUnit', index: 'purchaseUnit', width: 80},
+            {label: 'purchaserate', name: 'purchaseRate', index: 'purchaseRate', width: 80, hidden: true},
+            {label: 'minirate', name: 'miniRate', index: 'miniRate', width: 80, hidden: true},
             { label: '需求数量', name: 'orderWgt', index: 'orderWgt', width: 80 },
             { label: '领料单位', name: 'outUnit', index: 'outUnit', width: 80 },
-            { label: '件重', name: 'wgtUnit', index: 'wgtUnit', width: 80 },
-            { label: '件数', name: 'numberCase', index: 'numberCase', width: 80 },
+            {label: '库存数', name: 'storeCount', index: 'storeCount', width: 80},
+            {label: '件重', name: 'wgtUnit', index: 'wgtUnit', width: 80, hidden: true},
+            {label: '件数', name: 'numberCase', index: 'numberCase', width: 80, hidden: true},
             { label: '所属仓库', name: 'wareHouseName', index: 'wareHouseName', width: 120 }
         ],
         viewrecords: true,
@@ -34,6 +41,7 @@ $(function () {
             rows: "limit",
             order: "order"
         },
+        postData: vm.productionOrder,
         gridComplete: function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
@@ -45,21 +53,35 @@ $(function () {
     var newDate = new Date();
     var currentDate = newDate.toJSON();
 
-    $(".form_datetime").datetimepicker({
+    $("#searchCreateDate").datetimepicker({
         format: 'yyyy-mm-dd',
         language:'zh-CN',
         autoclose:true,
         minView:2,
         todayBtn:true,
         todayHighlight:true,
-        // initialDate:'2018-05-27',
         weekStart:1
         // startDate:new Date(currentDate)
     });
-    $('.form_datetime').datetimepicker().on('hide', function (ev) {
-        var value = $(".form_datetime").val();
+    $('#searchCreateDate').datetimepicker().on('hide', function (ev) {
+        var value = $("#searchCreateDate").val();
         vm.productionOrder.createDate = value;
     });
+    $("#searchDemandDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        minView: 2,
+        todayBtn: true,
+        todayHighlight: true,
+        weekStart: 1
+        // startDate:new Date(currentDate)
+    });
+    $('#searchDemandDate').datetimepicker().on('hide', function (ev) {
+        var value = $("#searchDemandDate").val();
+        vm.productionOrder.demandDate = value;
+    });
+
 });
 
 var vm = new Vue({

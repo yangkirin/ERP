@@ -53,12 +53,17 @@
 				</div>
 			</div>
 			<div class="form-group">
+				<div class="col-sm-1 control-label">需求日期</div>
+				<div class="col-sm-2">
+					<input type="text" class="form-control form_datetime" id="searchDemandDate"
+						   v-model="productionOrder.demandDate" placeholder="需求日期" readonly="readonly"/>
+				</div>
 				<div class="col-sm-1 control-label">订单编号</div>
 				<div class="col-sm-2">
 					<input type="text" class="form-control" v-model="productionOrder.productionNo" placeholder="订单编号"/>
 				</div>
 				<div class="col-sm-1 control-label"></div>
-				<div class="col-sm-6">
+				<div class="col-sm-5">
 					<div class="grid-btn">
 						<a  class="btn btn-primary" @click="search"><i class="fa fa-search"></i>&nbsp;查询</a>
 						<a  class="btn btn-primary" @click="clean"><i class="glyphicon glyphicon-repeat"></i>&nbsp;重置</a>
@@ -326,12 +331,17 @@
 									<option value="1">是</option>
 								</select>
 							</div>
+							<div class="col-sm-2 control-label">需求日期</div>
+							<div class="col-sm-3">
+								<input type="text" class="form-control form_datetime" id="demandDate"
+									   v-model="addOrder.demandDate" placeholder="需求日期" readonly="readonly"/>
+							</div>
+						</div>
+						<div class="form-group">
 							<div class="col-sm-2 control-label">领料单号</div>
 							<div class="col-sm-3">
 								<input type="text" class="form-control" id="addOutportNo" v-model="addOrder.outportNo" placeholder="单号" readonly="readonly"/>
 							</div>
-						</div>
-						<div class="form-group">
 							<div class="col-sm-2 control-label">客户</div>
 							<div class="col-sm-3">
 								<!--<input type="text" class="form-control" id="customerName" v-model="addOrder.customerId" placeholder="客户名称"/>-->
@@ -339,14 +349,14 @@
 									<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}
 								</select>
 							</div>
+						</div>
+						<div class="form-group">
 							<div class="col-sm-2 control-label">订单类别</div>
 							<div class="col-sm-3">
 								<select class="form-control" id="orderTypeAdd" v-model="addOrder.orderTypeId" placeholder="订单类别">
 									<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
 								</select>
 							</div>
-						</div>
-						<div class="form-group">
 							<div class="col-sm-2 control-label">售点</div>
 							<div class="col-sm-3">
 								<select class="form-control" id="placeAdd" v-model="addOrder.placeId" placeholder="售点">

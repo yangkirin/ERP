@@ -75,7 +75,8 @@ public class CustomerPrdController {
 	public R save(@RequestBody CustomerPrdEntity customerPrd){
 
         Long prdId = customerPrd.getPrdId();
-        if (prdId == null) {
+		Long customerId = customerPrd.getCustomerId();
+		if (prdId == null || customerId == null) {
             return R.error("请填写产品信息！");
         }
 
@@ -83,18 +84,27 @@ public class CustomerPrdController {
         String status = prdDataEntity.getStatus();
         switch (status) {
             case "1":    //启用
-                customerPrdService.save(customerPrd);
-                return R.ok();
+				if (!customerPrdSaveHelp(customerId, prdId)) {    //不存在
+					customerPrdService.save(customerPrd);
+					return R.ok();
+				} else {
+					return R.error("产品已存在！");
+				}
             case "0":    //禁用
                 return R.error("产品已被禁用！");
             case "2":    //编辑
                 return R.error("产品处于编辑状态！");
             default:
                 return R.error("产品状态未知");
-
         }
+	}
 
-
+	private boolean customerPrdSaveHelp(Long customerId, Long prdId) {    //判断客户是否已存在产品
+		Map<String, Object> params = new HashMap<>();
+		params.put("customerId", customerId);
+		params.put("prdId", prdId);
+		List<CustomerPrdEntity> list = customerPrdService.queryList(params);
+		return !list.isEmpty();
 	}
 	
 	/**

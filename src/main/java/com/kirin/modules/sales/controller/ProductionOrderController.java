@@ -192,6 +192,8 @@ public class ProductionOrderController extends AbstractController {
         TypeInfoEntity typeInfoEntity1 = typeInfoService.queryObject(productionOrder.getOrderTypeId());
         productionOrder.setOrderTypeName(typeInfoEntity1.getTypeName());
 
+		productionOrder.setDemandDate(String.valueOf(params.get("demandDate")));
+
         //设置客户信息
         productionOrder.setCustomerId(Long.valueOf(String.valueOf(params.get("customerId"))));
         CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(productionOrder.getCustomerId());

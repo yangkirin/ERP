@@ -90,8 +90,8 @@ public class CommonUtilServiceImpl implements CommonUtilService{
     }
 
     @Override
-    public List<Map> inventorySearch(){
-        return commonUtilDao.inventorySearch();
+    public List<Map> inventorySearch(Long mtrId) {
+        return commonUtilDao.inventorySearch(mtrId);
     }
 
     @Override

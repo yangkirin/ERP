@@ -12,6 +12,7 @@ $(function () {
             { label: 'id', name: 'id', index: 'ID', width: 50, key: true ,hidden:true},
             { label: '领料单号', name: 'outporrtNo', index: 'OUTPORRT_NO', width: 100},
             { label: '订单编号', name: 'productionNo', index: 'PRODUCTION_NO', width: 100 },
+            {label: '需求日期', name: 'demandDate', index: 'demandDate', width: 60},
             { label: '订单ID', name: 'orderId', index: 'ORDER_ID',hidden:true},
             { label: '订单类型名称', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 80 },
             { label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 },
@@ -331,6 +332,36 @@ $(function () {
         var value = $("#searchCreateDate").val();
         vm.productionOrder.createDate = value;
     });
+    $("#searchDemandDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        minView: 2,
+        todayBtn: true,
+        todayHighlight: true,
+        weekStart: 1
+        // startDate:new Date(currentDate)
+    });
+    $('#searchDemandDate').datetimepicker().on('hide', function (ev) {
+        var value = $("#searchDemandDate").val();
+        vm.productionOrder.demandDate = value;
+    });
+
+
+    $("#demandDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        minView: 2,
+        todayBtn: true,
+        todayHighlight: true,
+        weekStart: 1
+        // startDate:new Date(currentDate)
+    });
+    $('#demandDate').datetimepicker().on('hide', function (ev) {
+        var value = $("#demandDate").val();
+        vm.addOrder.demandDate = value;
+    });
 
     $('#stroageExport').on("select2:select",function(){
         var data = $(this).val();
@@ -588,9 +619,21 @@ var vm = new Vue({
         addOrder:{}
 	},
 	methods: {
-		search: function () {
-			vm.reload();
-		},
+        search: function () {
+            console.log(vm.orderInfo);
+            var postData = {
+                createDate: vm.productionOrder.createDate,
+                customerId: vm.productionOrder.customerId == 0 ? null : vm.productionOrder.customerId,
+                productionNo: vm.productionOrder.productionNo,
+                demandDate: vm.productionOrder.demandDate
+            };
+            var page = $("#jqGrid").jqGrid('getGridParam', 'page');
+            $("#jqGrid").jqGrid('setGridParam', {
+                postData: postData,
+                page: page
+            }).trigger("reloadGrid");
+            // vm.reload();
+        },
         createNewNo:function(){
             var no = '';
             $.ajax({
@@ -1018,7 +1061,8 @@ var vm = new Vue({
             vm.productionOrder={
                 customerId:0,
                 productionNo:null,
-                createDate:null
+                createDate: null,
+                demandDate: null
             };
         },
         initTypeInfoArr:function(parentId){
@@ -1096,7 +1140,7 @@ var vm = new Vue({
             //save2
             $.ajax({
                 type: "POST",
-                url: baseURL + "storage/outportdetail/save2?isDH="+vm.addOrder.isDH+"&outportNo="+vm.addOrder.outportNo+"&customerId="+vm.addOrder.customerId+"&orderTypeId="+vm.addOrder.orderTypeId+"&placeId="+vm.addOrder.placeId,
+                url: baseURL + "storage/outportdetail/save2?isDH=" + vm.addOrder.isDH + "&outportNo=" + vm.addOrder.outportNo + "&customerId=" + vm.addOrder.customerId + "&orderTypeId=" + vm.addOrder.orderTypeId + "&placeId=" + vm.addOrder.placeId + "&demandDate=" + vm.addOrder.demandDate,
                 contentType: "application/json",
                 data: JSON.stringify(vm.addOrder),
                 success: function(r){

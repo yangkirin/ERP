@@ -45,7 +45,7 @@ public class StorageController extends AbstractController {
 	@RequestMapping("/inventorySearch")
 //	@RequiresPermissions("storage:import:list")
 	public R list(@RequestParam Map<String, Object> params){
-		List<Map> listMap = commonUtilService.inventorySearch();
+		List<Map> listMap = commonUtilService.inventorySearch(null);
 		Map<String,Object> returnMap = new HashMap<>();
         Query query = new Query(params);
 		PageUtils pageUtil = new PageUtils(listMap, listMap == null ? 0:listMap.size(), query.getLimit(), query.getPage());

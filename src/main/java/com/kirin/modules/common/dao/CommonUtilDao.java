@@ -23,7 +23,7 @@ public interface CommonUtilDao extends BaseDao<Object> {
 
     List<Map> getDataToCommbox(@Param("tableName")String tableName,@Param("search")String search,@Param("returnField")String returnField);
 
-    List<Map> inventorySearch();
+    List<Map> inventorySearch(@Param("mtrId") Long mtrId);
 
     List<Map> batchInventorySearch(@Param("mtrId")Long mtrId);
 

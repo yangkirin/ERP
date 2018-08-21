@@ -20,7 +20,7 @@ public interface CommonUtilService {
 
     List<Map> getDataToCommbox(String tableName,String search,String returnField);
 
-    List<Map> inventorySearch();
+    List<Map> inventorySearch(Long mtrId);
 
     List<Map> batchInventorySearch(Long mtrId);
 

@@ -41,6 +41,8 @@ public class ProductionOrderEntity implements Serializable {
 	private String remakr;
 	//是否是预订单,1-预订单，0-实际订单
 	private Long typeId;
+	//需求日期
+	private String demandDate;
 	//状态
 	private String status;
 	//创建者
@@ -228,6 +230,14 @@ public class ProductionOrderEntity implements Serializable {
 	 */
 	public Long getTypeId() {
 		return typeId;
+	}
+
+	public String getDemandDate() {
+		return demandDate;
+	}
+
+	public void setDemandDate(String demandDate) {
+		this.demandDate = demandDate;
 	}
 
 	/**

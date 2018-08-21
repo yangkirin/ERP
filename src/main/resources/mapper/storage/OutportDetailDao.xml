@@ -201,8 +201,10 @@
 		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS wareHouseName,
 		bd.gross_wgt AS mtrGrossWgt,
 		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.MINI_UNIT ) AS outUnit,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.PURCHASE_UNIT ) AS purchaseUnit,
 		bd.semi_finished AS semiFinished,
-		m.MINI_RATE as miniRate
+		m.MINI_RATE as miniRate,
+		m.PURCHASE_RATE as purchaseRate
 		FROM
 		bom_info bi,
 		bom_detail bd,

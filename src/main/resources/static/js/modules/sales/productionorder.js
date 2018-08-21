@@ -14,8 +14,8 @@ $(function () {
 			{ label: '订单类型ID', name: 'orderTypeId', index: 'ORDER_TYPE_ID', width: 80 ,hidden:true},
 			{ label: '类型', name: 'orderTypeName', index: 'ORDER_TYPE_NAME', width: 60 },
 			{ label: '客户ID', name: 'customerId', index: 'CUSTOMER_ID', width: 80 ,hidden:true},
-			{ label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 }, 			
-			{ label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 140 },
+			{ label: '客户编号', name: 'customerNo', index: 'CUSTOMER_NO', width: 80 },
+            {label: '客户名称', name: 'customerName', index: 'CUSTOMER_NAME', width: 120},
 			{ label: '售点ID', name: 'placeId', index: 'PLACE_ID', width: 80,hidden:true },
 			{ label: '售点名称', name: 'placeName', index: 'PLACE_NAME', width: 60 },
             { label: '成本', name: 'prdCost', index: 'PRD_COST', width: 80,hidden:true },
@@ -24,6 +24,7 @@ $(function () {
             { label: '产品总数', name: 'prdMount', index: 'PRD_MOUNT', width: 60,hidden:false },
             { label: '成本率', name: 'costRate', index: 'COST_RATE', width: 80,hidden:true },
             { label: '折扣成本比', name: 'discountCostRate', index: 'DISCOUNT_COST_RATE', width: 80,hidden:true },
+            {label: '需求日期', name: 'demandDate', index: 'DEMAND_DATE', width: 60},
             { label: '备注', name: 'remakr', index: 'REMAKR', width: 100 },
             {
                 label: '预订单', name: 'typeId', index: 'TYPE_ID', width: 40, formatter: function (value) {
@@ -249,6 +250,22 @@ $(function () {
             $("#jqGridPRD").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
         }
     });
+
+    $("#demandDate").datetimepicker({
+        format: 'yyyy-mm-dd',
+        language: 'zh-CN',
+        autoclose: true,
+        minView: 2,
+        todayBtn: true,
+        todayHighlight: true,
+        weekStart: 1
+        // startDate:new Date(currentDate)
+    });
+    $('#demandDate').datetimepicker().on('hide', function (ev) {
+        var value = $("#demandDate").val();
+        vm.productionOrder.demandDate = value;
+    });
+
 
 });
 
