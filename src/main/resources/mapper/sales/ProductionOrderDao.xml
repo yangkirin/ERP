@@ -60,6 +60,9 @@
 			<if test="demandDate != null">
 				and po.DEMAND_DATE like CONCAT ('%',#{demandDate},'%')
 			</if>
+            <if test="typeId != null and typeId != 2">
+                and po.TYPE_ID = #{typeId}
+            </if>
 			<if test="status != null">
 				and po.STATUS in
 				<foreach collection="status" index="index" item="item" open="(" separator="," close=")">

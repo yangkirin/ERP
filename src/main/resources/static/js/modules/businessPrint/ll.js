@@ -87,7 +87,9 @@ $(function () {
 var vm = new Vue({
     el: '#rrapp',
     data: {
-        productionOrder: {},
+        productionOrder: {
+            typeId: 2
+        },
         selectArr:null,
         takeStnArr:null,
     },

@@ -50,8 +50,16 @@
             <div class="col-sm-2">
                 <input type="text" class="form-control" v-model="productionOrder.productionNo" placeholder="订单编号"/>
             </div>
-            <div class="col-sm-2 control-label"></div>
-            <div class="col-sm-4">
+            <div class="col-sm-2 control-label">订单类别</div>
+            <div class="col-sm-2">
+                <select class="form-control" v-model="productionOrder.typeId">
+                    <option value="0">实际生产单</option>
+                    <option value="1">预订单</option>
+                    <option value="2">全部</option>
+                </select>
+            </div>
+            <div class="col-sm-2 control-label">&nbsp;</div>
+            <div class="col-sm-2">
                 <a class="btn btn-primary" @click="query"><i class="fa fa-search"></i>&nbsp;查询</a>&nbsp;&nbsp;
                 <a class="btn btn-primary" @click="print"><i class="fa fa-print"></i>&nbsp;打印</a>&nbsp;&nbsp;
             </div>
