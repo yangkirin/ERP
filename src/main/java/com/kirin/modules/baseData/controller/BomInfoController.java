@@ -114,7 +114,11 @@ public class BomInfoController extends AbstractController {
 
 
 //		判断配方是否重复（一个产品只能关联一个配方）
-		BomInfoEntity entity = bomInfoService.queryObjectByPrdId(bomInfo.getPrdId());
+        Long prdId = bomInfo.getPrdId();
+        if (prdId == null) {
+            return R.error("请选择关联的产品！");
+        }
+        BomInfoEntity entity = bomInfoService.queryObjectByPrdId(prdId);
 		if(entity != null) {
 			return R.error("一个产品只能关联一个配方");
 		}

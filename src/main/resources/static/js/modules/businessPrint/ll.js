@@ -88,7 +88,11 @@ var vm = new Vue({
     el: '#rrapp',
     data: {
         productionOrder: {
-            typeId: 2
+            typeId: 2,
+            createDate: null,
+            demandDate: null,
+            takeStn: 0,
+            productionNo: null
         },
         selectArr:null,
         takeStnArr:null,
@@ -134,10 +138,16 @@ var vm = new Vue({
                 orderNo = vm.productionOrder.productionNo;
             }
             console.log(vm.productionOrder);
-            window.open(baseURL + "businessPrint/biSearch/PrintLL?token="+token+"&createDate="+vm.productionOrder.createDate+"&orderNo="+orderNo+"&takeStn="+vm.productionOrder.takeStn);
+            var url = '';
+            url += "&takeStn=" + vm.productionOrder.takeStn;
+            url += "&createDate=" + vm.productionOrder.createDate;
+            url += "&demandDate=" + vm.productionOrder.demandDate;
+            url += "&orderNo=" + vm.productionOrder.productionNo;
+            url += "&typeId=" + vm.productionOrder.typeId;
+            window.open(baseURL + "businessPrint/biSearch/PrintLL?token=" + token + url);
         }
     }
 });
 vm.takeStnArr = vm.initTypeInfoArr('19');
 vm.initCommbox();
-vm.productionOrder.takeStn = 0;
+
