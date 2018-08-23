@@ -10,22 +10,25 @@ $(function () {
         url: baseURL + 'businessPrint/biSearch/DataSearchQCLZY',
         datatype: "json",
         colModel: [
-            { label: 'id', name: 'prdId', index: 'prdId', width: 50, key: true ,hidden:true},
-            { label: '产品编号', name: 'prdCode', index: 'prdCode', width: 80 },
-            { label: '产品类型', name: 'prdTypeName', index: 'prdTypeName', width: 80 },
-            { label: '产品名称', name: 'prdName', index: 'prdName', width: 80 },
-            { label: '需求数量', name: 'orderCount', index: 'orderCount', width: 80 },
-            { label: '生产站点', name: 'prdStnName', index: 'prdStnName', width: 80 },
+            {label: 'id', name: 'mtrId', index: 'mtrId', width: 50, key: true, hidden: true},
+            {label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 80},
+            {label: '品名', name: 'key', index: 'key', width: 80},
+            {label: '生产量', name: 'bomWgt', index: 'bomWgt', width: 80},
+            {label: '配方单位', name: 'formulaUnit', index: 'formulaUnit', width: 80},
+            // { label: '生产站点', name: 'prdStnName', index: 'prdStnName', width: 80 , hidden: true},
 
-            { label: '需求总净重', name: 'sumNetWgt', index: 'sumNetWgt', width: 80 },
-            { label: '需求总毛重', name: 'sumGrossWgt', index: 'sumGrossWgt', width: 80 },
-            { label: '需求总熟重', name: 'sumCookedWgt', index: 'sumCookedWgt', width: 80 },
-            { label: '需求速冷重', name: 'sumQuickCoolWgt', index: 'sumQuickCoolWgt', width: 80 },
+            // { label: '需求总净重', name: 'sumNetWgt', index: 'sumNetWgt', width: 80 },
+            // { label: '需求总毛重', name: 'sumGrossWgt', index: 'sumGrossWgt', width: 80 },
+            // { label: '需求总熟重', name: 'sumCookedWgt', index: 'sumCookedWgt', width: 80 },
+            // { label: '需求速冷重', name: 'sumQuickCoolWgt', index: 'sumQuickCoolWgt', width: 80 },
 
-            { label: '单锅重', name: 'potWeight', index: 'potWeight', width: 80 },
             { label: '总锅数', name: 'sumPotCount', index: 'sumPotCount', width: 80 },
+            {label: '单锅重', name: 'potWeight', index: 'potWeight', width: 80},
             { label: '尾锅重', name: 'lastPotWeight', index: 'lastPotWeight', width: 80 },
-            { label: '尾锅数', name: 'lastPotCount', index: 'lastPotCount', width: 80 }
+            // { label: '尾锅数', name: 'lastPotCount', index: 'lastPotCount', width: 80 }
+            {label: '品名', name: 'mtrName', index: 'mtrName', width: 80},
+            {label: '总用量', name: 'bomWgt', index: 'bomWgt', width: 80},
+            {label: '单位', name: 'formulaUnit', index: 'formulaUnit', width: 80}
         ],
         viewrecords: true,
         height: "auto",
@@ -52,7 +55,7 @@ $(function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
         },
-        subGrid : true,
+        subGrid: false,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
             var url = baseURL + 'businessPrint/biSearch/DataSearchDetailQCLZY?prdId='+rowData.prdId+'&prdCount='+rowData.orderCount;

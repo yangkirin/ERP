@@ -22,7 +22,10 @@
 	</select>
 
 	<select id="queryObjectByPrdId" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">
-		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName from bom_info b where b.prd_id = #{prdId}
+		select b.*,(select p.prd_name FROM prd_data p WHERE p.id=b.prd_id) as prdIdName ,
+		(select p.prd_code FROM prd_data p WHERE p.id=b.prd_id) as prdCode,
+		(select p.POT_WEIGHT FROM prd_data p WHERE p.id=b.prd_id) as potWgt
+		from bom_info b where b.prd_id = #{prdId}
 	</select>
 
 	<select id="queryObjectByMtrId" resultType="com.kirin.modules.baseData.entity.BomInfoEntity">

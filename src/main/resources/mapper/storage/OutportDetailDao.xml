@@ -200,11 +200,16 @@
 		m.WAREHOUSE_ID,
 		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS wareHouseName,
 		bd.gross_wgt AS mtrGrossWgt,
+		bd.modi_wgt AS mtrModiWgt,
+		bd.net_wgt AS netWgt,
 		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.MINI_UNIT ) AS outUnit,
 		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.PURCHASE_UNIT ) AS purchaseUnit,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.FORMULA_UNIT ) AS formulaUnit,
+		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = bd.mtr_cut_id ) AS mtrCut,
 		bd.semi_finished AS semiFinished,
 		m.MINI_RATE as miniRate,
-		m.PURCHASE_RATE as purchaseRate
+		m.PURCHASE_RATE as purchaseRate,
+		p.POT_WEIGHT as potWeight
 		FROM
 		bom_info bi,
 		bom_detail bd,

@@ -10,18 +10,15 @@ $(function () {
         url: baseURL + 'businessPrint/biSearch/DataSearchPLFX',
         datatype: "json",
         colModel: [
-            { label: 'id', name: 'prdId', index: 'prdId', width: 50, key: true ,hidden:true},
-            { label: '产品编号', name: 'prdCode', index: 'prdCode', width: 80 },
-            { label: '产品类型', name: 'prdTypeName', index: 'prdTypeName', width: 80 },
-            { label: '产品名称', name: 'prdName', index: 'prdName', width: 200 },
-            { label: '需求数量', name: 'orderCount', index: 'orderCount', width: 80 },
-            { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 80 },
-
-            { label: '需求总净重', name: 'prdSumNetWgt', index: 'prdSumNetWgt', width: 80 },
-            { label: '需求总毛重', name: 'prdSumGrossWgt', index: 'prdSumGrossWgt', width: 80 },
-            { label: '需求总熟重', name: 'prdSumCookedWgt', index: 'prdSumCookedWgt', width: 80 },
-            { label: '总盒重', name: 'prdSumBoxWgt', index: 'prdSumBoxWgt', width: 80 },
-            { label: '总盒数', name: 'prdBoxCount', index: 'prdBoxCount', width: 80 }
+            {label: 'id', name: 'mtrId', index: 'mtrId', width: 50, key: true, hidden: true},
+            {label: '产品编号', name: 'mtrprdCode', index: 'mtrprdCode', width: 80},
+            {label: '品名', name: 'mtrprdName', index: 'mtrprdName', width: 100},
+            {label: '生产量', name: 'modiWgt', index: 'modiWgt', width: 80},
+            {label: '单位', name: 'formulaUnit', index: 'formulaUnit', width: 50},
+            {label: '份数', name: 'orderCount', index: 'orderCount', width: 80},
+            {label: '锅数', name: 'potCount', index: 'potCount', width: 80},
+            {label: '单锅量', name: 'pdcStnName', index: 'pdcStnName', width: 80},
+            {label: '不足锅量', name: 'prdSumNetWgt', index: 'prdSumNetWgt', width: 80},
         ],
         viewrecords: true,
         height: "auto",
@@ -51,7 +48,7 @@ $(function () {
         subGrid : true,
         subGridRowExpanded : function(subgrid_id,row_id){
             var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
-            var url = baseURL + 'businessPrint/biSearch/DataSearchDetailPLFX?prdId='+rowData.prdId+'&prdCount='+rowData.orderCount;
+            var url = baseURL + 'businessPrint/biSearch/DataSearchDetailPLFX?prdId=' + rowData.mtrId + '&prdCount=' + rowData.orderCount;
             createSubGrid(subgrid_id,row_id,url);
         }
     });
@@ -68,11 +65,10 @@ $(function () {
                 { label: 'mtrId', name: 'mtrId', index: 'mtrId', key: true,hidden:true},
                 { label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120 },
                 { label: '原料名称', name: 'mtrName', index: 'mtrName', width: 180 },
-                { label: '原料类型', name: 'mtrTypeName', index: 'mtrTypeName', width: 120 },
-                { label: '单位', name: 'formulaUnitName', index: 'formulaUnitName', width: 80 },
-                { label: '净重', name: 'netWgt', index: 'netWgt', width: 80 },
-                { label: '毛重', name: 'grossWgt', index: 'grossWgt', width: 80 },
-                { label: '熟重', name: 'cookedWgt', index: 'cookedWgt', width: 80 }
+                {label: '单锅量', name: 'pot', index: 'pot', width: 100},
+                {label: '不足锅量', name: 'lastPot', index: 'lastPot', width: 100},
+                {label: '总用量', name: 'totalWgt', index: 'totalWgt', width: 100},
+                {label: '单位', name: 'formulaUnit', index: 'formulaUnit', width: 80}
             ],
             rowNum : 9999999,
             // pager : pager_id,

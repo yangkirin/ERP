@@ -299,8 +299,8 @@ public class BiController {
                     List<Map> listMap = commonUtilService.inventorySearch(mtrId);
                     Object storeCount = listMap.get(0).get("STORE_COUNT");
                     tmp.put("storeCount", storeCount == null ? "0" : storeCount);
-                    String formulaUnit = listMap.get(0).get("FORMULA_UNIT").toString();
-                    tmp.put("formulaUnit", formulaUnit);
+//                    String formulaUnit = listMap.get(0).get("FORMULA_UNIT").toString();
+//                    tmp.put("formulaUnit", formulaUnit);
 
 
                     BigDecimal miniRate = new BigDecimal(tmp.get("miniRate") == null ? "1" : tmp.get("miniRate").toString());
@@ -470,8 +470,9 @@ public class BiController {
             params.put("createDate",createDate);
         }
 
-        List<Map> allPrdList = new ArrayList<>();
+//        List<Map> allPrdList = new ArrayList<>();
         List<Map> returnList = new ArrayList<>();
+        HashMap<String, Map> returnMap = new HashMap<>();
         //已确认状态的订单才产生领料报表
         params.put("status",new String[]{"2"});
         List<ProductionOrderEntity> productionOrderEntityList = productionOrderService.queryList(params);
@@ -482,15 +483,21 @@ public class BiController {
                 queryMap.put("productionOrderId",productionOrderEntity.getId());
 //                queryMap.put("takeStn",params.get("takeStn"));
                 List<ProductionOrderDetailEntity> productionOrderDetailEntityList = productionOrderDetailService.queryList(queryMap);
+//                System.out.println("size: "+productionOrderDetailEntityList.size());
                 for (ProductionOrderDetailEntity orderDetailEntity:productionOrderDetailEntityList){
-                    List<Map> listData = commonUtilService.eachGetPrd(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
-                    allPrdList.addAll(listData);
+//                    List<Map> listData = commonUtilService.eachGetPrd(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
+//                    allPrdList.addAll(listData);
+                    DataSearchQCLZYHelp(returnMap, orderDetailEntity.getPrdId(), new BigDecimal(orderDetailEntity.getAmount()), null);
                 }
             }
         }
-        if(allPrdList.size() > 0){
+//        System.out.println(returnMap.size());
+//
+//        System.out.println(returnMap.values().toString());
+
+        if (returnMap.size() > 0) {
 //            returnList = commonUtilService.distinctListData(allPrdList);
-            returnList.addAll(allPrdList);
+            returnList.addAll(returnMap.values());
         }
         int total = 0;
         if(returnList != null && returnList.size() > 0){
@@ -499,6 +506,53 @@ public class BiController {
         Query query = new Query(params);
         PageUtils pageUtil = new PageUtils(returnList, total, 9999999, 1);
         return R.ok().put("page", pageUtil);
+    }
+
+    private void DataSearchQCLZYHelp(HashMap<String, Map> returnMap, Long prdId, BigDecimal orderAmount, Long takeStnId) {
+//        List<Map> mtrList = new ArrayList<>();
+        BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdId);
+        if (bomInfoEntity == null) {
+            return;
+        }
+
+        List<Map> detailMapList = outportDetailService.queryMtrByPrdId(prdId, takeStnId, null);
+
+        if (detailMapList != null && detailMapList.size() > 0) {
+            for (Map map : detailMapList) {
+                BigDecimal grossWgt = new BigDecimal(map.get("mtrGrossWgt") == null ? "0" : map.get("mtrGrossWgt").toString());
+                //半成品则循环进行计算
+                if (map.get("semiFinished").equals("1")) {//半成品
+                    BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(Long.valueOf(map.get("mtrId").toString()));
+                    BigDecimal detailPrdGrossWgt = new BigDecimal(bomInfo.getSumGrossWgt() == null ? "1" : bomInfo.getSumGrossWgt().toString());
+                    //计算所需要半成品的份数
+                    //（【产品配方中半成品所需毛重】*【产品所需数量】）/【半成品配方单份毛重】
+                    BigDecimal cpoies = (grossWgt.multiply(orderAmount).setScale(4, BigDecimal.ROUND_HALF_UP)).divide(detailPrdGrossWgt, 2, BigDecimal.ROUND_HALF_UP);//份数
+//                    List<Map> mapList = findAllMtrByPrd2(Long.valueOf(map.get("mtrId").toString()),takeStnId,warehouseId,cpoies);
+                    DataSearchQCLZYHelp(returnMap, Long.valueOf(map.get("mtrId").toString()), cpoies, takeStnId);
+//                    if(mapList != null && mapList.size() > 0){
+//                        mtrList.addAll(mapList);
+//                    }
+
+                } else {//原料则直接运算后存入集合
+                    BigDecimal miniRate = new BigDecimal(map.get("miniRate") == null ? "1" : map.get("miniRate").toString());
+                    BigDecimal bomWgt = (grossWgt.multiply(orderAmount).setScale(4, BigDecimal.ROUND_HALF_UP));  //.divide(miniRate,2,BigDecimal.ROUND_HALF_UP);
+                    //需求重量需要转换为库存单位重量，需求重量=重量/原料最小转换率
+//                    System.out.println(bomWgt);
+                    //配方重量
+                    map.put("bomWgt", bomWgt);
+                    Object mtrCut = map.get("mtrCut");
+                    String key = map.get("mtrName").toString() + (mtrCut == null ? "" : mtrCut.toString());
+                    map.put("key", key);
+                    if (returnMap.containsKey(key)) {
+                        BigDecimal wgt = new BigDecimal(returnMap.get(key).get("bomWgt").toString());
+                        wgt.add(bomWgt);
+                        returnMap.get(key).put("bomWgt", wgt);
+                    } else {
+                        returnMap.put(key, map);
+                    }
+                }
+            }
+        }
     }
 
     @RequestMapping(value="/DataSearchDetailQCLZY")
@@ -536,6 +590,7 @@ public class BiController {
 
         //已确认状态的订单才产生领料报表
         List<Map> allPrdList = new ArrayList<>();
+        HashMap<String, Map> returnMap = new HashMap<>();
         params.put("status",new String[]{"2"});
         List<ProductionOrderEntity> productionOrderEntityList = productionOrderService.queryList(params);
         if(productionOrderEntityList != null && productionOrderEntityList.size() > 0){
@@ -546,11 +601,13 @@ public class BiController {
 //                queryMap.put("takeStn",params.get("takeStn"));
                 List<ProductionOrderDetailEntity> productionOrderDetailEntityList = productionOrderDetailService.queryList(queryMap);
                 for (ProductionOrderDetailEntity orderDetailEntity:productionOrderDetailEntityList){
-                    List<Map> listData = commonUtilService.eachGetPrd(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
-                    allPrdList.addAll(listData);
+//                    List<Map> listData = commonUtilService.eachGetPrd(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
+//                    allPrdList.addAll(listData);
+                    DataSearchQCLZYHelp(returnMap, orderDetailEntity.getPrdId(), new BigDecimal(orderDetailEntity.getAmount()), null);
                 }
             }
         }
+        allPrdList.addAll(returnMap.values());
 
         pdfFont = new PdfUtil().createFont(request);
         // 设置response参数，可以打开下载页面
@@ -569,7 +626,7 @@ public class BiController {
 //        Document document = new Document(pdf,new PageSize(PageSize.A3).rotate());
 
         //加载表格数据
-        Paragraph p = new Paragraph("半成品制令表").setTextAlignment(TextAlignment.CENTER).setFont(PdfUtil.helvetica).setFontSize(16);
+        Paragraph p = new Paragraph("前处理报表").setTextAlignment(TextAlignment.CENTER).setFont(PdfUtil.helvetica).setFontSize(16);
         document.add(p);
         //副标题
         document.add(new Paragraph("武汉中百古唐美膳").setTextAlignment(TextAlignment.CENTER).setFont(PdfUtil.helvetica).setFontSize(9));
@@ -584,70 +641,63 @@ public class BiController {
 
         UnitValue[] unitValue = new UnitValue[]{
                 UnitValue.createPercentValue((float) 10),
+                UnitValue.createPercentValue((float) 15),
                 UnitValue.createPercentValue((float) 10),
                 UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 5),
-                UnitValue.createPercentValue((float) 10)};
+                UnitValue.createPercentValue((float) 10),
+                UnitValue.createPercentValue((float) 10),
+                UnitValue.createPercentValue((float) 10),
+                UnitValue.createPercentValue((float) 15),
+                UnitValue.createPercentValue((float) 10),
+                UnitValue.createPercentValue((float) 5)};
         Table table2 = new Table(unitValue).setWidthPercent(100);
 
-        table2.addHeaderCell("半成品名称").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("原料名称").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("单位").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("总净重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("速冷重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("总毛重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("总熟重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("单锅重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("原料编号").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("品名").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("生产量").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("配方单位").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
         table2.addHeaderCell("总锅数").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("单锅重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
         table2.addHeaderCell("尾锅重").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("尾锅数").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
-        table2.addHeaderCell("备注").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("品名").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("总用量").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
+        table2.addHeaderCell("单位").setFont(PdfUtil.helvetica).setKeepTogether(true).setTextAlignment(TextAlignment.CENTER).setFontSize(14);
 
         if(allPrdList.size() > 0){
             for (Map dataMap :allPrdList) {
-                table2.addCell(dataMap.get("prdName") == null ? "" : dataMap.get("prdName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                table2.addCell(dataMap.get("mtrName") == null ? "" : dataMap.get("mtrName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                table2.addCell(dataMap.get("formulaUnitName") == null ? "" : dataMap.get("formulaUnitName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                table2.addCell(dataMap.get("sumNetWgt") == null ? "" : dataMap.get("sumNetWgt").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                table2.addCell(dataMap.get("sumQuickCoolWgt") == null ? "" : dataMap.get("sumQuickCoolWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                table2.addCell(dataMap.get("sumGrossWgt") == null ? "" : dataMap.get("sumGrossWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                table2.addCell(dataMap.get("sumCookedWgt") == null ? "" : dataMap.get("sumCookedWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-
-                table2.addCell(dataMap.get("potWeight") == null ? "" : dataMap.get("potWeight").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                table2.addCell(dataMap.get("sumPotCount") == null ? "" : dataMap.get("sumPotCount").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                table2.addCell(dataMap.get("lastPotWeight") == null ? "" : dataMap.get("lastPotWeight").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                table2.addCell(dataMap.get("lastPotCount") == null ? "" : dataMap.get("lastPotCount").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
+                table2.addCell(dataMap.get("mtrCode") == null ? "" : dataMap.get("mtrCode").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell(dataMap.get("key") == null ? "" : dataMap.get("key").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell(dataMap.get("bomWgt") == null ? "" : dataMap.get("bomWgt").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell(dataMap.get("formulaUnit") == null ? "" : dataMap.get("formulaUnit").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
                 table2.addCell("").setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell("").setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell("").setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+                table2.addCell(dataMap.get("mtrName") == null ? "" : dataMap.get("mtrName").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
+                table2.addCell(dataMap.get("bomWgt") == null ? "" : dataMap.get("bomWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
+                table2.addCell(dataMap.get("formulaUnit") == null ? "" : dataMap.get("formulaUnit").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
 //                orderCount
-                Long prdId = Long.valueOf(dataMap.get("prdId").toString());
-                Long prdCount = Long.valueOf(dataMap.get("orderCount").toString());
-                List<Map> returnList = new ArrayList<>();
-                List<Map> listData = commonUtilService.eachGetPrdMtr(prdId,prdCount,params);
-                if(listData.size() > 0){
-                    returnList = commonUtilService.distinctListData(listData);
-                }
-                for (Map dataMtrDetailMap :returnList) {
-                    table2.addCell("").setTextAlignment(TextAlignment.CENTER);
-                    table2.addCell(dataMtrDetailMap.get("mtrName") == null ? "" : dataMtrDetailMap.get("mtrName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                    table2.addCell(dataMtrDetailMap.get("formulaUnitName") == null ? "" : dataMtrDetailMap.get("formulaUnitName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                    table2.addCell(dataMtrDetailMap.get("netWgt") == null ? "" : dataMtrDetailMap.get("netWgt").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
-                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
-                    table2.addCell(dataMtrDetailMap.get("grossWgt") == null ? "" : dataMtrDetailMap.get("grossWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-                    table2.addCell(dataMtrDetailMap.get("cookedWgt") == null ? "" : dataMtrDetailMap.get("cookedWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
-
-                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
-                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
-                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
-                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
-                    table2.addCell("").setTextAlignment(TextAlignment.CENTER);
-                }
+//                Long prdId = Long.valueOf(dataMap.get("prdId").toString());
+//                Long prdCount = Long.valueOf(dataMap.get("orderCount").toString());
+//                List<Map> returnList = new ArrayList<>();
+//                List<Map> listData = commonUtilService.eachGetPrdMtr(prdId,prdCount,params);
+//                if(listData.size() > 0){
+//                    returnList = commonUtilService.distinctListData(listData);
+//                }
+//                for (Map dataMtrDetailMap :returnList) {
+//                    table2.addCell("").setTextAlignment(TextAlignment.CENTER);
+//                    table2.addCell(dataMtrDetailMap.get("mtrName") == null ? "" : dataMtrDetailMap.get("mtrName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+//                    table2.addCell(dataMtrDetailMap.get("formulaUnitName") == null ? "" : dataMtrDetailMap.get("formulaUnitName").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+//                    table2.addCell(dataMtrDetailMap.get("netWgt") == null ? "" : dataMtrDetailMap.get("netWgt").toString()).setTextAlignment(TextAlignment.CENTER).setFontSize(10);
+//                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
+//                    table2.addCell(dataMtrDetailMap.get("grossWgt") == null ? "" : dataMtrDetailMap.get("grossWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
+//                    table2.addCell(dataMtrDetailMap.get("cookedWgt") == null ? "" : dataMtrDetailMap.get("cookedWgt").toString()).setTextAlignment(TextAlignment.RIGHT).setFontSize(10);
+//
+//                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
+//                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
+//                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
+//                    table2.addCell("").setTextAlignment(TextAlignment.RIGHT);
+//                    table2.addCell("").setTextAlignment(TextAlignment.CENTER);
+//                }
             }
         }
 
@@ -667,13 +717,96 @@ public class BiController {
         params.put("createDate",createDate);
         //已确认状态的订单
         params.put("status",new String[]{"2"});
-        List<Map> returnList = searchPLFX(params);
+//        List<Map> returnList = searchPLFX(params);
+
+        HashMap<String, Map> returnMap = new HashMap<>();
+        List<ProductionOrderEntity> productionOrderEntityList = productionOrderService.queryList(params);
+//        System.out.println(productionOrderEntityList.size());
+        if (productionOrderEntityList != null && productionOrderEntityList.size() > 0) {
+            Map<String, Object> queryMap = new HashMap<>();
+            for (ProductionOrderEntity productionOrderEntity : productionOrderEntityList) {
+                queryMap.clear();
+                queryMap.put("productionOrderId", productionOrderEntity.getId());
+//                queryMap.put("takeStn",params.get("takeStn"));
+                List<ProductionOrderDetailEntity> productionOrderDetailEntityList = productionOrderDetailService.queryList(queryMap);
+//                System.out.println("productionOrderDetailEntityList: "+productionOrderDetailEntityList.toString());
+                for (ProductionOrderDetailEntity orderDetailEntity : productionOrderDetailEntityList) {
+//                    List<Map> listData = commonUtilService.eachGetPrd(orderDetailEntity.getPrdId(),Long.valueOf(orderDetailEntity.getAmount()),queryMap);
+//                    allPrdList.addAll(listData);
+                    DataSearchPLFXHelp(returnMap, orderDetailEntity.getPrdId(), new BigDecimal(orderDetailEntity.getAmount()), null);
+                }
+            }
+        }
+
+        List<Map> returnList = new ArrayList<>();
+        returnList.addAll(returnMap.values());
+
         int total = 0;
         if(returnList.size() > 0){
             total = returnList.size();
         }
         PageUtils pageUtil = new PageUtils(returnList, total, 9999999, 1);
         return R.ok().put("page", pageUtil);
+    }
+
+    private void DataSearchPLFXHelp(HashMap<String, Map> returnMap, Long prdId, BigDecimal orderAmount, Long takeStnId) {
+//        List<Map> mtrList = new ArrayList<>();
+        BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdId);
+        if (bomInfoEntity == null) {
+            return;
+        }
+
+        List<Map> detailMapList = outportDetailService.queryMtrByPrdId(prdId, takeStnId, null);
+        if (detailMapList != null && detailMapList.size() > 0) {
+            for (Map map : detailMapList) {
+                BigDecimal grossWgt = new BigDecimal(map.get("mtrGrossWgt") == null ? "0" : map.get("mtrGrossWgt").toString());
+                BigDecimal modiWgt = new BigDecimal(map.get("mtrModiWgt") == null ? "0" : map.get("mtrModiWgt").toString());
+                //半成品则循环进行计算
+                if (map.get("semiFinished").equals("1")) {//半成品
+                    BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(Long.valueOf(map.get("mtrId").toString()));
+
+                    BigDecimal detailPrdGrossWgt = new BigDecimal(bomInfo.getSumGrossWgt() == null ? "1" : bomInfo.getSumGrossWgt().toString());
+                    //计算所需要半成品的份数
+                    //（【产品配方中半成品所需毛重】*【产品所需数量】）/【半成品配方单份毛重】
+                    BigDecimal cpoies = (grossWgt.multiply(orderAmount).setScale(4, BigDecimal.ROUND_HALF_UP)).divide(detailPrdGrossWgt, 2, BigDecimal.ROUND_HALF_UP);//份数
+
+                    //锅数 = 总毛重 / 锅重
+                    BigDecimal potCount = grossWgt.multiply(orderAmount).divide(new BigDecimal(bomInfo.getPotWgt()));
+                    map.put("potCount", potCount);
+
+                    map.put("orderCount", cpoies);
+
+                    map.put("mtrprdName", bomInfo.getBomName());
+                    map.put("mtrprdCode", bomInfo.getPrdCode());
+
+
+                    map.put("grossWgt", grossWgt.multiply(orderAmount));
+                    map.put("modiWgt", modiWgt.multiply(orderAmount));
+                    if (returnMap.containsKey(map.get("mtrId").toString())) {
+                        BigDecimal tmp = new BigDecimal(returnMap.get(map.get("mtrId").toString()).get("grossWgt").toString());
+                        tmp.add(grossWgt.multiply(orderAmount));
+                        returnMap.get(map.get("mtrId").toString()).put("grossWgt", tmp);
+                        BigDecimal tmp2 = new BigDecimal(returnMap.get(map.get("mtrId").toString()).get("modiWgt").toString());
+                        tmp2.add(modiWgt.multiply(orderAmount));
+                        returnMap.get(map.get("mtrId").toString()).put("modiWgt", tmp2);
+                        BigDecimal tmp3 = new BigDecimal(returnMap.get(map.get("mtrId").toString()).get("orderCount").toString());
+                        tmp3.add(cpoies);
+                        returnMap.get(map.get("mtrId").toString()).put("orderCount", tmp3);
+
+                        BigDecimal tmp4 = new BigDecimal(returnMap.get(map.get("mtrId").toString()).get("potCount").toString());
+                        tmp4.add(potCount);
+                        returnMap.get(map.get("mtrId").toString()).put("potCount", tmp4);
+
+                    } else {
+                        returnMap.put(map.get("mtrId").toString(), map);
+                    }
+
+                    DataSearchPLFXHelp(returnMap, Long.valueOf(map.get("mtrId").toString()), cpoies, takeStnId);
+                } else {  //原料则直接返回
+                    continue;
+                }
+            }
+        }
     }
 
     public List<Map> searchPLFX(Map<String,Object> params){
@@ -740,7 +873,40 @@ public class BiController {
     @RequestMapping(value="/DataSearchDetailPLFX")
     public R DataSearchDetailPLFX(@RequestParam Map<String, Object> params){
 
-        List<Map> returnList = searchDetailPLFX(params);
+        List<Map> returnList = new ArrayList<>();
+//        = searchDetailPLFX(params);
+
+        Long prdId = Long.valueOf(params.get("prdId").toString());
+        //份数
+        BigDecimal orderCount = new BigDecimal(params.get("prdCount").toString());
+        List<Map> detailMapList = outportDetailService.queryMtrByPrdId(prdId, null, null);
+        PrdDataEntity prdDataEntity = prdDataService.queryObject(prdId);
+
+        if (detailMapList != null && detailMapList.size() > 0) {
+            for (Map map : detailMapList) {
+                BigDecimal netWgt = new BigDecimal(map.get("netWgt") == null ? "0" : map.get("netWgt").toString());
+
+                map.put("totalWgt", netWgt.multiply(orderCount));
+                //单锅重 = 原料净重/产品净重*单品单锅重
+                System.out.println(netWgt + " " + prdDataEntity.getPotWeight() + " " + prdDataEntity.getSumNetWgt());
+                BigDecimal pot = netWgt.multiply(new BigDecimal(prdDataEntity.getPotWeight())).divide(new BigDecimal(prdDataEntity.getSumNetWgt()));
+                map.put("pot", pot);
+                //不足锅量
+                BigDecimal lastPot = netWgt.multiply(orderCount).remainder(pot);
+                map.put("lastPot", lastPot);
+
+                if (map.get("semiFinished").equals("1")) {//半成品
+                    BomInfoEntity bomInfo = bomInfoService.queryObjectByPrdId(Long.valueOf(map.get("mtrId").toString()));
+                    map.put("mtrName", bomInfo.getBomName());
+                    map.put("mtrCode", bomInfo.getPrdCode());
+
+                }
+
+                returnList.add(map);
+            }
+        }
+
+
         int total = 0;
         if(returnList != null && returnList.size() > 0){
             total = returnList.size();
