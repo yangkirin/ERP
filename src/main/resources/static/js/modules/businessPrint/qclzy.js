@@ -130,9 +130,12 @@ $(function () {
 var vm = new Vue({
     el: '#rrapp',
     data: {
-        productionOrder: {},
+        productionOrder: {
+            createDate: '',
+            takeStn: 0
+        },
         selectArr:null,
-        pdcStnArr:null,
+        takeStnArr: null,
     },
     methods: {
         query: function () {
@@ -176,10 +179,10 @@ var vm = new Vue({
             if(vm.productionOrder.productionNo !== undefined){
                 orderNo = vm.productionOrder.productionNo;
             }
-            window.open(baseURL + "businessPrint/biSearch/PrintQCLZY?token="+token+"&createDate="+vm.productionOrder.createDate+"&orderNo="+orderNo+"&pdcStn="+vm.productionOrder.pdcStn);
+            window.open(baseURL + "businessPrint/biSearch/PrintQCLZY?token=" + token + "&createDate=" + vm.productionOrder.createDate + "&orderNo=" + orderNo + "&takeStn=" + vm.productionOrder.takeStn);
         }
     }
 });
-vm.pdcStnArr = vm.initTypeInfoArr('48');
+vm.takeStnArr = vm.initTypeInfoArr('19');
 vm.initCommbox();
-vm.productionOrder.pdcStn = 0;
+vm.productionOrder.takeStn = 0;
