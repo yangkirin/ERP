@@ -31,16 +31,16 @@
 			<if test="exceptionDate != null and exceptionDate.trim != ''">
 				and oe.EXCEPTION_DATE = #{exceptionDate}
 			</if>
-			<if	test="orderNo != null or supplierName != null">
-				and (
+			<!--<if	test="orderNo != null or supplierName != null">-->
+				<!--and (-->
 				<if test="orderNo != null">
-					ORDER_NO like "%${orderNo}%"
+					ORDER_NO like concat('%',#{orderNo},'%')
 				</if>
 				<if test="supplierName != null">
-					or supplierName like "%${supplierName}%"
+					supplierName like concat('%',#{supplierName},'%')
 				</if>
-				)
-			</if>
+				<!--)-->
+			<!--</if>-->
 		</where>
 		<choose>
 			<when test="sidx != null and sidx.trim() != ''">
@@ -68,16 +68,12 @@
 			<if test="exceptionDate != null and exceptionDate.trim != ''">
 				and oe.EXCEPTION_DATE = #{exceptionDate}
 			</if>
-			<if	test="orderNo != null or supplierName != null">
-				and (
 				<if test="orderNo != null">
-					ORDER_NO like "%${orderNo}%"
+					ORDER_NO like concat('%',#{orderNo},'%')
 				</if>
 				<if test="supplierName != null">
-					or supplierName like "%${supplierName}%"
+					supplierName like concat('%',#{supplierName},'%')
 				</if>
-				)
-			</if>
 		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">

@@ -30,20 +30,22 @@ $(function () {
 			{ label: '备注', name: 'remark', index: 'remark', width: 80 , search:false,hidden:true},
 			{ label: '操作', name: 'operation', index: 'operation', search:false, width: 150 ,formatter:function(value, options, row){
 				var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo("+row.id+")'>修改</button>" +
-				 "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig("+row.id+")'>原料配置</button>";
+				 "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig("+row.id+")'>原料配置</button>"+
+                    "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='copy("+row.id+")'>复制</button>"
+                ;
 				return optionStr;
 			}}
         ],
 		viewrecords: true,
         height: "auto",
-        rowNum: 9999999,
-		rowList : [10,30,50],
+        rowNum: 20,
+		rowList : [20,60,80],
         rownumbers: true,
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
-        scroll:true,
-        // pager: "#jqGridPager",
+        // scroll:true,
+        pager: "#jqGridPager",
         toppager: true,
         jsonReader : {
             root: "page.list",
@@ -216,6 +218,12 @@ function editInfo(rowid){
     vm.update(rowid);
 }
 
+function copy(rowId){
+    $("#myModal").modal("show");
+    vm.getFieldDataSupplier();
+    vm.copyInfo.selectId = rowId;
+}
+
 var setting = {
     data: {
         simpleData: {
@@ -270,7 +278,8 @@ var vm = new Vue({
         titleMtr:null,
 		supplierInfo: {},
         mtrExtendArr: {},
-        typeArr:{}
+        typeArr:{},
+        copyInfo:{}
 	},
 	methods: {
 		query: function () {
@@ -607,6 +616,59 @@ var vm = new Vue({
                 }
             });
             return dataArr;
+        },
+        getFieldDataSupplier:function(){
+            $('#search_supplier').typeahead({
+                source: function (query, process) {
+                    $.ajax({
+                        type: "POST",
+                        url: baseURL + "common/commonUtil/getTableData",
+                        data: "tableName=tb_supplier_info&fieldName=suppier_name:suppier_py&searchWord=" + query,
+                        success: function (r) {
+                            var resultList = r.data.map(function (item) {
+                                var aItem = {id: item.id, py: item.suppier_py, name: item.suppier_name};
+                                return JSON.stringify(aItem);
+                            });
+                            process(resultList);
+                        }
+                    });
+                },
+                highlighter: function (obj) {
+                    var item = JSON.parse(obj);
+                    var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+                    return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+                        return '<strong>' + match + '</strong>'
+                    });
+                },
+                updater: function (obj) {
+                    var item = JSON.parse(obj);
+                    vm.copyInfo.targetId = item.id;
+                    return item.name;
+                }
+            })
+        },
+        modalCommit:function(){
+            console.log(vm.copyInfo.selectId+"------"+vm.copyInfo.targetId);
+
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "purchase/suppiermtr/copy",
+                // contentType: "application/json",
+                data: {selectId:vm.copyInfo.selectId,targetId:vm.copyInfo.targetId},
+                success: function(r){
+                    if(r.code == 0){
+                        alert('操作成功', function(index){
+                            vm.reloadMtrConfig();
+                            $("#myModal").modal("hide");
+                            vm.copyInfo = {};
+                        });
+                    }else{
+                        alert(r.msg);
+                    }
+                }
+            });
+
         }
 	}
 });

@@ -42,6 +42,9 @@ public class ProductionOrderDetailEntity implements Serializable {
 	//预估收入
 	private String revenue;
 
+	private Long realCount;
+
+	private BigDecimal realIncome;
 	/**
 	 * 设置：ID
 	 */
@@ -197,5 +200,21 @@ public class ProductionOrderDetailEntity implements Serializable {
 	 */
 	public String getRevenue() {
 		return revenue;
+	}
+
+	public Long getRealCount() {
+		return realCount;
+	}
+
+	public void setRealCount(Long realCount) {
+		this.realCount = realCount;
+	}
+
+	public BigDecimal getRealIncome() {
+		return realIncome;
+	}
+
+	public void setRealIncome(BigDecimal realIncome) {
+		this.realIncome = realIncome;
 	}
 }

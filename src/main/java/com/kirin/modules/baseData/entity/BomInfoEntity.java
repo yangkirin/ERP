@@ -63,6 +63,7 @@ public class BomInfoEntity implements Serializable {
 
 	private String price;
 
+	private String orderTypeName;
 
 	/**
 	 * 设置：
@@ -279,5 +280,13 @@ public class BomInfoEntity implements Serializable {
 
 	public void setPrice(String price) {
 		this.price = price;
+	}
+
+	public String getOrderTypeName() {
+		return orderTypeName;
+	}
+
+	public void setOrderTypeName(String orderTypeName) {
+		this.orderTypeName = orderTypeName;
 	}
 }

@@ -77,14 +77,14 @@ $(function () {
 		viewrecords: true,
         // height: 385,
         height: 'auto',
-        rowNum: 99999999,
-		rowList : [10,30,50],
+        rowNum: 20,
+		rowList : [20,50,100],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
         // scroll:true,
-        // pager: "#jqGridPager",
+        pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -119,7 +119,6 @@ $(function () {
                         break;
                     }
                 }
-
             }else{
                 var id = $('#jqGrid').jqGrid("getGridParam","selrow");
                 var rowData = $("#jqGrid").jqGrid("getRowData", id);

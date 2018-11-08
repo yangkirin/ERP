@@ -6,18 +6,18 @@ $(function () {
         $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     };
 
-    $("#jqGrid").jqGrid({
+    mygrid = $("#jqGrid").jqGrid({
         url: baseURL + 'purchase/orderinfo/list',
         datatype: "json",
         colModel: [			
-			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
-			{ label: '订单编号', name: 'orderNo', index: 'ORDER_NO', width: 80 },
-			{ label: '供应商ID', name: 'supplierId', index: 'SUPPLIER_ID', width: 80 ,hidden:true},
-			{ label: '供应商', name: 'supplierName', index: 'SUPPLIER_NAME', width: 120 },
-            { label: '订购总额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 60 ,formatter : "number",align:"right"},
-            { label: '入库总额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 60 ,formatter : "number",align:"right"},
-			{ label: '期望到货日期', name: 'exceptionDate', index: 'EXCEPTION_DATE', width: 60 ,align:"right"},
-			{ label: '状态', name: 'status', index: 'STATUS', width: 40 ,align:"center",formatter: function(value, options, row){
+			{ label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true, search:false},
+			{ label: '订单编号', name: 'orderNo', index: 'orderNo', width: 80 },
+			{ label: '供应商ID', name: 'supplierId', index: 'SUPPLIER_ID', width: 80 ,hidden:true, search:false},
+			{ label: '供应商', name: 'supplierName', index: 'supplierName', width: 120 },
+            { label: '订购总额', name: 'orderSumPrice', index: 'ORDER_SUM_PRICE', width: 60 , search:false,formatter : "number",align:"right"},
+            { label: '入库总额', name: 'inSumPrice', index: 'IN_SUM_PRICE', width: 60 , search:false,formatter : "number",align:"right"},
+			{ label: '期望到货日期', name: 'exceptionDate', index: 'exceptionDate', width: 60 ,align:"right"},
+			{ label: '状态', name: 'status', index: 'STATUS', width: 40 , search:false,align:"center",formatter: function(value, options, row){
 			    var msg = "";
 			    if(value == 0){
                     msg = '<p class="bg-danger">已撤销</p>';
@@ -46,7 +46,7 @@ $(function () {
                     return "4";
                 }
             }},
-            { label: '操作', name: 'operation', index: 'operation', width: 150,formatter:function(value, options, row){
+            { label: '操作', name: 'operation', index: 'operation', width: 150, search:false,formatter:function(value, options, row){
                 // var detailStr = "<button type='button' class='btn btn-primary btn-xs' onclick='opearionEvent("+row.id+",\'0\')'>详&nbsp;&nbsp;情</button>&nbsp;&nbsp;"+
                 var operatorStr = "";
 
@@ -81,14 +81,14 @@ $(function () {
 		viewrecords: true,
         // height: 385,
         height: 'auto',
-        rowNum: 999999999,
-		rowList : [10,30,50],
+        rowNum: 20,
+		rowList : [20,50,80],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
         multiselect: false,
         // scroll:true,
-        // pager: "#jqGridPager",
+        pager: "#jqGridPager",
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -139,6 +139,26 @@ $(function () {
         }
     });
 
+    $("#jqGrid").jqGrid('navGrid','#jqGrid_toppager', {edit:false,add:false,del:false,search:false,refresh:true});
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager", {
+        caption: "隐藏",
+        title: "隐藏搜索工具栏",
+        buttonicon:"ui-icon-search",
+        onClickButton:function(){
+            mygrid[0].toggleToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('navButtonAdd',"#jqGrid_toppager",{
+        caption:"清空",
+        title:"清空搜索栏",
+        buttonicon :'ui-icon-refresh',
+        onClickButton:function(){
+            mygrid[0].clearToolbar()
+        }
+    });
+    $("#jqGrid").jqGrid('filterToolbar');
+
+
     function createSubGrid(subgrid_id,row_id,url){
         var subgrid_table_id, pager_id;
         subgrid_table_id = subgrid_id + "_t";
@@ -163,7 +183,8 @@ $(function () {
                     {label: '入库数量', name: 'inCount', index: 'IN_COUNT', width: 80,editable:true,formatter : "number"},
                     {label: '入库重量', name: 'inWgt', index: 'IN_WGT', width: 80,formatter : "number"},
                     {label: '入库金额', name: 'inPrice', index: 'IN_PRICE', width: 80,formatter : "number"},
-                    {label: '实际入库日期', name: 'inDate', index: 'IN_DATE', width: 80}
+                    {label: '实际入库日期', name: 'inDate', index: 'IN_DATE', width: 80},
+                    {label: '对外编码', name: 'extendCode', index: 'extendCode', width: 80}
                 ],
             rowNum : 20,
             // pager : pager_id,

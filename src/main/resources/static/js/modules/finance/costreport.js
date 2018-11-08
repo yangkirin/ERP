@@ -196,10 +196,14 @@ var vm = new Vue({
                     console.log(r);
                     if(r.dataList.length > 0){
                         r.dataList.forEach(function(ietm,index){
+                            var priceMoney = typeof(ietm.PRICEMONEY) == "undefined" ? 0 : ietm.PRICEMONEY;
+                            var sumCost = typeof(ietm.SUMCOST) == "undefined" ? 0 : ietm.SUMCOST;
+                            var percent = typeof(ietm.PERCENT) == "undefined" ? 0 : ietm.PERCENT;
+
                             $("#headTbl thead tr").append("<th>"+ietm.PRD_TYPE_NAME+"</th>");
-                            $("#headTbl tbody tr:eq(0)").append("<td>"+ietm.PRICEMONEY+"</td>");
-                            $("#headTbl tbody tr:eq(1)").append("<td>"+ietm.SUMCOST+"</td>");
-                            $("#headTbl tbody tr:eq(2)").append("<td>"+ietm.PERCENT+"</td>");
+                            $("#headTbl tbody tr:eq(0)").append("<td>"+priceMoney+"</td>");
+                            $("#headTbl tbody tr:eq(1)").append("<td>"+sumCost+"</td>");
+                            $("#headTbl tbody tr:eq(2)").append("<td>"+percent+"</td>");
                         });
                     }
 

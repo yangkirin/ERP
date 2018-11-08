@@ -54,41 +54,65 @@
 			<if test="customerId != null">
 				and po.CUSTOMER_ID=#{customerId}
 			</if>
-			<if test="createDate != null">
+			<if test="createDate != null and createDate.trim() != ''">
 				and po.CREATE_DATE like CONCAT ('%',#{createDate},'%')
 			</if>
-			<if test="demandDate != null">
-				and po.DEMAND_DATE like CONCAT ('%',#{demandDate},'%')
+			<if test="demandDate != null and demandDate !=''">
+				and po.DEMAND_DATE <![CDATA[>=]]> #{demandDate}
 			</if>
-            <if test="typeId != null and typeId != 2">
+			<if test="demandEndDate != null and demandEndDate !=''">
+				and po.DEMAND_DATE <![CDATA[<=]]> #{demandEndDate}
+			</if>
+
+            <if test="typeId != null and typeId != 2"><!-- 排除预订单的数据 -->
                 and po.TYPE_ID = #{typeId}
             </if>
+
+			<if test="orderTypeId != null and orderTypeId != 0">
+				and po.ORDER_TYPE_ID = #{orderTypeId}
+			</if>
+
 			<if test="status != null">
 				and po.STATUS in
 				<foreach collection="status" index="index" item="item" open="(" separator="," close=")">
 					#{item}
 				</foreach>
 			</if>
+
+
+			<if test="productionNo != null and productionNo != ''">
+				and po.PRODUCTION_NO like '%${productionNo}%'
+			</if>
+			<if test="orderTypeName != null and orderTypeName != ''">
+				and po.ORDER_TYPE_ID like '%${orderTypeName}%'
+			</if>
+			<if test="customer != null and customer != ''">
+				and (po.CUSTOMER_NO like '%${customer}%' OR po.CUSTOMER_NAME like '%${customer}%')
+			</if>
+			<if test="placeName != null and placeName != ''">
+				and po.PLACE_ID like '%${placeName}%'
+			</if>
+
 			<!--<if test="productionNo != null and productionNo.trim() != ''">-->
 				<!--and PRODUCTION_NO=#{productionNo}-->
 			<!--</if>-->
-			<if test="productionNo != null or orderTypeName != null or customerNo != null
-			or customerName != null or placeName != null">
-				and (
-				<if test="productionNo != null">
-					po.PRODUCTION_NO like '%${productionNo}%'
-				</if>
-				<if test="orderTypeName != null">
-					and po.ORDER_TYPE_ID like '%${orderTypeName}%'
-				</if>
-				<if test="customer != null">
-					and (po.CUSTOMER_NO like '%${customer}%' OR po.CUSTOMER_NAME like '%${customer}%')
-				</if>
-				<if test="placeName != null">
-					and po.PLACE_ID like '%${placeName}%'
-				</if>
-				)
-			</if>
+			<!--<if test="productionNo != null or orderTypeName != null or customerNo != null-->
+			<!--or customerName != null or placeName != null">-->
+				<!--and (-->
+				<!--<if test="productionNo != null and productionNo != ''">-->
+					<!--po.PRODUCTION_NO like '%${productionNo}%'-->
+				<!--</if>-->
+				<!--<if test="orderTypeName != null and orderTypeName != ''">-->
+					<!--and po.ORDER_TYPE_ID like '%${orderTypeName}%'-->
+				<!--</if>-->
+				<!--<if test="customer != null and customer != ''">-->
+					<!--and (po.CUSTOMER_NO like '%${customer}%' OR po.CUSTOMER_NAME like '%${customer}%')-->
+				<!--</if>-->
+				<!--<if test="placeName != null and placeName != ''">-->
+					<!--and po.PLACE_ID like '%${placeName}%'-->
+				<!--</if>-->
+				<!--)-->
+			<!--</if>-->
 		</where>
         <choose>
             <when test="sidx != null and sidx.trim() != ''">

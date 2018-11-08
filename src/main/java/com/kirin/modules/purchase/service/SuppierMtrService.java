@@ -31,4 +31,6 @@ public interface SuppierMtrService {
 	List<SuppierMtrEntity> querySupplierByMtrId(Long mtrId,Long supplierId);
 
 	List<SuppierMtrEntity> queryByIdAndPy(Long mtrId,Long supplierId,String searchWord);
+
+	int batchInsert(List<SuppierMtrEntity> suppierMtrEntityList);
 }

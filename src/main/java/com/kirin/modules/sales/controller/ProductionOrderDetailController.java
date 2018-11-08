@@ -97,9 +97,15 @@ public class ProductionOrderDetailController {
             }
             //计算预估收入=(数量*售价）-（数量*定价）
             BigDecimal revenue = new BigDecimal(0);
-            revenue = new BigDecimal(productionOrderDetail.getAmount()).multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(new BigDecimal(productionOrderDetail.getAmount()).multiply(productionOrderDetail.getCost())).setScale(2, BigDecimal.ROUND_HALF_DOWN);
-
+            revenue = new BigDecimal(productionOrderDetail.getAmount()).multiply(new BigDecimal(productionOrderDetail.getPrice2()));
+//            .subtract(new BigDecimal(productionOrderDetail.getAmount()).multiply(productionOrderDetail.getCost())).setScale(2, BigDecimal.ROUND_HALF_DOWN);
             productionOrderDetail.setRevenue(revenue.toString());
+
+            //计算实际收入=(实际数量*售价）-（实际数量*定价）
+            BigDecimal realIncome = new BigDecimal("0");
+            BigDecimal realCount = new BigDecimal(productionOrderDetail.getRealCount() == null ? "0" : productionOrderDetail.getRealCount().toString());
+			realIncome = realCount.multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(realCount.multiply(productionOrderDetail.getCost())).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+            productionOrderDetail.setRealIncome(realIncome);
 
             productionOrderDetailService.save(productionOrderDetail);
 
@@ -125,8 +131,13 @@ public class ProductionOrderDetailController {
 		//计算预估收入=(数量*售价）-（数量*定价）
 		BigDecimal revenue = new BigDecimal(0);
 		revenue = new BigDecimal(productionOrderDetail.getAmount()).multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(new BigDecimal(productionOrderDetail.getAmount()).multiply(productionOrderDetail.getCost())).setScale(2,BigDecimal.ROUND_HALF_DOWN);
-
 		productionOrderDetail.setRevenue(revenue.toString());
+
+		//计算实际收入=(实际数量*售价）-（实际数量*定价）
+		BigDecimal realIncome = new BigDecimal("0");
+		BigDecimal realCount = new BigDecimal(productionOrderDetail.getRealCount() == null ? "0" : productionOrderDetail.getRealCount().toString());
+		realIncome = realCount.multiply(new BigDecimal(productionOrderDetail.getPrice2())).subtract(realCount.multiply(productionOrderDetail.getCost())).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+		productionOrderDetail.setRealIncome(realIncome);
 
 		productionOrderDetailService.update(productionOrderDetail);
 

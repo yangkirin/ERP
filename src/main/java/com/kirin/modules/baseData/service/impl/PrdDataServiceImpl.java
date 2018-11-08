@@ -57,4 +57,6 @@ public class PrdDataServiceImpl implements PrdDataService {
 		return prdDataDao.queryByPrdName(prdName);
 	}
 
+	@Override
+	public PrdDataEntity queryObjectMap(Map<String,Object> params){return prdDataDao.queryObjectMap(params);}
 }

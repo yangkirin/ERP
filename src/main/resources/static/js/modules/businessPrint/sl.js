@@ -1,37 +1,64 @@
 $(function () {
 
-    window.onresize = function _doResize() {
+    window.onresize = function  _doResize() {
         var ss = pageSize();
-        $("#jqGrid").jqGrid('setGridWidth', ss.WinW - 10).jqGrid('setGridHeight', ss.WinH - 200);
+        $("#jqGrid").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
         // $("#jqGridMtr").jqGrid('setGridWidth', ss.WinW-10).jqGrid('setGridHeight', ss.WinH-200);
     }
 
     $("#jqGrid").jqGrid({
-        url: baseURL + 'businessPrint/biSearch/DataSearchQCLZY',
+        url: baseURL + 'businessPrint/biSearch/DataSearchPLFX',
         datatype: "local",
         colModel: [
             {label: 'id', name: 'mtrId', index: 'mtrId', width: 50, key: true, hidden: true},
-            {label: '编号', name: 'mtrCode', index: 'mtrCode', width: 80},
-            {label: '品名', name: 'mtrIdName', index: 'mtrIdName', width: 80},
+            {label: '产品编号', name: 'mtrCode', index: 'mtrCode', width: 80},
+            {label: '品名', name: 'mtrIdName', index: 'mtrIdName', width: 100},
             {label: '生产量', name: 'sumDemandWgt', index: 'sumDemandWgt', width: 80,formatter:function(value, options, row){
-                // if(row.miniRate){
-                //     return Number(Number(value)/Number(row.miniRate)).toFixed(4);
-                // }else{
+                // if(row.miniRate == null || row.miniRate == 0){
                     return value;
                 // }
+                // return Number(value/row.miniRate).toFixed(4);
+            },unformat:function(value, options, row){
+                // if(row.miniRate == null || row.miniRate == 0){
+                    return value;
+                // }
+                // return value*row.miniRate;
             }},
-            {label: '单位', name: 'miniUnitName', index: 'miniUnitName', width: 80},
-            {label: '转换率', name: 'miniRate', index: 'miniRate', width: 80},
-            { label: '生产站点', name: 'takeStnIdName', index: 'takeStnIdName', width: 80 },
-            { label: '生产站点', name: 'takeStnId', index: 'takeStnId', width: 80 , hidden: true},
+            {label: '单位', name: 'miniUnitName', index: 'miniUnitName', width: 50},
+            {label: '转换率', name: 'miniRate', index: 'miniRate', width: 50},
+            {label: '速冷', name: 'quickCool', index: 'quickCool', width: 80,formatter:function(value, options, row){
+                //0-否，1-速冷，2-摊凉
+                if(value == '0'){
+                    return '否';
+                }else if(value == '1'){
+                    return '速冷';
+                }else if(value == '2'){
+                    return '摊凉';
+                }
+            },unformat:function(value, options, row){
+                if($.trim(value)=="否"){
+                    return "0";
+                }else if($.trim(value)=="速冷"){
+                    return "1";
+                }else if($.trim(value)=="摊凉"){
+                    return "2";
+                }
+            }},
+            {label: '速冷率', name: 'quickCoolRate', index: 'quickCoolRate', width: 50},
+            {label: '速冷重', name: 'quickCoolWgt', index: 'quickCoolWgt', width: 80,formatter:function(value, options, row){
+                if(row.miniRate == null || row.miniRate == 0){
+                    return '';
+                }
+                var sumDemandWgt = Number(row.sumDemandWgt/row.miniRate).toFixed(4);
+                if(row.quickCoolRate != null && row.quickCool == '1'){
+                    return Number(sumDemandWgt*row.quickCoolRate).toFixed(4);
+                }else{
+                    return '0';
+                }
 
-            {label: '总锅数', name: 'sumPotCount', index: 'sumPotCount', width: 80, hidden: true},
-            {label: '单锅重', name: 'potWeight', index: 'potWeight', width: 80, hidden: true},
-            {label: '尾锅重', name: 'lastPotWeight', index: 'lastPotWeight', width: 80, hidden: true}
-            // { label: '尾锅数', name: 'lastPotCount', index: 'lastPotCount', width: 80 }
-            // {label: '品名', name: 'mtrName', index: 'mtrName', width: 80},
-            // {label: '总用量', name: 'bomWgt', index: 'bomWgt', width: 80, hidden: true},
-            // {label: '单位', name: 'formulaUnit', index: 'formulaUnit', width: 80}
+            }},
+            {label: '生产站点', name: 'takeStnIdName', index: 'takeStnIdName', width: 80},
+            {label: '生产站点', name: 'takeStnId', index: 'takeStnId', width: 80, hidden: true}
         ],
         viewrecords: true,
         height: "auto",
@@ -66,54 +93,61 @@ $(function () {
             }
             vm.gridCurrentdata = getGridAllData('jqGrid');
         },
-        subGrid: false,
-        subGridRowExpanded: function (subgrid_id, row_id) {
-            var rowData = $("#jqGrid").jqGrid('getRowData', row_id);
-            var url = baseURL + 'businessPrint/biSearch/DataSearchDetailQCLZY?prdId=' + rowData.mtrId + '&prdCount=' + rowData.sumDemandWgt;
-            createSubGrid(subgrid_id, row_id, url);
+        subGrid : false,
+        subGridRowExpanded : function(subgrid_id,row_id){
+            var rowData = $("#jqGrid").jqGrid('getRowData',row_id);
+            var sumDemandWgt = rowData.sumDemandWgt*rowData.miniRate;
+            var url = baseURL + 'businessPrint/biSearch/DataSearchDetailPLFX?prdId=' + rowData.mtrId + '&sumDemandWgt=' + sumDemandWgt;
+            createSubGrid(subgrid_id,row_id,url);
         }
     });
 
-    function createSubGrid(subgrid_id, row_id, url) {
+    function createSubGrid(subgrid_id,row_id,url){
         var subgrid_table_id, pager_id;
         subgrid_table_id = subgrid_id + "_t";
         pager_id = "p_" + subgrid_table_id;
         $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
         jQuery("#" + subgrid_table_id).jqGrid({
-            url: url,
-            datatype: "json",
-            colModel: [
-                {label: 'mtrId', name: 'mtrId', index: 'mtrId', key: true, hidden: true},
-                {label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120},
-                {label: '原料名称', name: 'mtrName', index: 'mtrName', width: 180},
-                {label: '原料类型', name: 'mtrTypeName', index: 'mtrTypeName', width: 120},
-                {label: '单位', name: 'formulaUnitName', index: 'formulaUnitName', width: 80},
-                {label: '净重', name: 'netWgt', index: 'netWgt', width: 80},
-                {label: '毛重', name: 'grossWgt', index: 'grossWgt', width: 80},
-                {label: '熟重', name: 'cookedWgt', index: 'cookedWgt', width: 80}
+            url : url,
+            datatype : "json",
+            colModel : [
+                { label: 'mtrId', name: 'mtrId', index: 'mtrId', key: true,hidden:true},
+                { label: '原料编号', name: 'mtrCode', index: 'mtrCode', width: 120 },
+                { label: '原料名称', name: 'mtrIdName', index: 'mtrIdName', width: 180 },
+                {label: '单锅量', name: 'potWeight', index: 'potWeight', width: 100},
+                {label: '锅数', name: 'potCount', index: 'potCount', width: 100},
+                {label: '不足锅量', name: 'residueCount', index: 'residueCount', width: 100},
+                {label: '总用量', name: 'totalWgt', index: 'totalWgt', width: 100,formatter:function(value, options, row){
+                    if(row.miniRate == null || row.miniRate == 0){
+                        return value;
+                    }
+                    return Number(value/row.miniRate).toFixed(4);
+                }},
+                {label: '单位', name: 'miniUnitName', index: 'miniUnitName', width: 80},
+                {label: '转换率', name: 'miniRate', index: 'miniRate', width: 80}
             ],
-            rowNum: 9999999,
+            rowNum : 9999999,
             // pager : pager_id,
-            height: '100%',
-            rowList: [10, 30, 50],
+            height : '100%',
+            rowList : [10,30,50],
             // rownumbers: true,
             // rownumWidth: 25,
-            autowidth: true,
+            autowidth:true,
             multiselect: false,
-            jsonReader: {
+            jsonReader : {
                 root: "page.list",
                 page: "page.currPage",
                 total: "page.totalPage",
                 records: "page.totalCount"
             },
-            prmNames: {
-                page: "page",
-                rows: "limit",
+            prmNames : {
+                page:"page",
+                rows:"limit",
                 order: "order"
             },
-            gridComplete: function () {
+            gridComplete:function(){
                 //隐藏grid底部滚动条
-                $("#" + subgrid_table_id).closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+                $("#" + subgrid_table_id).closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
             }
         });
     }
@@ -169,54 +203,6 @@ $(function () {
         vm.productionOrder.demandEndDate = value;
     });
 
-
-    //数据选择getGridAllData
-    // $("#takeStn").bind("change", function () {
-    //     var data = $(this).val();
-    //     var text = $(this).find("option:selected").text();
-    //     vm.takeStn = text;
-    //     var takeStnData;
-    //
-    //     if(data == 0){
-    //         takeStnData = vm.gridAlldata;
-    //     }else{
-    //         takeStnData = vm.gridAlldata.filter(function (e) { return e.takeStnId == data; });
-    //     }
-    //
-    //     $("#jqGrid").jqGrid("clearGridData");
-    //     $("#jqGrid").jqGrid('setGridParam',{
-    //         datatype: 'local',
-    //         data:takeStnData
-    //     }).trigger("reloadGrid");
-    //
-    // });
-
-    // $("#warehouse").bind("change", function () {
-    //     var data = $(this).val();
-    //     var text = $(this).find("option:selected").text();
-    //     var takeStnId = $('#takeStn').val();
-    //     var warehouseData;
-    //     if(data == 0 && takeStnId == 0){
-    //         warehouseData = vm.gridAlldata;
-    //     }else if(data == 0 && takeStnId != 0){
-    //         warehouseData = vm.gridAlldata.filter(function (e) { return e.TAKE_STN_ID == takeStnId; });
-    //     }else if(data != 0 && takeStnId == 0){
-    //         warehouseData = vm.gridAlldata.filter(function (e) { return e.WAREHOUSE_ID == data; });
-    //     }else if(data != 0 && takeStnId != 0){
-    //         warehouseData = vm.gridAlldata.filter(function (e) { return e.WAREHOUSE_ID == data; });
-    //         warehouseData = warehouseData.filter(function (e) { return e.TAKE_STN_ID == takeStnId; });
-    //     }
-    //
-    //     vm.gridCurrentdata = warehouseData;
-    //
-    //     $("#jqGrid").jqGrid("clearGridData");
-    //     $("#jqGrid").jqGrid('setGridParam',{
-    //         datatype: 'local',
-    //         data:warehouseData
-    //     }).trigger("reloadGrid");
-    //
-    // });
-
     //init salesOrderGrid
     $("#salesOrderGrid").jqGrid({
         url: baseURL + 'sales/productionorder/reportSearch',
@@ -268,6 +254,26 @@ $(function () {
         }
     });
 
+    //数据过滤加载
+    $('#isCold').bind("change", function () {
+        var takeStnData = vm.gridAlldata;
+        if(vm.productionOrder.takeStn != 0){
+            takeStnData = vm.gridAlldata.filter(function (e) { return e.takeStnId == vm.productionOrder.takeStn; });
+        }
+        var coldData;
+        if(vm.productionOrder.isCold != '-1'){
+            coldData = takeStnData.filter(function (e) { return e.quickCool == vm.productionOrder.isCold; });
+        }else{
+            coldData = takeStnData;
+        }
+
+        $("#jqGrid").jqGrid("clearGridData");
+        $("#jqGrid").jqGrid('setGridParam',{
+            datatype: 'local',
+            data:coldData
+        }).trigger("reloadGrid");
+    });
+
     $("#accordionSearch").collapse('show');
     $("#accordionScreen").collapse('hide');
 });
@@ -277,6 +283,7 @@ var vm = new Vue({
     data: {
         productionOrder: {
             typeId: 2,
+            isCold:-1,
             createDate: null,
             demandDate: null,
             takeStn: 0,
@@ -308,7 +315,6 @@ var vm = new Vue({
             }).trigger("reloadGrid");
             // console.log(JSON.stringify(vm.productionOrder));
             $("#myModal").modal("show");
-            // vm.reload();
         },
         modalCommit:function(){
             //获取选择的订单ID
@@ -331,6 +337,7 @@ var vm = new Vue({
         reset:function(){
             vm.productionOrder = {
                 typeId: 2,
+                isCold:-1,
                 createDate: null,
                 demandDate: null,
                 takeStn: 0,
@@ -343,13 +350,13 @@ var vm = new Vue({
                 datatype: "local"
             }).trigger("reloadGrid");
         },
-        initCommbox: function () {
+        initCommbox:function(){
             $.ajax({
                 type: "POST",
                 url: baseURL + "common/commonUtil/getDataToCommbox",
                 // contentType: "application/json",
-                data: {tableName: "tb_type_info", search: "PARENT_ID=23", returnField: "ID as value,TYPE_NAME as text"},
-                success: function (r) {
+                data: {tableName:"tb_type_info",search:"PARENT_ID=23",returnField:"ID as value,TYPE_NAME as text"},
+                success: function(r){
                     vm.selectArr = r.data;
                     // vm.productionOrder.warehouse = 0;
                 }
@@ -383,6 +390,7 @@ var vm = new Vue({
                 btn: ['确定', '取消'],
                 btn1: function (index) {
 
+
                     var nodes = ztree.getCheckedNodes(true);
                     if(0 === nodes.length) {
                         alert("请选择!");
@@ -399,7 +407,7 @@ var vm = new Vue({
                     }
                     dataNodesName = dataNodesName.substr(0,dataNodesName.length-1);
                     dataNodesId = dataNodesId.substr(0,dataNodesId.length-1);
-                    // alert(dataNodes); //获取选中节点的值
+
 
                     var node = ztree.getSelectedNodes();
                     if(opeation == 'takeStn'){
@@ -411,7 +419,7 @@ var vm = new Vue({
                     vm.takeStn = (dataNodesName);
                     var takeStnData;
 
-                    // if(node[0].id == 0){
+                    // if(nodes.length > 0){
                     //     takeStnData = vm.gridAlldata;
                     // }else{
                         takeStnData = vm.gridAlldata.filter(function (e) {
@@ -419,13 +427,21 @@ var vm = new Vue({
                             return (dataNodesId.indexOf(e.takeStnId) != -1);
                         });
                     // }
+                    var resultData;
+                    if(vm.productionOrder.isCold !='-1'){
+                        resultData = takeStnData.filter(function (e) {
+                            return e.quickCool == vm.productionOrder.isCold;
+                        });
+                    }else{
+                        resultData = takeStnData;
+                    }
+
 
                     $("#jqGrid").jqGrid("clearGridData");
                     $("#jqGrid").jqGrid('setGridParam',{
                         datatype: 'local',
-                        data:takeStnData
+                        data:resultData
                     }).trigger("reloadGrid");
-
                     layer.close(index);
                 },
                 btn2:function(event){
@@ -433,36 +449,32 @@ var vm = new Vue({
                 }
             });
         },
-        initTypeInfoArr: function (parentId) {
+        initTypeInfoArr:function(parentId){
             var dataArr = "";
             $.ajax({
                 type: "POST",
-                async: false,
+                async:false,
                 url: baseURL + "common/commonUtil/getDataToCommbox",
                 // contentType: "application/json",
-                data: {
-                    tableName: "tb_type_info",
-                    search: "PARENT_ID=" + parentId,
-                    returnField: "ID as value,TYPE_NAME as text"
-                },
-                success: function (r) {
-                    dataArr = r.data;
+                data: {tableName:"tb_type_info",search:"PARENT_ID="+parentId,returnField:"ID as value,TYPE_NAME as text"},
+                success: function(r){
+                    dataArr =  r.data;
                 }
             });
             return dataArr;
         },
-        reload: function () {
-            $("#jqGrid").jqGrid('setGridParam', {
-                postData: vm.productionOrder
+        reload:function(){
+            $("#jqGrid").jqGrid('setGridParam',{
+                postData:vm.productionOrder
             }).trigger("reloadGrid");
         },
-        print: function () {
+        print:function(){
             // console.log(vm.productionOrder);
             // var orderNo = "";
-            // if (vm.productionOrder.productionNo !== undefined) {
+            // if(vm.productionOrder.productionNo !== undefined){
             //     orderNo = vm.productionOrder.productionNo;
             // }
-            // window.open(baseURL + "businessPrint/biSearch/PrintQCLZY?token=" + token + "&createDate=" + vm.productionOrder.createDate + "&orderNo=" + orderNo + "&takeStn=" + vm.productionOrder.takeStn);
+            // window.open(baseURL + "businessPrint/biSearch/PrintPLFX?token=" + token + "&createDate=" + vm.productionOrder.createDate + "&orderNo=" + orderNo + "&pdcStn=" + vm.productionOrder.pdcStn);
 
             if(vm.orderIds == null){
                 alert("未选择任何订单！");
@@ -473,12 +485,8 @@ var vm = new Vue({
             }else{
                 printData = vm.gridCurrentdata;
             }
-            // console.log(printData);
-            // var printData = getGridAllData('jqGrid');
-            // var postData = {};
-            // postData.printData = printData;
 
-            openPostWindow(baseURL + "businessPrint/biSearch/PrintQCLZYNew?token=" + token+"&takeStn="+vm.takeStn+"&demandDate="+vm.productionOrder.demandDate,JSON.stringify(printData),'printQCLZY');
+            openPostWindow(baseURL + "businessPrint/biSearch/PrintSL?token=" + token+"&takeStn="+vm.takeStn+"&demandDate="+vm.productionOrder.demandDate,JSON.stringify(printData),'printPLFX');
         }
     }
 });

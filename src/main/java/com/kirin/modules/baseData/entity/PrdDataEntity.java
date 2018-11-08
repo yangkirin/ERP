@@ -4,6 +4,7 @@ import com.kirin.modules.baseData.service.BomDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,12 @@ public class PrdDataEntity implements Serializable {
 	private String updateUser;
 	private Date updateDate;
 	private String extendCode;
+
+	private Integer unit;
+	private String unitName;
+
+	private BigDecimal prdRate;
+
 	/**
 	 * 设置：
 	 */
@@ -478,5 +485,29 @@ public class PrdDataEntity implements Serializable {
 
 	public void setExtendCode(String extendCode) {
 		this.extendCode = extendCode;
+	}
+
+	public Integer getUnit() {
+		return unit;
+	}
+
+	public void setUnit(Integer unit) {
+		this.unit = unit;
+	}
+
+	public String getUnitName() {
+		return unitName;
+	}
+
+	public void setUnitName(String unitName) {
+		this.unitName = unitName;
+	}
+
+	public BigDecimal getPrdRate() {
+		return prdRate;
+	}
+
+	public void setPrdRate(BigDecimal prdRate) {
+		this.prdRate = prdRate;
 	}
 }

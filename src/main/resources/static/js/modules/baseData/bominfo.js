@@ -19,22 +19,23 @@ $(function () {
                     return value;
                 // }
             }},
-            { label: '产品类别', name: 'prdTypeName', index: 'prdTypeName', width: 80 },
-            { label: '产品编码', name: 'prdCode', index: 'prdCode', width: 80 },
-            { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 80 },
-            { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 80 },
-            {label: '售价', name: 'price', index: 'price', width: 60, search: false},
-            {label: '锅重', name: 'potWgt', index: 'potWgt', width: 60, search: false},
-            {label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 60, search: false},
-            {label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 60, search: false},
-            {label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 60, search: false},
-            {label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 60, search: false},
-            {label: '配方成本', name: 'cost', index: 'cost', width: 60, search: false},
+            { label: '产品类别', name: 'prdTypeName', index: 'prdTypeName', width: 70 },
+            { label: '订单类别', name: 'orderTypeName', index: 'orderTypeName', width: 70 },
+            { label: '产品编码', name: 'prdCode', index: 'prdCode', width: 70 },
+            { label: '生产站点', name: 'pdcStnName', index: 'pdcStnName', width: 70 },
+            { label: '拼音码', name: 'bomPy', index: 'bom_py', width: 70 },
+            {label: '售价', name: 'price', index: 'price', width: 50, search: false},
+            {label: '锅重', name: 'potWgt', index: 'potWgt', width: 50, search: false,hidden:true},
+            {label: '盒重', name: 'boxWgt', index: 'boxWgt', width: 50, search: false,hidden:true},
+            {label: '总毛重', name: 'sumGrossWgt', index: 'sum_gross_Wgt', width: 50, search: false},
+            {label: '总净重', name: 'sumNetWgt', index: 'sum_net_Wgt', width: 50, search: false},
+            {label: '总熟重', name: 'sumModiWgt', index: 'sum_modi_Wgt', width: 50, search: false},
+            {label: '配方成本', name: 'cost', index: 'cost', width: 50, search: false},
             {
                 label: '成本率',
                 name: 'sumCostRate',
                 index: 'sumCostRate',
-                width: 60,
+                width: 50,
                 search: false,
                 formatter: function (value, options, row) {
                 if(value == null){
@@ -47,7 +48,7 @@ $(function () {
                 label: '状态',
                 name: 'status',
                 index: 'status',
-                width: 60,
+                width: 70,
                 stype: 'select',
                 align: 'center',
                 searchoptions: {value: "-1:全部;1:正常;2:编辑;0:禁用"},
@@ -92,29 +93,29 @@ $(function () {
                 name: 'operation',
                 index: 'operation',
                 search: false,
-                width: 150,
+                width: 170,
                 formatter: function (value, options, row) {
                     var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo(" + row.id + ")'>修改</button>" +
-                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig(" + row.id + ")'>原料配置</button>" +
-                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='bomcopy(" + row.id + ")'>复制</button>" +
-                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='delbom(" + row.id + ")'>删除</button>";
+                        "&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='mtrConfig(" + row.id + ")'>原料配置</button>" +
+                        "&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='bomcopy(" + row.id + ")'>复制</button>" +
+                        "&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='delbom(" + row.id + ")'>删除</button>";
                     return optionStr;
                 }
             }
         ],
 		viewrecords: true,
         height: 'auto',
-        rowNum: 999999,
-		rowList : [50,100,150],
+        rowNum: 20,
+		rowList : [20,40,60],
         rownumbers: true,
         rownumWidth: 25, 
         autowidth:true,
         multiselect: false,
         // scroll:true,
-        // pager: "#jqGridPager",
+        pager: "#jqGridPager",
 
         toppager: true,
-        pagerpos: 'hide',
+        // pagerpos: 'hide',
         jsonReader : {
             root: "page.list",
             page: "page.currPage",
@@ -173,7 +174,7 @@ $(function () {
 
     $("#bomDetailGrid").jqGrid({
         url: baseURL + 'baseData/bomdetail/list',
-        datatype: "json",
+        datatype: "local",
         colModel: [
             { label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
             { label: 'mtrId', name: 'mtrId', index: 'mtrId', width: 50 ,hidden:true},
@@ -287,17 +288,30 @@ $(function () {
             colModel : [
                 { label: 'id', name: 'id', index: 'id', width: 50, key: true ,hidden:true},
                 { label: 'mtrId', name: 'mtrId', index: 'mtrId', width: 50,hidden:true},
-                { label: '类别', name: 'typeIdName', index: 'TYPE_ID_NAME', width: 80 ,hidden:false},
+                { label: '类别', name: 'typeIdName', index: 'TYPE_ID_NAME', width: 60 ,hidden:false},
                 { label: '原料名称', name: 'mtrIdName', index: 'MTR_ID_NAME', width: 80 ,formatter:function(value, options, row){
-                    if(row.semiFinished == '1'){//0-成品，1-半成品
+                    if(row.semiFinished == '1'){//0-原料，1-半成品
                         return '*'+value;
                     }else{
                         return value;
                     }
                 }},
                 { label: '切割形状', name: 'mtrCutIdName', index: 'MTR_CUT_ID_NAME', width: 100 },
-                { label: '规格说明', name: 'mtrExtendDesc', index: 'MTR_EXTEND_DESC', width: 100},
-                { label: '净菜', name: 'netWgt', index: 'NET_WGT', editable:true,width: 40 },
+                { label: '规格说明', name: 'mtrExtendDesc', index: 'MTR_EXTEND_DESC', width: 80},
+                { label: '净菜', name: 'netWgt', index: 'NET_WGT', editable:true,width: 40 ,formatter:function(value, options, row){
+                    // if(row.semiFinished == '0'){
+                        //净菜=净菜/基本转换率
+                        // if(row.miniRate == null || row.miniRate == 0){
+                        //     return 0;
+                        // }else{
+                        //     var netWgt = value/row.miniRate;
+                        //     return Number(netWgt).toFixed(4);
+                        // }
+                    // }else{
+                        return value;
+                    // }
+
+                } },
                 { label: '净菜得率', name: 'netRate', index: 'NET_RATE', editable:true,width: 40,formatter:function(value, options, row){
                     if(value == null){
                         return 1;
@@ -305,9 +319,35 @@ $(function () {
                         return value;
                     }
                 } },
-                { label: '毛菜', name: 'grossWgt', index: 'GROSS_WGT', editable:true,width: 40 },
+                { label: '毛菜', name: 'grossWgt', index: 'GROSS_WGT', editable:true,width: 40 ,formatter:function(value, options, row){
+                    // if(row.semiFinished == '0'){
+                        //净菜=净菜/基本转换率
+                        //毛重=净重/净得率
+                        // if(row.miniRate == null || row.miniRate == 0 || row.netRate == null || row.netRate == 0){
+                        //     return 0;
+                        // }else{
+                        //     var grossWgt = (value/row.miniRate);
+                        //     return Number(grossWgt).toFixed(4);
+                        // }
+                    // }else{
+                        return value;
+                    // }
+                } },
                 { label: '熟菜得率', name: 'modiRate', index: 'MODI_RATE', editable:true,width: 40 },
-                { label: '熟菜', name: 'modiWgt', index: 'MODI_WGT',editable:true, width: 40  },
+                { label: '熟菜', name: 'modiWgt', index: 'MODI_WGT',editable:true, width: 40,formatter:function(value, options, row){
+                    // if(row.semiFinished == '0'){
+                        //净菜=净菜/基本转换率
+                        //熟重=净重*熟得率
+                        // if(row.miniRate == null || row.miniRate == 0 || row.modiRate == null || row.modiRate == 0){
+                        //     return 0;
+                        // }else{
+                        //     var modiWgt = (value/row.miniRate);
+                        //     return Number(modiWgt).toFixed(4);
+                        // }
+                    // }else{
+                        return value;
+                    // }
+                } },
                 { label: '单价', name: 'price', index: 'PRICE', editable:true,width: 40 ,formatter:function(value, options, row){
                     if(value == null){
                         return Number(0).toFixed(2);
@@ -315,7 +355,7 @@ $(function () {
                         return Number(value).toFixed(2);
                     }
                 } },
-                { label: '成本', name: 'cost', index: 'COST', width: 80 ,formatter:function(value, options, row){
+                { label: '成本', name: 'cost', index: 'COST', width: 40 ,formatter:function(value, options, row){
                     if(value == null){
                         return Number(0).toFixed(2);
                     }else{
@@ -821,7 +861,7 @@ var vm = new Vue({
                 type: 1,
                 skin: 'layui-layer-molv',
                 title: vm.title,
-                area: ['750px', '350px'],
+                area: ['750px', '450px'],
                 shadeClose: false,
                 content: jQuery("#addLayer"),
                 btn: ['提交','取消'],
@@ -1028,6 +1068,9 @@ var vm = new Vue({
                         vm.bomDetail.modiWgt="净菜*熟得率";
                         vm.bomDetail.modiRate=r.mtrData.modiRate2;
                         vm.bomDetail.semiFinished='0';
+                        vm.bomDetail.miniUnitName=r.mtrData.miniUnitName;
+                        vm.bomDetail.miniRate=r.mtrData.miniRate;
+                        vm.bomDetail.formulaUnitName=r.mtrData.formulaUnitName;
 
 
                     });
@@ -1085,8 +1128,9 @@ var vm = new Vue({
                     vm.bomDetailPrd.mtrId=r.prdData.id;
                     vm.bomDetailPrd.mtrIdName=r.prdData.prdName;
                     vm.bomDetailPrd.mtrCode=r.prdData.prdCode;
-
+                    vm.bomDetailPrd.formulaUnitName = r.prdData.unitName;
                     vm.bomDetailPrd.semiFinished='1';
+                    vm.bomDetailPrd.miniRate=r.prdData.prdRate;
                 });
             }
 
@@ -1094,13 +1138,28 @@ var vm = new Vue({
         countWgt:function(){
             var netWgt = $('#add_mtr_netWgt').val();
             vm.bomDetail.netWgt = netWgt;
-            vm.bomDetail.grossWgt= (Number(netWgt)/Number(vm.bomDetail.netRate)).toFixed(2);
-            vm.bomDetail.modiWgt= (Number(netWgt)*Number(vm.bomDetail.modiRate)).toFixed(2);
+            if(vm.bomDetail.netRate != null && vm.bomDetail.netRate != 0){
+                vm.bomDetail.grossWgt= (Number(netWgt)/Number(vm.bomDetail.netRate)).toFixed(2);
+            }
+            if(vm.bomDetail.modiRate != null && vm.bomDetail.modiRate != 0){
+                vm.bomDetail.modiWgt= (Number(netWgt)*Number(vm.bomDetail.modiRate)).toFixed(2);
+            }
+            if(vm.bomDetail.modiRate == 0){
+                vm.bomDetail.modiWgt = 0;
+            }
+
         },
         countPrdWgt:function() {
-            vm.bomDetailPrd.modiWgt = (Number(vm.bomDetailPrd.netWgt)*Number(vm.bomDetailPrd.modiRate)).toFixed(2);
-            //毛重=净重/净得率
-            vm.bomDetailPrd.grossWgt= (Number(vm.bomDetailPrd.netWgt)/Number(vm.bomDetailPrd.netRate)).toFixed(2);
+            if(vm.bomDetailPrd.netRate != null && vm.bomDetailPrd.netRate != 0){
+                //毛重=净重/净得率
+                vm.bomDetailPrd.grossWgt= (Number(vm.bomDetailPrd.netWgt)/Number(vm.bomDetailPrd.netRate)).toFixed(2);
+            }
+            if(vm.bomDetailPrd.modiRate != null && vm.bomDetailPrd.modiRate != 0){
+                vm.bomDetailPrd.modiWgt = (Number(vm.bomDetailPrd.netWgt)*Number(vm.bomDetailPrd.modiRate)).toFixed(2);
+            }
+            if(vm.bomDetailPrd.modiRate == 0){
+                vm.bomDetailPrd.modiWgt = 0;
+            }
             $('#add_prd_modiWgt').val(vm.bomDetailPrd.modiWgt);
             $('#add_prd_grossWgt').val(vm.bomDetailPrd.grossWgt);
         },

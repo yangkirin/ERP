@@ -25,7 +25,10 @@
 		select t.* from tb_type_info t
 		<if test="parentId != null">
 			<where>
-				t.id=#{parentId} or t.PARENT_ID=#{parentId} or t.PARENT_ID in (select id from tb_type_info where parent_id=#{parentId})
+				t.id=#{parentId}
+				or t.PARENT_ID=#{parentId}
+				or t.PARENT_ID in (select id from tb_type_info where parent_id=#{parentId})
+				or t.PARENT_ID in(select id from tb_type_info where parent_id in (select id from tb_type_info where parent_id=#{parentId}))
 			</where>
 		</if>
 	</select>

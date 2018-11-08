@@ -27,4 +27,8 @@ public interface CustomerPrdService {
 	void delete(Long id);
 	
 	void deleteBatch(Long[] ids);
+
+	int batchInsert(List<CustomerPrdEntity> customerPrdEntityList);
+
+	CustomerPrdEntity queryObjectMap(Map<String,Object> params);
 }

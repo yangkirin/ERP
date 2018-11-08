@@ -1,11 +1,15 @@
 package com.kirin.modules.sales.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.kirin.modules.baseData.entity.PrdDataEntity;
 import com.kirin.modules.baseData.service.PrdDataService;
+import com.kirin.modules.sales.entity.CustomerInfoEntity;
+import com.kirin.modules.sales.service.CustomerInfoService;
+import com.kirin.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,7 +81,8 @@ public class CustomerPrdController {
         Long prdId = customerPrd.getPrdId();
 		Long customerId = customerPrd.getCustomerId();
 		if (prdId == null || customerId == null) {
-            return R.error("请填写产品信息！");
+            return R.error("未找到关联产品！");
+//            return R.ok();
         }
 
         PrdDataEntity prdDataEntity = prdDataService.queryObject(prdId);
@@ -154,5 +159,41 @@ public class CustomerPrdController {
 //			}
 		}
 		return R.ok().put("data",returnMap);
+	}
+
+	@Autowired
+	private CustomerInfoService customerInfoService;
+
+	@RequestMapping("/copy")
+//	@RequiresPermissions("purchase:suppiermtr:delete")
+	public R copy(@RequestParam("selectId") Long selectId,@RequestParam("targetId") Long targetId) {
+
+		CustomerInfoEntity customerInfoEntity = customerInfoService.queryObject(targetId);
+
+		Map<String,Object> paramMap = new HashMap<>();
+		paramMap.put("customerId",selectId);
+		List<CustomerPrdEntity> selectCustomerPrdEntityList = customerPrdService.queryList(paramMap);
+		if(selectCustomerPrdEntityList != null && selectCustomerPrdEntityList.size() > 0){
+			paramMap.put("customerId",targetId);
+			List<CustomerPrdEntity> targetCustomerPrdEntityList = customerPrdService.queryList(paramMap);
+			if(targetCustomerPrdEntityList != null && targetCustomerPrdEntityList.size() > 0){
+				Long[] targetTableId = new Long[targetCustomerPrdEntityList.size()];
+				for (int i=0;i<targetCustomerPrdEntityList.size();i++) {
+					CustomerPrdEntity customerPrdEntity = targetCustomerPrdEntityList.get(i);
+					targetTableId[i] = customerPrdEntity.getId();
+				}
+				customerPrdService.deleteBatch(targetTableId);
+			}
+
+			List<CustomerPrdEntity> insertList = new ArrayList<>();
+			for (CustomerPrdEntity customerPrdEntity:selectCustomerPrdEntityList) {
+				customerPrdEntity.setCustomerId(targetId);
+				customerPrdEntity.setCustomerName(customerInfoEntity.getCustomerName());
+
+				insertList.add(customerPrdEntity);
+			}
+			customerPrdService.batchInsert(insertList);
+		}
+		return R.ok();
 	}
 }

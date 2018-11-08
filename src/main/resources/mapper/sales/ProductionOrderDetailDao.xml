@@ -59,10 +59,12 @@
 			`PRD_TYPE_ID`, 
 			`PRD_TYPE_NAME`, 
 			`AMOUNT`, 
-			`PRICE1`, 
+			`REAL_COUNT`,
+			`PRICE1`,
 			`PRICE2`, 
 			`COST`, 
-			`REVENUE`
+			`REVENUE`,
+			`REAL_INCOME`
 		)
 		values
 		(
@@ -74,10 +76,12 @@
 			#{prdTypeId}, 
 			#{prdTypeName}, 
 			#{amount}, 
-			#{price1}, 
+			#{realCount},
+			#{price1},
 			#{price2}, 
 			#{cost}, 
-			#{revenue}
+			#{revenue},
+			#{realIncome}
 		)
 	</insert>
 	 
@@ -92,10 +96,12 @@
 			<if test="prdTypeId != null">`PRD_TYPE_ID` = #{prdTypeId}, </if>
 			<if test="prdTypeName != null">`PRD_TYPE_NAME` = #{prdTypeName}, </if>
 			<if test="amount != null">`AMOUNT` = #{amount}, </if>
+			<if test="realCount != null">`REAL_COUNT` = #{realCount}, </if>
 			<if test="price1 != null">`PRICE1` = #{price1}, </if>
 			<if test="price2 != null">`PRICE2` = #{price2}, </if>
 			<if test="cost != null">`COST` = #{cost}, </if>
-			<if test="revenue != null">`REVENUE` = #{revenue}</if>
+			<if test="revenue != null">`REVENUE` = #{revenue},</if>
+			<if test="realIncome != null">`REAL_INCOME` = #{realIncome}</if>
 		</set>
 		where ID = #{id}
 	</update>
@@ -119,6 +125,7 @@
 		SELECT
 			pod.PRD_ID as prdId,
 			sum(pod.AMOUNT) as orderCount,
+			sum(pod.REAL_COUNT) as realCount,
 			pod.PRICE1 as basePrice,
 			pod.PRICE2 as salePrice
 		FROM

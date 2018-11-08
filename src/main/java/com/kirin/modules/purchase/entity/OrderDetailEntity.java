@@ -63,6 +63,8 @@ public class OrderDetailEntity implements Serializable {
 	private String updateUser;
 	private Date updateDate;
 
+	private String extendCode;
+
 	/**
 	 * 设置：ID
 	 */
@@ -326,5 +328,13 @@ public class OrderDetailEntity implements Serializable {
 
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public String getExtendCode() {
+		return extendCode;
+	}
+
+	public void setExtendCode(String extendCode) {
+		this.extendCode = extendCode;
 	}
 }

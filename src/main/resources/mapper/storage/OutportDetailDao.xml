@@ -186,47 +186,37 @@
 	</delete>
 
 	<select id="queryMtrByPrdId" resultType="map">
+
 		SELECT
-		p.id AS prdId,
-		p.PRD_CODE AS prdCode,
-		p.PRD_NAME AS prdName,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = p.TYPE_ID ) AS prdTypeName,
-		m.id AS mtrId,
-		m.MTR_CODE AS mtrCode,
-		m.MTR_NAME AS mtrName,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TYPE_ID ) AS mtrTypeName,
-		m.TAKE_STN_ID,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.TAKE_STN_ID ) AS takeStnName,
-		m.WAREHOUSE_ID,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.WAREHOUSE_ID ) AS wareHouseName,
-		bd.gross_wgt AS mtrGrossWgt,
-		bd.modi_wgt AS mtrModiWgt,
-		bd.net_wgt AS netWgt,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.MINI_UNIT ) AS outUnit,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.PURCHASE_UNIT ) AS purchaseUnit,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = m.FORMULA_UNIT ) AS formulaUnit,
-		( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = bd.mtr_cut_id ) AS mtrCut,
-		bd.semi_finished AS semiFinished,
-		m.MINI_RATE as miniRate,
-		m.PURCHASE_RATE as purchaseRate,
-		p.POT_WEIGHT as potWeight
-		FROM
-		bom_info bi,
-		bom_detail bd,
-		prd_data p,
-		mtr_data m
-		WHERE
-		bd.mtr_id = m.id
-		AND bi.id = bd.bom_id
-		AND bi.prd_id
-		AND bi.prd_id = p.id
-		AND p.id = ${prdId}
-		<if test="wareHouseId != null and wareHouseId != 0">
-			and m.WAREHOUSE_ID=${wareHouseId}
-		</if>
-		<if test="takeStnId != null and takeStnId != 0">
-			and m.TAKE_STN_ID=${takeStnId}
-		</if>
+			p.PRD_CODE,
+			p.PRD_NAME,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = p.TYPE_ID ) AS prdTypeName,
+			bd.mtr_id AS mtrId,
+			if(bd.semi_finished='0',(select m.MTR_CODE from mtr_data m where m.id=bd.mtr_id),(select m.PRD_CODE from prd_data m where m.id=bd.mtr_id)) as mtrCode,
+			if(bd.semi_finished='0',(select m.MTR_NAME from mtr_data m where m.id=bd.mtr_id),(select m.PRD_NAME from prd_data m where m.id=bd.mtr_id)) as mtrName,
+			if(bd.semi_finished='0',(select t.TYPE_NAME from mtr_data m,tb_type_info t where m.id=bd.mtr_id and t.id = m.TYPE_ID),(select t.TYPE_NAME from prd_data m,tb_type_info t where m.id=bd.mtr_id and t.id = m.TYPE_ID)) as mtrTypeName,
+			if(bd.semi_finished='0',(select m.TAKE_STN_ID from mtr_data m where m.id=bd.mtr_id),(select m.PDC_STN from prd_data m where m.id=bd.mtr_id)) as TAKE_STN_ID,
+			if(bd.semi_finished='0',(select t.TYPE_NAME from mtr_data m,tb_type_info t where m.id=bd.mtr_id and t.id = m.TAKE_STN_ID),(select t.TYPE_NAME from prd_data m,tb_type_info t where m.id=bd.mtr_id and t.id = m.PDC_STN)) as takeStnName,
+			if(bd.semi_finished='0',(select m.WAREHOUSE_ID from mtr_data m where m.id=bd.mtr_id),(NULL)) as WAREHOUSE_ID,
+			if(bd.semi_finished='0',(select t.TYPE_NAME from mtr_data m,tb_type_info t where m.id=bd.mtr_id and t.id = m.WAREHOUSE_ID),(NULL)) as wareHouseName,
+			bd.gross_wgt AS mtrGrossWgt,
+			bd.modi_wgt AS mtrModiWgt,
+			bd.net_wgt AS netWgt,
+			if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.MINI_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as formulaUnit,
+			if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.MINI_UNIT),(NULL)) as miniUnitName,
+			if(bd.semi_finished='0',(select m.MINI_RATE from mtr_data m where m.id=bd.mtr_id),(select m.PRD_RATE from prd_data m where m.id=bd.mtr_id)) as miniRate,
+			( SELECT t.TYPE_NAME FROM tb_type_info t WHERE t.id = bd.mtr_cut_id ) AS mtrCut,
+			bd.semi_finished AS semiFinished,
+			if(bd.semi_finished='0',(0),(select m.POT_WEIGHT from prd_data m where m.id=bd.mtr_id)) as potWeight
+			FROM
+			bom_info bi,
+			bom_detail bd,
+			prd_data p
+			WHERE
+			bi.prd_id = p.id
+			AND bi.id = bd.bom_id
+			AND p.id = ${prdId}
+		ORDER BY WAREHOUSE_ID ASC
 	</select>
 
 </mapper>

@@ -23,4 +23,5 @@ public interface SuppierMtrDao extends BaseDao<SuppierMtrEntity> {
 
     List<SuppierMtrEntity> queryByIdAndPy(@Param("mtrId") Long mtrId,@Param("supplierId")Long supplierId,@Param("searchWord")String searchWord);
 
+    int batchInsert(List<SuppierMtrEntity> suppierMtrEntityList);
 }

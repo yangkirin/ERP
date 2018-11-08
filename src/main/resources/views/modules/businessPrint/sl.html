@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
-    <title>领料表</title>
+    <title>速冷分析表</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -55,16 +55,16 @@
                                 <input type="text" class="form-control form_datetime" id="searchEndDemandDate"
                                        v-model="productionOrder.demandEndDate" placeholder="截止日期" readonly="readonly"/>
                             </div>
-                            <div class="col-sm-2" style="height: 25px;"></div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-2" style="height: 25px;">
                                 <a class="btn btn-primary" @click="query"><i class="fa fa-search"></i>&nbsp;查询</a>&nbsp;&nbsp;
                                 <a class="btn btn-primary" @click="reset"><i class="fa fa-search"></i>&nbsp;重置</a>&nbsp;&nbsp;
                             </div>
+                            <div class="col-sm-2" style="height: 25px;"></div>
                         </div>
                         <div class="form-group">
-                            <label for="typeId" class="col-sm-1 control-label">单据类型</label>
+                            <label for="type" class="col-sm-1 control-label">单据类型</label>
                             <div class="col-sm-2" style="height: 25px;">
-                                <select class="form-control" v-model="productionOrder.typeId" id="typeId">
+                                <select id="type" class="form-control" v-model="productionOrder.typeId">
                                     <option value="0">实际生产单</option>
                                     <option value="1">预订单</option>
                                     <option value="2" selected="selected">全部</option>
@@ -76,9 +76,7 @@
                                        v-model="productionOrder.createDate" placeholder="制单日期" readonly="readonly"/>
                             </div>
                             <div class="col-sm-2" style="height: 25px;"></div>
-                            <div class="col-sm-2" style="height: 25px;">
-
-                            </div>
+                            <div class="col-sm-2" style="height: 25px;"></div>
                             <div class="col-sm-2" style="height: 25px;"></div>
                         </div>
                     </form>
@@ -98,23 +96,24 @@
                 <div class="panel-body">
                     <form class="form-horizontal" style="width: 90%;">
                         <div class="form-group">
-                            <label for="warehouse" class="col-sm-1 control-label">仓库</label>
+                            <label for="takeStn" class="col-sm-1 control-label">生产站点</label>
                             <div class="col-sm-2" style="height: 25px;">
-                                <select class="form-control" id="warehouse" v-model="productionOrder.warehouse" >
-                                    <option v-for="option in warehouseArr" v-bind:value="option.value">{{option.text}}
+                                <input type="text" id="takeStn" class="form-control" v-model="productionOrder.takeStnName" placeholder="生产站点" @click="typeInfoTree('takeStn')" readonly="readonly"/>
+                            </div>
+                            <label for="isCold" class="col-sm-1 control-label">是否速冷</label>
+                            <div class="col-sm-2" style="height: 25px;">
+                                <select id="isCold" class="form-control" v-model="productionOrder.isCold">
+                                    <option value="2">摊凉</option>
+                                    <option value="1">速冷</option>
+                                    <option value="0">否</option>
+                                    <option value="-1" selected="selected">全部</option>
                                 </select>
                             </div>
-                            <label for="takeStn" class="col-sm-1 control-label">领料站点</label>
-                            <div class="col-sm-2" style="height: 25px;">
-                                <select class="form-control" id="takeStn" v-model="productionOrder.takeStn" >
-                                    <option v-for="option in takeStnArr" v-bind:value="option.value">{{option.text}}
-                                </select>
-                            </div>
+                            <div class="col-sm-2" style="height: 25px;"></div>
                             <div class="col-sm-2" style="height: 25px;"></div>
                             <div class="col-sm-2" style="height: 25px;">
                                 <a class="btn btn-primary" @click="print"><i class="fa fa-print"></i>&nbsp;打印</a>&nbsp;&nbsp;
                             </div>
-                            <div class="col-sm-2" style="height: 25px;"></div>
                         </div>
                     </form>
                 </div>
@@ -123,15 +122,61 @@
     </div>
 
 
-    <!--<div id="accordionSearch" class="form-group" style="margin-left: 10%">-->
-        <!--<p>订单查询</p>-->
-        <!---->
-    <!--</div>-->
-    <!--<div id="accordionScreen" class="form-group" style="margin-left: 10%">-->
-        <!--<p>数据筛选</p>-->
-        <!---->
-    <!--</div>-->
 
+
+    <!--<form class="form-horizontal" style="width: 80%;">-->
+        <!--<div class="form-group">-->
+            <!--<label for="type" class="col-sm-1 control-label">单据类型</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<select id="type" class="form-control" v-model="productionOrder.typeId">-->
+                    <!--<option value="0">实际生产单</option>-->
+                    <!--<option value="1">预订单</option>-->
+                    <!--<option value="2" selected="selected">全部</option>-->
+                <!--</select>-->
+            <!--</div>-->
+            <!--<label for="orderType" class="col-sm-1 control-label">订单类别</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<select class="form-control" id="orderType" v-model="productionOrder.orderTypeId" >-->
+                    <!--<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}-->
+                <!--</select>-->
+            <!--</div>-->
+            <!--<label for="searchCreateDate" class="col-sm-1 control-label">制单日期</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<input type="text" class="form-control form_datetime" id="searchCreateDate"-->
+                       <!--v-model="productionOrder.createDate" placeholder="制单日期" readonly="readonly"/>-->
+            <!--</div>-->
+            <!--<label for="searchDemandDate" class="col-sm-1 control-label">需求日期</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<input type="text" class="form-control form_datetime" id="searchDemandDate"-->
+                       <!--v-model="productionOrder.demandDate" placeholder="开始日期" readonly="readonly"/>-->
+            <!--</div>-->
+            <!--<div class="col-sm-1">-->
+                <!--<input type="text" class="form-control form_datetime" id="searchEndDemandDate"-->
+                       <!--v-model="productionOrder.demandEndDate" placeholder="截止日期" readonly="readonly"/>-->
+            <!--</div>-->
+            <!--<div class="col-sm-2">-->
+                <!--<a class="btn btn-primary" @click="query"><i class="fa fa-search"></i>&nbsp;查询</a>&nbsp;&nbsp;-->
+                <!--<a class="btn btn-primary" @click="reset"><i class="fa fa-search"></i>&nbsp;重置</a>&nbsp;&nbsp;-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="form-group">-->
+            <!--<label for="takeStn" class="col-sm-1 control-label">生产站点</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<input type="text" id="takeStn" class="form-control" v-model="productionOrder.takeStnName" placeholder="生产站点" @click="typeInfoTree('takeStn')" readonly="readonly"/>-->
+            <!--</div>-->
+            <!--<label for="isCold" class="col-sm-1 control-label">是否速冷</label>-->
+            <!--<div class="col-sm-1">-->
+                <!--<select id="isCold" class="form-control" v-model="productionOrder.isCold">-->
+                    <!--<option value="0">否</option>-->
+                    <!--<option value="1">是</option>-->
+                    <!--<option value="2" selected="selected">全部</option>-->
+                <!--</select>-->
+            <!--</div>-->
+            <!--<div class="col-sm-2">-->
+                <!--<a class="btn btn-primary" @click="print"><i class="fa fa-print"></i>&nbsp;打印</a>&nbsp;&nbsp;-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</form>-->
 
     <table id="jqGrid"></table>
     <div id="jqGridPager"></div>
@@ -162,9 +207,12 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
 </div>
 
-<script src="../../js/modules/businessPrint/ll.js"></script>
+<div id="typeInfoLayer" style="display: none;padding:10px;">
+    <ul id="typeInfoTree" class="ztree"></ul>
+</div>
+
+<script src="../../js/modules/businessPrint/sl.js"></script>
 </body>
 </html>

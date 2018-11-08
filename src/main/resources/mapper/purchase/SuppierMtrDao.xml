@@ -100,6 +100,39 @@
 			#{createUser}
 		)
 	</insert>
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into tb_suppier_mtr
+		(
+			`suppier_id`,
+			`mtr_id`,
+			`mtr_extend_id`,
+			`mtr_extend_desc`,
+			`purchase_no`,
+			`price`,
+			`status`,
+			`last_edit_user`,
+			`last_edit_date`,
+			`create_date`,
+			`create_user`
+		)
+		values
+		<foreach collection="list" item="item"  separator=",">
+			(
+			#{item.suppierId},
+			#{item.mtrId},
+			#{item.mtrExtendId},
+			#{item.mtrExtendDesc},
+			#{item.purchaseNo},
+			#{item.price},
+			#{item.status},
+			#{item.lastEditUser},
+			#{item.lastEditDate},
+			#{item.createDate},
+			#{item.createUser}
+			)
+		</foreach>
+	</insert>
 	 
 	<update id="update" parameterType="com.kirin.modules.purchase.entity.SuppierMtrEntity">
 		update tb_suppier_mtr 

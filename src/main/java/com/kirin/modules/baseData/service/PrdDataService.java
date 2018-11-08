@@ -29,4 +29,6 @@ public interface PrdDataService {
 	void deleteBatch(Long[] ids);
 
     int queryByPrdName(String prdName);
+
+	PrdDataEntity queryObjectMap(Map<String,Object> params);
 }

@@ -39,7 +39,10 @@
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
-		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.MINI_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as miniUnitName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.FORMULA_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as formulaUnitName,
+		if(bd.semi_finished='0',(select m.MINI_RATE from mtr_data m where m.id=bd.mtr_id),(select m.PRD_RATE from prd_data m where m.id=bd.mtr_id)) as miniRate
 		from BOM_DETAIL bd where bd.id=#{id};
 	</select>
 
@@ -53,11 +56,20 @@
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
-		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.MINI_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as miniUnitName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.FORMULA_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as formulaUnitName,
+		if(bd.semi_finished='0',(select m.MINI_RATE from mtr_data m where m.id=bd.mtr_id),(select m.PRD_RATE from prd_data m where m.id=bd.mtr_id)) as miniRate
 		from bom_detail bd
 		<where>
 			<if test="bomInfoId != null">
 				and bd.bom_id = #{bomInfoId}
+			</if>
+			<if test="mtrId != null">
+				and bd.mtr_id = #{mtrId}
+			</if>
+			<if test="semiFinished != null">
+				and bd.semi_finished = #{semiFinished}
 			</if>
 		</where>
         <choose>
@@ -75,14 +87,21 @@
 
 	<select id="queryListByPrdId" resultType="com.kirin.modules.baseData.entity.BomDetailEntity">
 		select bd.*,
+		bi.sum_modi_wgt as bomSumModiWgt,
+		bi.sum_net_wgt as bomSumNetWgt,
+		bi.sum_gross_wgt as bomSumGrossWgt,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('')) as typeId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t ,mtr_data m where m.id=bd.mtr_id and t.id=m.type_id),('半成品')) as typeIdName,
 		if(bd.semi_finished='0',(select d.MTR_NAME from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_NAME from PRD_DATA p where p.id=bd.mtr_id)) as mtrIdName,
 		if(bd.semi_finished='0',(select d.MTR_CODE from MTR_DATA d where d.id=bd.mtr_id),(select p.PRD_CODE from PRD_DATA p where p.id=bd.mtr_id)) as mtrCode,
 		if(bd.semi_finished='0',(select t.ID from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutId,
 		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t where t.id=bd.mtr_cut_id),('')) as mtrCutIdName,
-		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnId,
-		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),('')) as takeStnIdName
+		if(bd.semi_finished='0',(select t.ID from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),(select p.PDC_STN from prd_data p where bd.mtr_id=p.id)) as takeStnId,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.take_stn_id),(select t.TYPE_NAME from prd_data p,tb_type_info t where bd.mtr_id=p.id and t.id=p.PDC_STN)) as takeStnIdName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.MINI_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as miniUnitName,
+		if(bd.semi_finished='0',(select t.TYPE_NAME from tb_type_info t,mtr_data m where m.id=bd.mtr_id and t.id=m.FORMULA_UNIT),(select t.TYPE_NAME from tb_type_info t, prd_data m where m.id=bd.mtr_id and t.id=m.UNIT)) as formulaUnitName,
+		if(bd.semi_finished='0',(select m.MINI_RATE from mtr_data m where m.id=bd.mtr_id),(select m.PRD_RATE from prd_data m where m.id=bd.mtr_id)) as miniRate,
+		if(bd.semi_finished='0',('0'),(select p.POT_WEIGHT from prd_data p where bd.mtr_id=p.id)) as potWeight
 		from bom_detail bd,BOM_INFO bi WHERE bd.bom_id=bi.id
 		<if test="prdId != null">
 			and bi.prd_id = #{prdId}

@@ -33,12 +33,10 @@
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.purchase.entity.OrderDetailEntity">
-		select od.* from tb_order_detail od
-		<where>
+		select od.*,m.EXTEND_CODE from tb_order_detail od,mtr_data m WHERE MTR_ID=m.id
 			<if test="orderId != null and orderId != 0">
-				od.ORDER_ID = ${orderId}
+				and od.ORDER_ID = ${orderId}
 			</if>
-		</where>
         <choose>
 
 			<when test="sidx != null and sidx.trim() != ''">

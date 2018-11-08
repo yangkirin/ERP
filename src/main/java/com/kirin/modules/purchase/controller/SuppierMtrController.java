@@ -172,5 +172,36 @@ public class SuppierMtrController extends AbstractController {
 		
 		return R.ok();
 	}
+
+	@RequestMapping("/copy")
+//	@RequiresPermissions("purchase:suppiermtr:delete")
+	public R copy(@RequestParam("selectId") Long selectId,@RequestParam("targetId") Long targetId){
+		SysUserEntity sysUserEntity =  getUser();
+
+
+		List<SuppierMtrEntity> selectSuppierMtrList = suppierMtrService.querySupplierByMtrId(null,selectId);
+		if(selectSuppierMtrList != null && selectSuppierMtrList.size() > 0){
+			List<SuppierMtrEntity> targetSuppierMtrList = suppierMtrService.querySupplierByMtrId(null,targetId);
+			if(targetSuppierMtrList != null && targetSuppierMtrList.size() > 0){
+				Long[] targetTableId = new Long[targetSuppierMtrList.size()];
+				for (int i=0;i<targetSuppierMtrList.size();i++) {
+					SuppierMtrEntity suppierMtrEntity = targetSuppierMtrList.get(i);
+					targetTableId[i] = suppierMtrEntity.getId();
+				}
+				suppierMtrService.deleteBatch(targetTableId);
+			}
+			List<SuppierMtrEntity> insertList = new ArrayList<>();
+			for (SuppierMtrEntity suppierMtrEntity:selectSuppierMtrList) {
+				suppierMtrEntity.setCreateDate(new Date());
+				suppierMtrEntity.setCreateUser(sysUserEntity.getUsername());
+				suppierMtrEntity.setSuppierId(targetId);
+
+				insertList.add(suppierMtrEntity);
+			}
+			suppierMtrService.batchInsert(insertList);
+		}
+
+		return R.ok();
+	}
 	
 }

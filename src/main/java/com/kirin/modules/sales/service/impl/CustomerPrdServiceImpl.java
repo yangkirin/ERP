@@ -51,5 +51,11 @@ public class CustomerPrdServiceImpl implements CustomerPrdService {
 	public void deleteBatch(Long[] ids){
 		customerPrdDao.deleteBatch(ids);
 	}
+
+	@Override
+	public int batchInsert(List<CustomerPrdEntity> customerPrdEntityList){return customerPrdDao.batchInsert(customerPrdEntityList);}
+
+	@Override
+	public CustomerPrdEntity queryObjectMap(Map<String,Object> params){return customerPrdDao.queryObjectMap(params);}
 	
 }

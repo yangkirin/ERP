@@ -190,28 +190,11 @@ $(function () {
                         '<span class="label label-success">正常</span>';
                 }
             },
-            {label: '备注', name: 'remark', index: 'remark', width: 80, hidden: true},
-            {label: '创建者', name: 'createUser', index: 'create_user', width: 80, hidden: true},
-            {label: '创建日期', name: 'createDate', index: 'create_date', width: 80, hidden: true},
-            {label: '修改者', name: 'updateUser', index: 'create_user', width: 80, hidden: true},
-            {
-                label: '修改日期',
-                name: 'updateDate',
-                index: 'create_date',
-                width: 80,
-                hidden: true,
-                formatter: function (value, options, row) {
-                    if (value == null) {
-                        return "";
-                    } else {
-                        return value;
-                    }
-                }
-            },
             {label: '是否半成品', name: 'semiFinished', index: 'SEMIFINISHED', editable: true, width: 80, hidden: true}
         ],
         viewrecords: true,
         height: "auto",
+        width:"800",
         rowNum: 999999,
         rowList: [10, 30, 50],
         rownumbers: true,
@@ -412,6 +395,7 @@ var vm = new Vue({
         prdTypeArr_s:{},
         prdTypeArr:{},
         pdcStnArr:{},
+        unitArr:{},
         cookTypeArr:{},
         sfbcp:null,
         bomCount: 0,
@@ -467,13 +451,61 @@ var vm = new Vue({
             vm.getInfo(id)
 		},
 		saveOrUpdate: function (event) {
-			// var url = vm.prdData.id == null ? "baseData/prddata/save" : "baseData/prddata/update";
+
+            // vm.addPrdData = vm.prdData;
+            // vm.addPrdData.typeName = vm.prdData.typeName;
+            // console.log(vm.prdData);
+            // console.log(vm.addPrdData);
+            // console.log($("#select2-addPrdType-container"));
+            // // $('#addPrdType').select2("val",vm.addPrdData.typeId);
+            // $("#select2-addPrdType-container").text('565656');
+            // $("#select2-addPrdType-container").innerText = '565656';
+            //
+            //
+            // var num = layer.open({
+            //     type: 1,
+            //     skin: 'layui-layer-molv',
+            //     title: "新增产品",
+            //     area: ['750px', '450px'],
+            //     shadeClose: false,
+            //     content: jQuery("#addLayer"),
+            //     btn: ['提交','取消'],
+            //     btn1: function (event) {
+            //         var url = "baseData/prddata/update";
+            //         $.ajax({
+            //             type: "POST",
+            //             url: baseURL + url,
+            //             contentType: "application/json",
+            //             data: JSON.stringify(vm.addPrdData),
+            //             success: function(r){
+            //                 if(r.code === 0){
+            //                     alert('操作成功', function(index){
+            //                         layer.close(num);
+            //                         vm.reload();
+            //                         vm.addPrdData = {};
+            //                     });
+            //                 }else{
+            //                     alert(r.msg);
+            //                 }
+            //             }
+            //         });
+            //     },
+            //     btn2:function(event){
+            //         vm.addPrdData = {};
+            //     }
+            // });
+
+            // $(".select2.select2-container.select2-container--default.select2-container--below").attr("class","select2 select2-container select2-container--default select2-container--below select2-container--focus");
+            // $("#select2-addPrdType-container").attr("title",'3');
+
+
+
+            var url = vm.prdData.id == null ? "baseData/prddata/save" : "baseData/prddata/update";
             var data = $("#prdTypeId").select2("data")[0];
             if(data){
                 vm.prdData.typeId=data.id;
                 vm.prdData.typeName=data.text;
             }
-            console.log(vm.prdData);
             // if(vm.prdData.semiFinished == '1'){
             //     vm.prdData.prdName = vm.prdData.prdName.substring(1,vm.prdData.prdName.length);
             // }
@@ -492,7 +524,7 @@ var vm = new Vue({
                             vm.q = {};
                             vm.q.prdName=null;
                             // $('#searchName').val();
-                            console.log($('#searchName').val());
+                            // console.log($('#searchName').val());
 
                             vm.reload();
                             // vm.getFieldData();
@@ -617,27 +649,30 @@ var vm = new Vue({
                 url: baseURL + "common/commonUtil/getTableData",
                 data:"tableName=PRD_DATA&fieldName=PRD_NAME:PRD_PY&searchWord="+query,
                 success: function(r){
-                    var resultList = r.data.map(function (item) {
-                        var aItem = {py: item.PRD_PY, name: item.PRD_NAME};
-                        return JSON.stringify(aItem);
-                    });
-                    dataSource = resultList;
-                    // console.log(dataSource);
-                    $('#searchName').typeahead({
-                        source:dataSource,
-                        highlighter: function (obj) {
-                            var item = JSON.parse(obj);
-                            var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-                            return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
-                                return '<strong>' + match + '</strong>'
-                            });
-                        },
-                        updater: function (obj) {
-                            var item = JSON.parse(obj);
-                            vm.q.prdName = item.name;
-                            return item.name;
-                        }
-                    });
+                    if(r.data){
+                        var resultList = r.data.map(function (item) {
+                            var aItem = {py: item.PRD_PY, name: item.PRD_NAME};
+                            return JSON.stringify(aItem);
+                        });
+                        dataSource = resultList;
+                        // console.log(dataSource);
+                        $('#searchName').typeahead({
+                            source:dataSource,
+                            highlighter: function (obj) {
+                                var item = JSON.parse(obj);
+                                var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+                                return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+                                    return '<strong>' + match + '</strong>'
+                                });
+                            },
+                            updater: function (obj) {
+                                var item = JSON.parse(obj);
+                                vm.q.prdName = item.name;
+                                return item.name;
+                            }
+                        });
+                    }
+
                 }
             });
         },
@@ -757,7 +792,7 @@ var vm = new Vue({
             if (vm.bomCount == 0)
                 return;
             $("#bomGrid").jqGrid('setGridParam', {
-                postData: {'prdId': vm.prdId},
+                postData: {'prdId': vm.prdId}
             }).trigger("reloadGrid");
             $("#myModal").modal("show");
         }
@@ -792,3 +827,4 @@ vm.prdTypeArr_s = vm.initTypeSelect2('31');
 vm.prdTypeArr = vm.initTypeSelect2('31');
 // vm.pdcStnArr = vm.initTypeInfoArr('48');
 vm.cookTypeArr = vm.initTypeInfoArr('87');
+vm.unitArr = vm.initTypeInfoArr('10');

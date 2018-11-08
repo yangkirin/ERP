@@ -3,10 +3,7 @@ package com.kirin.modules.common.service.impl;
 import com.kirin.common.utils.CommonUtils;
 import com.kirin.common.utils.DateUtils;
 import com.kirin.modules.baseData.dao.TypeInfoDao;
-import com.kirin.modules.baseData.entity.BomDetailEntity;
-import com.kirin.modules.baseData.entity.BomInfoEntity;
-import com.kirin.modules.baseData.entity.PrdDataEntity;
-import com.kirin.modules.baseData.entity.TypeInfoEntity;
+import com.kirin.modules.baseData.entity.*;
 import com.kirin.modules.baseData.service.BomDetailService;
 import com.kirin.modules.baseData.service.BomInfoService;
 import com.kirin.modules.baseData.service.PrdDataService;
@@ -460,6 +457,164 @@ public class CommonUtilServiceImpl implements CommonUtilService{
         String currentMaxNo = getTableMaxNo(returnFiled, tableName, likeDateStr);
         return currentMaxNo;
     }
+
+
+    @Override
+    public void updateCost(Object object,String type){
+        Map<String,Object> params = new HashMap<>();
+        if(type.equals("Mtr")){
+            MtrDataEntity mtrDataEntity = (MtrDataEntity) object;
+
+            BigDecimal miniRate = new BigDecimal(mtrDataEntity.getMiniRate() == null ? "0" : mtrDataEntity.getMiniRate().toString());
+            BigDecimal orderRate = new BigDecimal(mtrDataEntity.getPurchaseRate() == null ? "0" : mtrDataEntity.getPurchaseRate().toString());
+            BigDecimal orderPrice = new BigDecimal(mtrDataEntity.getPrice() == null ? "0" : mtrDataEntity.getPrice().toString());
+            BigDecimal miniPrice = new BigDecimal("0");
+            if(orderRate.compareTo(BigDecimal.ZERO) != 0){
+                miniPrice = (orderPrice.divide(orderRate,4,BigDecimal.ROUND_HALF_UP));
+            }
+
+            params.put("mtrId",mtrDataEntity.getId());
+            params.put("semiFinished","0");
+            List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(params);
+            if(bomDetailEntityList != null && bomDetailEntityList.size() > 0){
+                for (BomDetailEntity bomDetailEntity:bomDetailEntityList) {
+                    BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "0" : bomDetailEntity.getGrossWgt().toString());
+                    //原料成本=（原料所需毛重/基本转换率）*基本单价（采购价格/采购转换率）
+                    BigDecimal cost = new BigDecimal("0");
+                    if(miniRate.compareTo(BigDecimal.ZERO) != 0){
+                        cost = (grossWgt.divide(miniRate,8,BigDecimal.ROUND_HALF_UP)).multiply(miniPrice).setScale(4,BigDecimal.ROUND_HALF_UP);
+                    }
+
+                    bomDetailEntity.setCost(cost);
+                    bomDetailEntity.setPrice(miniPrice);
+
+                    //修改规格说明
+                    if(bomDetailEntity.getMtrCutId() == null || bomDetailEntity.getMtrCutId() == 0){
+                        String mtrExtendDesc = mtrDataEntity.getMiniUnitName()+"-"+mtrDataEntity.getPurchaseRate()+"-￥"+mtrDataEntity.getPrice();
+                        bomDetailEntity.setMtrExtendDesc(mtrExtendDesc);
+                    }
+
+                    bomDetailService.update(bomDetailEntity);
+
+                    updateCostNew(bomDetailEntity.getBomId());
+                }
+            }
+        }else if(type.equals("Prd")){
+            PrdDataEntity prdDataEntity = (PrdDataEntity) object;
+
+            BigDecimal miniRate = new BigDecimal(prdDataEntity.getPrdRate() == null ? "0" : prdDataEntity.getPrdRate().toString());
+            BigDecimal price = new BigDecimal(prdDataEntity.getReferencePrice() == null ? "0" : prdDataEntity.getReferencePrice().toString());
+            params.put("mtrId",prdDataEntity.getId());
+            params.put("semiFinished","1");
+            List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(params);
+            if(bomDetailEntityList != null && bomDetailEntityList.size() > 0) {
+                for (BomDetailEntity bomDetailEntity : bomDetailEntityList) {
+                    BigDecimal grossWgt = new BigDecimal(bomDetailEntity.getGrossWgt() == null ? "0" : bomDetailEntity.getGrossWgt().toString());
+                    BigDecimal cost = new BigDecimal("0");
+                    if(miniRate.compareTo(BigDecimal.ZERO) != 0){
+                        cost = grossWgt.multiply(price.divide(miniRate,8,BigDecimal.ROUND_HALF_UP)).setScale(2,BigDecimal.ROUND_HALF_UP);
+                    }
+
+                    bomDetailEntity.setCost(cost);
+                    bomDetailEntity.setPrice(price);
+
+                    bomDetailService.update(bomDetailEntity);
+
+                    updateCostNew(bomDetailEntity.getBomId());
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 更新配方成本
+     * @param bomInfoId
+     */
+    public void updateCostNew(Long bomInfoId){
+        BigDecimal sumCost = new BigDecimal("0");
+
+        BigDecimal sumModiWgt = new BigDecimal(0);
+        BigDecimal sumNetWgt = new BigDecimal(0);
+        BigDecimal sumGrossWgt = new BigDecimal(0);
+        BigDecimal sumCostRate = new BigDecimal(0);
+
+        boolean isEqualOne = true;
+
+        BomInfoEntity bomInfoEntity = bomInfoService.queryObject(bomInfoId);
+        if(bomInfoEntity != null){
+            Map<String,Object> paramMap = new HashMap<>();
+            paramMap.put("bomInfoId",bomInfoId);
+            List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(paramMap);
+
+            if(bomDetailEntityList != null && bomDetailEntityList.size() > 0) {
+                for (BomDetailEntity bomDetailEntity : bomDetailEntityList) {
+                    sumCost = sumCost.add(bomDetailEntity.getCost() == null ? new BigDecimal(0) : bomDetailEntity.getCost() );
+
+                    sumModiWgt = sumModiWgt.add(bomDetailEntity.getModiWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getModiWgt().toString()));
+                    sumNetWgt = sumNetWgt.add(bomDetailEntity.getNetWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getNetWgt().toString()));
+                    sumGrossWgt = sumGrossWgt.add(bomDetailEntity.getGrossWgt() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getGrossWgt().toString()));
+//				sumCostRate = sumCostRate.add(bomDetailEntity.getCostRate() == null ? new BigDecimal(0):new BigDecimal(bomDetailEntity.getCostRate().toString()));
+                    //判断熟得率是否等于1
+                    if(isEqualOne){
+                        isEqualOne = bomDetailEntity.getModiRate() == null ? false : bomDetailEntity.getModiRate().equals("1");
+                    }
+                }
+            }
+            bomInfoEntity.setCost(sumCost);
+            //更新配方各总重量
+            bomInfoEntity.setSumGrossWgt(sumGrossWgt);
+            bomInfoEntity.setSumNetWgt(sumNetWgt);
+            bomInfoEntity.setSumModiWgt(sumModiWgt);
+
+
+            //更新配方成本率
+            //半成品成本率=（半成品配方成本/半成品的价格）*100%
+            PrdDataEntity prdData = prdDataService.queryObject(bomInfoEntity.getPrdId());
+            BigDecimal prdPrice = new BigDecimal("0");
+            if(prdData != null && prdData.getReferencePrice() != null){
+                prdPrice = new BigDecimal(prdData.getReferencePrice().toString());
+            }
+            if(prdData.getSemiFinished().equals("1")){//重新计算半成品售价
+                //1.熟得率=1时；售价=（总成本/总毛重）/基本单位
+                //2.熟得率<>1时，配方明细中存在1个<>1的即成立；售价=（总成本/总熟重）/基本单位
+                if(prdData.getPrdRate() != null && prdData.getPrdRate().compareTo(BigDecimal.ZERO) != 0){
+                    if(isEqualOne){
+                        prdPrice = sumCost.divide(sumGrossWgt.divide(prdData.getPrdRate(),6,BigDecimal.ROUND_HALF_UP),4,BigDecimal.ROUND_HALF_UP);
+                    }else{
+                        prdPrice = sumCost.divide(sumModiWgt.divide(prdData.getPrdRate(),6,BigDecimal.ROUND_HALF_UP),4,BigDecimal.ROUND_HALF_UP);
+                    }
+                }
+            }
+
+            sumCostRate = sumCost.divide(prdPrice,5,BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_UP);
+            bomInfoEntity.setSumCostRate(sumCostRate);
+
+            bomInfoService.update(bomInfoEntity);
+
+        }
+
+
+    }
+
+    @Override
+    public void updatePrdPrice(){
+        Map<String,Object> params = new HashMap<>();
+        params.put("semifinished","1");
+
+        List<PrdDataEntity> prdDataEntityList = prdDataService.queryList(params);
+        if(prdDataEntityList != null && prdDataEntityList.size() > 0){
+            for (PrdDataEntity prdDataEntity :prdDataEntityList ) {
+                BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdDataEntity.getId());
+                if(bomInfoEntity != null){
+                    updateCostNew(bomInfoEntity.getId());
+                }
+            }
+        }
+    }
+
+
+
 
     public static void main(String[] args){
         BigDecimal A = new BigDecimal(100);

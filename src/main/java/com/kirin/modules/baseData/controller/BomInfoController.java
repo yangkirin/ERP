@@ -109,10 +109,6 @@ public class BomInfoController extends AbstractController {
 		bomInfo.setCreateUser(sysUserEntity.getUsername());
 		bomInfo.setCreateDate(new Date());
 
-
-
-
-
 //		判断配方是否重复（一个产品只能关联一个配方）
         Long prdId = bomInfo.getPrdId();
         if (prdId == null) {
@@ -217,7 +213,9 @@ public class BomInfoController extends AbstractController {
             for (int i = 0; i < bomDetailList.size(); i++) {
                 bdList[i] = bomDetailList.get(i).getId();
             }
-            bomDetailService.deleteBatch(bdList);
+            if(bdList.length > 0){
+				bomDetailService.deleteBatch(bdList);
+			}
         }
 		bomInfoService.deleteBatch(ids);
 		

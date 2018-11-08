@@ -36,11 +36,34 @@
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.PDC_STN) as pdcStnName,
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.ORDER_TYPE) as orderTypeName,
 		(SELECT t.type_name FROM tb_type_info t where t.id=p.COOK_TYPE) as cookTypeName,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.UNIT) as unitName,
 		(SELECT sum(b.gross_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumGrossWgt,
 		(SELECT sum(b.net_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumNetWgt,
 		(SELECT sum(b.modi_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumCookedWgt,
 		(select bi.cost from bom_info bi where bi.prd_id=p.id) as cost
 		from prd_data p where p.id = #{value}
+	</select>
+
+	<select id="queryObjectMap" resultType="com.kirin.modules.baseData.entity.PrdDataEntity">
+		select p.*,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.TYPE_ID) as typeName,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.PDC_STN) as pdcStnName,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.ORDER_TYPE) as orderTypeName,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.COOK_TYPE) as cookTypeName,
+		(SELECT t.type_name FROM tb_type_info t where t.id=p.UNIT) as unitName,
+		(SELECT sum(b.gross_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumGrossWgt,
+		(SELECT sum(b.net_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumNetWgt,
+		(SELECT sum(b.modi_wgt) FROM BOM_DETAIL b,bom_info bi where b.bom_id = bi.id and bi.prd_id=p.id) as sumCookedWgt,
+		(select bi.cost from bom_info bi where bi.prd_id=p.id) as cost
+		from prd_data p
+		<where>
+			<if test="id != null">
+				and p.id=#{id}
+			</if>
+			<if test="prdCode != null">
+				and p.PRD_CODE=#{prdCode}
+			</if>
+		</where>
 	</select>
 
 	<select id="queryList" resultType="com.kirin.modules.baseData.entity.PrdDataEntity">
@@ -108,7 +131,9 @@
 			`QUICK_COOLING_RATE`, 
 			`ROUNDING`, 
 			`ROUND_WEIGHT`, 
-			`REMARK`, 
+			`UNIT`,
+			`PRD_RATE`,
+			`REMARK`,
 			`CREATE_USER`, 
 			`CREATE_DATE`, 
 			`STATUS`,
@@ -137,7 +162,9 @@
 			#{quickCoolingRate}, 
 			#{rounding}, 
 			#{roundWeight}, 
-			#{remark}, 
+			#{unit},
+			#{prdRate},
+			#{remark},
 			#{createUser}, 
 			#{createDate}, 
 			#{status},
@@ -169,6 +196,8 @@
 			<if test="quickCoolingRate != null">`QUICK_COOLING_RATE` = #{quickCoolingRate}, </if>
 			<if test="rounding != null">`ROUNDING` = #{rounding}, </if>
 			<if test="roundWeight != null">`ROUND_WEIGHT` = #{roundWeight}, </if>
+			<if test="unit != null">`UNIT` = #{unit}, </if>
+			<if test="prdRate != null">`PRD_RATE` = #{prdRate}, </if>
 			<if test="remark != null">`REMARK` = #{remark}, </if>
 			<if test="createUser != null">`CREATE_USER` = #{createUser}, </if>
 			<if test="createDate != null">`CREATE_DATE` = #{createDate}, </if>

@@ -26,21 +26,22 @@ $(function () {
 			{ label: '备注', name: 'remark', index: 'remark', search:false, width: 80 },
             { label: '操作', name: 'operation', index: 'operation', search:false, width: 150 ,formatter:function(value, options, row){
                     var optionStr = "<button type='button' class='btn btn-primary btn-xs' onclick='editInfo("+row.id+")'>修改</button>" +
-                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='prdConfig("+row.id+")'>产品配置</button>";
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='prdConfig("+row.id+")'>产品配置</button>"+
+                        "&nbsp;&nbsp;<button type='button' class='btn btn-primary btn-xs' onclick='copy("+row.id+")'>复制</button>";
                     return optionStr;
                 }}
         ],
 		viewrecords: true,
         // height: 385,
         height: "auto",
-        rowNum: 999999,
-		rowList : [10,30,50],
+        rowNum: 20,
+		rowList : [20,50,100],
         rownumbers: true, 
         rownumWidth: 25, 
         autowidth:true,
         multiselect: true,
-        scroll:true,
-        // pager: "#jqGridPager",
+        // scroll:true,
+        pager: "#jqGridPager",
         toppager:true,
         jsonReader : {
             root: "page.list",
@@ -211,6 +212,11 @@ function editInfo(rowid){
     vm.update(rowid);
 }
 
+function copy(rowId){
+    $("#myModal").modal("show");
+    vm.getFieldDataCustomer();
+    vm.copyInfo.selectId = rowId;
+}
 
 var vm = new Vue({
 	el:'#rrapp',
@@ -222,7 +228,8 @@ var vm = new Vue({
 		title: null,
 		customerInfo: {},
         customerPrd:{},
-        prdData:{}
+        prdData:{},
+        copyInfo:{}
 	},
 	methods: {
 		query: function () {
@@ -490,6 +497,58 @@ var vm = new Vue({
                 page:page
             }).trigger("reloadGrid");
             // vm.reload();
+        },
+        getFieldDataCustomer:function(){
+            $('#search_customer').typeahead({
+                source: function (query, process) {
+                    $.ajax({
+                        type: "POST",
+                        url: baseURL + "common/commonUtil/getTableData",
+                        data: "tableName=tb_customer_info&fieldName=CUSTOMER_NAME:CUSTOMER_PY&searchWord=" + query,
+                        success: function (r) {
+                            var resultList = r.data.map(function (item) {
+                                var aItem = {id: item.ID, py: item.CUSTOMER_PY, name: item.CUSTOMER_NAME};
+                                return JSON.stringify(aItem);
+                            });
+                            process(resultList);
+                        }
+                    });
+                },
+                highlighter: function (obj) {
+                    var item = JSON.parse(obj);
+                    var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+                    return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+                        return '<strong>' + match + '</strong>'
+                    });
+                },
+                updater: function (obj) {
+                    var item = JSON.parse(obj);
+                    vm.copyInfo.targetId = item.id;
+                    return item.name;
+                }
+            })
+        },
+        modalCommit:function(){
+            console.log(vm.copyInfo.selectId+"------"+vm.copyInfo.targetId);
+
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: baseURL + "sales/customerprd/copy",
+                // contentType: "application/json",
+                data: {selectId:vm.copyInfo.selectId,targetId:vm.copyInfo.targetId},
+                success: function(r){
+                    if(r.code == 0){
+                        alert('操作成功', function(index){
+                            vm.reload();
+                            $("#myModal").modal("hide");
+                            vm.copyInfo = {};
+                        });
+                    }else{
+                        alert(r.msg);
+                    }
+                }
+            });
         }
 	}
 });

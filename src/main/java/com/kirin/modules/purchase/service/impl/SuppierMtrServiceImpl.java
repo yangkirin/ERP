@@ -61,4 +61,7 @@ public class SuppierMtrServiceImpl implements SuppierMtrService {
 	public List<SuppierMtrEntity> queryByIdAndPy(Long mtrId,Long supplierId,String searchWord){
 		return suppierMtrDao.queryByIdAndPy(mtrId,supplierId,searchWord);
 	}
+
+	@Override
+	public int batchInsert(List<SuppierMtrEntity> suppierMtrEntityList){return suppierMtrDao.batchInsert(suppierMtrEntityList);}
 }

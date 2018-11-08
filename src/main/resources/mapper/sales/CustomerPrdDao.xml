@@ -46,6 +46,31 @@
 		where cp.prd_id=p.id and cp.customer_id=c.id and  cp.ID = #{value}
 	</select>
 
+
+	<select id="queryObjectMap" resultType="com.kirin.modules.sales.entity.CustomerPrdEntity">
+		SELECT
+		p.prd_name AS prdName,
+		c.CUSTOMER_NAME AS customerName,
+		p.PRD_CODE AS prdCode,
+		p.PRD_PY AS prdPy,
+		( SELECT bi.cost FROM bom_info bi WHERE bi.prd_id = p.id ) AS cost,
+		cp.*
+		FROM
+		tb_customer_prd cp,
+		prd_data p,
+		TB_CUSTOMER_INFO c
+		where cp.prd_id=p.id and cp.customer_id=c.id
+		<if test="id != null">
+			and cp.ID = #{id}
+		</if>
+		<if test="prdId != null">
+			and cp.PRD_ID = #{prdId}
+		</if>
+		<if test="customerId != null">
+			and cp.CUSTOMER_ID = #{customerId}
+		</if>
+	</select>
+
 	<select id="queryList" resultType="com.kirin.modules.sales.entity.CustomerPrdEntity">
 		SELECT
 			p.prd_name AS prdName,
@@ -135,7 +160,60 @@
 			#{remark}
 		)
 	</insert>
-	 
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into tb_customer_prd
+		(
+			`CUSTOMER_ID`,
+			`PRD_ID`,
+			`PRD_NO`,
+			`PRD_PRICE`,
+			`TAG_SPEC`,
+			`TAG_NO`,
+			`TAG_CODE`,
+			`TAG_POWER`,
+			`TAG_PROD_TIME`,
+			`TAG_QGP`,
+			`TAG_STORAGE`,
+			`TAG_NETWGT`,
+			`TAG_PRICE`,
+			`TAG_ADDR`,
+			`TAG_PROD_ADDR`,
+			`TAG_MANUFACTURER`,
+			`TAG_LINKPHONE`,
+			`TAG_BURDEN_LIST`,
+			`TAG_LICENSE_NO`,
+			`STATUS`,
+			`REMARK`
+		)
+		values
+		<foreach collection="list" item="item"  separator=",">
+			(
+			#{item.customerId},
+			#{item.prdId},
+			#{item.prdNo},
+			#{item.prdPrice},
+			#{item.tagSpec},
+			#{item.tagNo},
+			#{item.tagCode},
+			#{item.tagPower},
+			#{item.tagProdTime},
+			#{item.tagQgp},
+			#{item.tagStorage},
+			#{item.tagNetwgt},
+			#{item.tagPrice},
+			#{item.tagAddr},
+			#{item.tagProdAddr},
+			#{item.tagManufacturer},
+			#{item.tagLinkphone},
+			#{item.tagBurdenList},
+			#{item.tagLicenseNo},
+			#{item.status},
+			#{item.remark}
+			)
+		</foreach>
+	</insert>
+
 	<update id="update" parameterType="com.kirin.modules.sales.entity.CustomerPrdEntity">
 		update tb_customer_prd 
 		<set>

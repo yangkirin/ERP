@@ -73,10 +73,14 @@ public class TypeInfoController extends AbstractController {
 		//添加顶级菜单
 		TypeInfoEntity root = new TypeInfoEntity();
 		root.setId(0L);
-		root.setTypeName("一级分类");
+		root.setTypeName("全部");
 		root.setParentId(-1L);
 		root.setOpen(true);
 		typeInfoList.add(root);
+
+
+
+
 
 		return R.ok().put("typeInfoList", typeInfoList);
 	}

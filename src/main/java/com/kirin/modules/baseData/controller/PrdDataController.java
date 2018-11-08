@@ -1,5 +1,6 @@
 package com.kirin.modules.baseData.controller;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -103,10 +104,20 @@ public class PrdDataController extends AbstractController {
 		BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(prdData.getId());
 		if (bomInfoEntity != null) {
 			prdData.setCost(bomInfoEntity.getCost() == null ? "0.00" : bomInfoEntity.getCost().toString());
-			Map<String, Object> countMap = countBomInfo(bomInfoEntity.getId());
-			prdData.setSumGrossWgt(countMap.get("sumGrossWgt").toString());
-			prdData.setSumNetWgt(countMap.get("sumNetWgt").toString());
-			prdData.setSumCookedWgt(countMap.get("sumCookedWgt").toString());
+
+//			if(prdData.getSemiFinished().equals("1")){
+				prdData.setSumGrossWgt(bomInfoEntity.getSumGrossWgt() == null ? "0" : bomInfoEntity.getSumGrossWgt().toString());
+				prdData.setSumNetWgt(bomInfoEntity.getSumNetWgt() == null ? "0" : bomInfoEntity.getSumNetWgt().toString());
+				prdData.setSumCookedWgt(bomInfoEntity.getSumModiWgt() == null ? "0" : bomInfoEntity.getSumModiWgt().toString());
+//			}else{
+//
+//			}
+
+
+//			Map<String, Object> countMap = countBomInfo(bomInfoEntity.getId());
+//			prdData.setSumGrossWgt(countMap.get("sumGrossWgt").toString());
+//			prdData.setSumNetWgt(countMap.get("sumNetWgt").toString());
+//			prdData.setSumCookedWgt(countMap.get("sumCookedWgt").toString());
 
 		}
 
@@ -218,18 +229,27 @@ public class PrdDataController extends AbstractController {
 //			prdData.setPrdName(prdName);
 //		}
 
+		//修改了半成品的
+
+
 		SysUserEntity sysUserEntity = getUser();
 
 		prdData.setUpdateUser(sysUserEntity.getUsername());
 		prdData.setUpdateDate(new Date());
 		prdDataService.update(prdData);
 
-		if (!bomInfo.getBomName().equals(prdName)) {
+		if(bomInfo !=null ){
+			commonUtilService.updateCost(prdData,"Prd");
+		}
+
+		if (bomInfo !=null && !bomInfo.getBomName().equals(prdName)) {
 			bomInfo.setBomName(prdName);
 			bomInfo.setUpdateUser(sysUserEntity.getUsername());
 			bomInfo.setUpdateDate(new Date());
 			bomInfoService.update(bomInfo);
 		}
+
+
 
 		return R.ok();
 	}
@@ -267,9 +287,9 @@ public class PrdDataController extends AbstractController {
 	}
 
     public Map<String, Object> countBomInfo(Long bomId) {
-        Double sumGrossWgt = new Double(0);//总毛重
-        Double sumNetWgt = new Double(0);//总净重
-        Double sumCookedWgt = new Double(0);//总熟重
+        BigDecimal sumGrossWgt = new BigDecimal("0");//总毛重
+        BigDecimal sumNetWgt = new BigDecimal("0");//总毛重
+        BigDecimal sumCookedWgt = new BigDecimal("0");//总毛重
         Map<String, Object> param = new HashMap<>();
         param.put("bomInfoId", bomId);
         List<BomDetailEntity> bomDetailEntityList = bomDetailService.queryList(param);
@@ -279,9 +299,13 @@ public class PrdDataController extends AbstractController {
                     BomInfoEntity bomInfoEntity = bomInfoService.queryObjectByPrdId(bomDetail.getMtrId());
                     countBomInfo(bomInfoEntity.getId());
                 } else {
-                    sumGrossWgt += (bomDetail.getGrossWgt() == null ? 0 : Double.valueOf(bomDetail.getGrossWgt()));
-                    sumNetWgt += (bomDetail.getNetWgt() == null ? 0 : Double.valueOf(bomDetail.getNetWgt()));
-                    sumCookedWgt += (bomDetail.getModiWgt() == null ? 0 : Double.valueOf(bomDetail.getModiWgt()));
+					BigDecimal grossWgt = new BigDecimal(bomDetail.getGrossWgt() == null ? "0" : bomDetail.getGrossWgt()).setScale(4,BigDecimal.ROUND_HALF_UP);
+					BigDecimal netWgt = new BigDecimal(bomDetail.getNetWgt() == null ? "0" : bomDetail.getNetWgt()).setScale(4,BigDecimal.ROUND_HALF_UP);
+					BigDecimal modiWgt = new BigDecimal(bomDetail.getModiWgt() == null ? "0" : bomDetail.getModiWgt()).setScale(4,BigDecimal.ROUND_HALF_UP);
+					sumGrossWgt = sumGrossWgt.add(grossWgt);
+					sumNetWgt = sumNetWgt.add(netWgt);
+					sumCookedWgt = sumCookedWgt.add(modiWgt);
+
                 }
             }
         }

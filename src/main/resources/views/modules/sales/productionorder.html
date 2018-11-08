@@ -9,7 +9,8 @@
 <link rel="stylesheet" href="../../css/font-awesome.min.css">
 <link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
 <link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
-	<link rel="stylesheet" href="../../plugins/datetimepicker/bootstrap-datetimepicker.min.css">
+<link rel="stylesheet" href="../../plugins/datetimepicker/bootstrap-datetimepicker.min.css">
+<link rel="stylesheet" href="../../plugins/fileinput/fileinput.min.css">
 
 <link rel="stylesheet" href="../../css/main.css">
 <script src="../../libs/jquery.min.js"></script>
@@ -20,8 +21,10 @@
 <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
 <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
 <script src="../../plugins/typeahead/bootstrap3-typeahead.min.js"></script>
-	<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
-	<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+<script src="../../plugins/datetimepicker/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="../../plugins/fileinput/fileinput.min.js"></script>
+<script src="../../plugins/fileinput/zh.js"></script>
 <script src="../../js/common.js"></script>
 </head>
 <body>
@@ -30,34 +33,33 @@
 		<div class="row">
 			<div class="grid-btn col-lg-1">
 				<a v-if="hasPermission('sales:productionorder:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
-				<!--<a v-if="hasPermission('sales:productionorder:update')" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>-->
+				<a class="btn btn-primary" @click="importOrder"><i class="fa fa-pencil-square-o"></i>&nbsp;订单导入</a>
 				<!--<a v-if="hasPermission('sales:productionorder:delete')" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>-->
 			</div>
 			<div class="col-lg-6">
-				<form class="form-horizontal" style="width: 100%;">
+				<form class="form-horizontal" style="width: 1024px;">
 					<div class="form-group">
-						<div class="col-sm-1 control-label">订单编号</div>
+						<label for="productionNo" class="col-sm-1 control-label">订单编号</label>
 						<div class="col-sm-2">
 							<input type="text" class="form-control"  placeholder="订单编号" id="productionNo" v-model="q.productionNo"/>
 						</div>
-						<div class="col-sm-1 control-label">订单类型</div>
+						<label for="orderTypeName" class="col-sm-1 control-label">订单类型</label>
 						<div class="col-sm-2">
 							<!--<input type="text" class="form-control"  placeholder="订单类型" id="orderTypeName" v-model="q.orderTypeName"/>-->
-							<select class="form-control" v-model="q.orderTypeName" placeholder="订单类型">
+							<select class="form-control" id="orderTypeName" v-model="q.orderTypeName" placeholder="订单类型">
 								<option v-for="option in orderTypeArr" v-bind:value="option.value">{{option.text}}
 							</select>
 						</div>
 					</div>
 					<div class="form-group">
-						<div class="col-sm-1 control-label">客户</div>
+						<label for="customer" class="col-sm-1 control-label">客户</label>
 						<div class="col-sm-2">
 							<input type="text" class="form-control"  placeholder="客户编号/名称" id="customer" v-model="q.customer" @input="getFieldData" data-provide="typeahead" autocomplete="off"/>
 						</div>
-
-						<div class="col-sm-1 control-label">售点名称</div>
+						<label for="placeName" class="col-sm-1 control-label">售点名称</label>
 						<div class="col-sm-2" >
 							<!--<input type="text" class="form-control"  placeholder="售点名称" id="placeName" v-model="q.placeName"/>-->
-							<select class="form-control" v-model="q.placeName" placeholder="售点名称">
+							<select class="form-control" id="placeName" v-model="q.placeName" placeholder="售点名称">
 								<option v-for="option in placeArr" v-bind:value="option.value">{{option.text}}
 							</select>
 						</div>
@@ -175,17 +177,30 @@
 
 	<div v-show="showForm" class="panel panel-default">
 		<!--<div class="panel-heading">{{title}}</div>-->
-		<div class="grid-btn">
-			<a  class="btn btn-primary" id="addPrd_btn" @click="addPrd"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
+		<div v-show="showRealCount">
+			<div class="grid-btn">
+				<a  class="btn btn-info" id="confirm_out" @click="confirmOut"><i class="fa fa-check"></i>&nbsp;确认出库</a>
+				<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+			</div>
+		</div>
+		<div v-show="!showRealCount">
+			<div class="grid-btn">
+				<a  class="btn btn-primary" id="addPrd_btn" @click="addPrd"><i class="fa fa-plus"></i>&nbsp;新增产品</a>
+				<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
+			</div>
+		</div>
+		<!--<div class="grid-btn">-->
+			<!--<a  class="btn btn-primary" id="addPrd_btn" @click="addPrd"><i class="fa fa-plus"></i>&nbsp;新增产品</a>-->
 			<!--<a  class="btn btn-primary" id="editPrd_btn" @click="editPrd"><i class="fa fa-pencil"></i>&nbsp;编辑产品</a>-->
 			<!--<a  class="btn btn-primary" id="delPrd_btn" @click="deletePrd"><i class="fa fa-close"></i>&nbsp;删除产品</a>-->
 			<!--<a  class="btn btn-primary" id="savePrd_btn" @click="savePrd"><i class="fa fa-save"></i>&nbsp;保存</a>-->
 
-			<!--<a  class="btn btn-info" id="confirm_ok" @click="saveOrder"><i class="fa fa-check"></i>&nbsp;确认</a>-->
+			<!--<a  class="btn btn-info" id="confirm_out" @click="confirmOut"><i class="fa fa-check"></i>&nbsp;确认出库</a>-->
+
 			<!--<a  class="btn btn-warning" id="confirm_back" @click="confirm('back')"><i class="fa fa-history"></i>&nbsp;反确认</a>-->
 
-			<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>
-		</div>
+			<!--<a  class="btn btn-primary" @click="reload"><i class="fa fa-undo"></i>&nbsp;返回</a>-->
+		<!--</div>-->
 
 		<div class="container-fluid" style="width: 100%;">
 			<div class="row">
@@ -206,10 +221,20 @@
 					<input type="text" class="form-control" v-model="productionOrderDetailEntity.prdName" placeholder="请选择" id="prd" @input="getSelectDataPrd()" data-provide="typeahead" autocomplete="off"/>
 				</div>
 			</div>
-			<div class="form-group">
-				<div class="col-sm-3 control-label">需求量</div>
-				<div class="col-sm-9">
-					<input type="text" class="form-control" v-model="productionOrderDetailEntity.amount" placeholder="需求量" />
+			<div v-show="showRealCount">
+				<div class="form-group">
+					<div class="col-sm-3 control-label">需求量</div>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" v-model="productionOrderDetailEntity.amount" placeholder="需求量" readonly="readonly"/>
+					</div>
+				</div>
+			</div>
+			<div v-show="!showRealCount">
+				<div class="form-group">
+					<div class="col-sm-3 control-label">需求量</div>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" v-model="productionOrderDetailEntity.amount" placeholder="需求量" />
+					</div>
 				</div>
 			</div>
 			<div class="form-group">
@@ -222,6 +247,14 @@
 				<div class="col-sm-3 control-label">售价</div>
 				<div class="col-sm-9">
 					<input type="text" class="form-control" v-model="productionOrderDetailEntity.price2" id="selectPrice2" placeholder="售价" />
+				</div>
+			</div>
+			<div v-show="showRealCount">
+				<div class="form-group">
+					<div class="col-sm-3 control-label">实发数量</div>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" v-model="productionOrderDetailEntity.realCount" id="realCount" placeholder="实发数量" />
+					</div>
 				</div>
 			</div>
 		</form>
@@ -320,7 +353,46 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+	<!-- 模态框（Modal） -->
+	<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+		 data-backdrop="false">
+		<div class="modal-dialog" style="width:800px;height: 720px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+					</button>
+					<h4 class="modal-title">
+						订单导入：
+					</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal" style="width: 100%;">
+						<div class="form-group">
+							<div class="col-sm-1 control-label">选择文件</div>
+							<div class="col-sm-3">
+								<!--<select class="form-control" @change="selectVal('customerId')"-->
+										<!--v-model="productionOrder.customerId" placeholder="客户" readonly="readonly">-->
+									<!--<option v-for="option in customerArr" v-bind:value="option.value">{{option.text}}-->
+								<!--</select>-->
 
+								<input id="input-b5" name="file" type="file" multiple>
+								<input id="cusotmerId-b5" name="cusotmerId" type="hidden">
+							</div>
+						</div>
+					</form>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						关闭
+					</button>
+					<!--<button type="button" class="btn btn-primary" @click="modalCommit">-->
+						<!--提交-->
+					<!--</button>-->
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 </div>
 
 <script src="../../js/modules/sales/productionorder.js"></script>

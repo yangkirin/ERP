@@ -10,10 +10,11 @@ window.T = {};
 // 使用示例
 // location.href = http://localhost/index.html?id=123
 // T.p('id') --> 123;
-var url = function(name) {
-	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
-	var r = window.location.search.substr(1).match(reg);
-	if(r!=null)return  unescape(r[2]); return null;
+var url = function (name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return unescape(r[2]);
+    return null;
 };
 T.p = url;
 
@@ -22,27 +23,31 @@ var baseURL = "/erp/";
 
 //登录token
 var token = localStorage.getItem("token");
-if(token == 'null'){
+if (token == 'null') {
     parent.location.href = baseURL + 'login.html';
 }
 
 //jquery全局配置
 
 $.ajaxSetup({
-	dataType: "json",
-	cache: false,
+    dataType: "json",
+    cache: false,
     headers: {
         "token": token
     },
     xhrFields: {
-	    withCredentials: true
+        withCredentials: true
     },
-    complete: function(xhr) {
-	    // console.log(xhr);
+    beforeSend:function(xhr){
+        showLoading();
+    },
+    complete: function (xhr) {
+        // console.log(xhr);
+        hideLoading();
         //token过期，则跳转到登录页面
-        if(xhr.responseJSON !=undefined && xhr.responseJSON.code == 401){
+        if (xhr.responseJSON != undefined && xhr.responseJSON.code == 401) {
             parent.location.href = baseURL + 'login.html';
-        }else{
+        } else {
             // xhr.onload = function() {
             //     if (this.status == 200) {
             //         var blob = this.response;
@@ -55,13 +60,15 @@ $.ajaxSetup({
             //     }
             // }
             // xhr.send();
+
         }
+
     }
 });
 
 //jqgrid全局配置
 $.extend($.jgrid.defaults, {
-    ajaxGridOptions : {
+    ajaxGridOptions: {
         headers: {
             "token": token
         }
@@ -78,40 +85,40 @@ function hasPermission(permission) {
 }
 
 //重写alert
-window.alert = function(msg, callback){
-	parent.layer.alert(msg, function(index){
-		parent.layer.close(index);
-		if(typeof(callback) === "function"){
-			callback("ok");
-		}
-	});
+window.alert = function (msg, callback) {
+    parent.layer.alert(msg, function (index) {
+        parent.layer.close(index);
+        if (typeof(callback) === "function") {
+            callback("ok");
+        }
+    });
 }
 
 //重写confirm式样框
-window.confirm = function(msg, callback){
-	parent.layer.confirm(msg, {btn: ['确定','取消']},
-	function(){//确定事件
-		if(typeof(callback) === "function"){
-			callback("ok");
-		}
-	});
+window.confirm = function (msg, callback) {
+    parent.layer.confirm(msg, {btn: ['确定', '取消']},
+        function () {//确定事件
+            if (typeof(callback) === "function") {
+                callback("ok");
+            }
+        });
 }
 
 //选择一条记录
 function getSelectedRow() {
     var grid = $("#jqGrid");
     var rowKey = grid.getGridParam("selrow");
-    if(!rowKey){
-    	alert("请选择一条记录");
-    	return ;
+    if (!rowKey) {
+        alert("请选择一条记录");
+        return;
     }
-    
+
     var selectedIDs = grid.getGridParam("selarrrow");
-    if(selectedIDs.length > 1){
-    	alert("只能选择一条记录");
-    	return ;
+    if (selectedIDs.length > 1) {
+        alert("只能选择一条记录");
+        return;
     }
-    
+
     return selectedIDs[0];
 }
 
@@ -119,25 +126,39 @@ function getSelectedRow() {
 function getSelectedRows() {
     var grid = $("#jqGrid");
     var rowKey = grid.getGridParam("selrow");
-    if(!rowKey){
-    	alert("请选择一条记录");
-    	return ;
+    if (!rowKey) {
+        alert("请选择一条记录");
+        return;
     }
-    
     return grid.getGridParam("selarrrow");
 }
 
-function getGridAllData(gridId){
-    var o = jQuery("#"+gridId);
+//选择多条记录
+function getSelectedRows(gridIdName) {
+    var grid = $("#" + gridIdName);
+    var rowKey = grid.getGridParam("selrow");
+    if (!rowKey) {
+        // alert("请选择一条记录");
+        return;
+    }
+    return grid.getGridParam("selarrrow");
+}
+
+function getGridAllData(gridId) {
+    var obj = jQuery("#" + gridId);
     //获取当前显示的数据
-    var rows = o.jqGrid('getRowData');
-    var rowNum = o.jqGrid('getGridParam', 'rowNum'); //获取显示配置记录数量
-    var total = o.jqGrid('getGridParam', 'records'); //获取查询得到的总记录数量
-    //设置rowNum为总记录数量并且刷新jqGrid，使所有记录现出来调用getRowData方法才能获取到所有数据
-    o.jqGrid('setGridParam', { rowNum: total }).trigger('reloadGrid');
-    var rows = o.jqGrid('getRowData');  //此时获取表格所有匹配的
-    o.jqGrid('setGridParam', { rowNum: rowNum }).trigger('reloadGrid'); //还原原来显示的记录数量
-    return rows;
+    //获取grid表中所有的rowid值
+    var rowIds = obj.jqGrid('getDataIDs');
+    //初始化一个数组arrayData容器，用来存放rowData
+    // console.log(rowIds);
+    var arrayData = new Array();
+    if (rowIds.length > 0) {
+        for (var i = 0; i < rowIds.length; i++) {
+            //rowData=obj.getRowData(rowid);//这里rowid=rowIds[i];
+            arrayData.push(obj.jqGrid('getRowData',rowIds[i]));
+        }
+    }
+    return arrayData;
 }
 
 //选择多条记录
@@ -152,14 +173,14 @@ function getGridAllData(gridId){
 //     return grid.getGridParam("selarrrow");
 // }
 
-function getSelectedRowCell(cellName){
+function getSelectedRowCell(cellName) {
     var grid = $("#jqGrid");
     var rowKey = grid.getGridParam("selrow");
-    if(!rowKey){
+    if (!rowKey) {
         alert("请选择一条记录");
-        return ;
+        return;
     }
-    return grid.getCell(rowKey,cellName);
+    return grid.getCell(rowKey, cellName);
 }
 
 //判断是否为空
@@ -168,32 +189,32 @@ function isBlank(value) {
 }
 
 //日期处理
-function dateFtt(fmt,date){
+function dateFtt(fmt, date) {
     var o = {
-        "M+" : date.getMonth()+1,                 //月份
-        "d+" : date.getDate(),                    //日
-        "h+" : date.getHours(),                   //小时
-        "m+" : date.getMinutes(),                 //分
-        "s+" : date.getSeconds(),                 //秒
-        "q+" : Math.floor((date.getMonth()+3)/3), //季度
-        "S"  : date.getMilliseconds()             //毫秒
+        "M+": date.getMonth() + 1,                 //月份
+        "d+": date.getDate(),                    //日
+        "h+": date.getHours(),                   //小时
+        "m+": date.getMinutes(),                 //分
+        "s+": date.getSeconds(),                 //秒
+        "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+        "S": date.getMilliseconds()             //毫秒
     };
-    if(/(y+)/.test(fmt))
-        fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
-    for(var k in o)
-        if(new RegExp("("+ k +")").test(fmt))
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+    if (/(y+)/.test(fmt))
+        fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt))
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
     return fmt;
 }
 
-Array.prototype.indexOf = function(val) {
+Array.prototype.indexOf = function (val) {
     for (var i = 0; i < this.length; i++) {
         if (this[i] == val) return i;
     }
     return -1;
 };
 
-Array.prototype.remove = function(val) {
+Array.prototype.remove = function (val) {
     var index = this.indexOf(val);
     if (index > -1) {
         this.splice(index, 1);
@@ -203,7 +224,7 @@ Array.prototype.remove = function(val) {
 //自适应
 function pageSize() {
     var winW, winH;
-    if(window.innerHeight) {// all except IE
+    if (window.innerHeight) {// all except IE
         winW = window.innerWidth;
         winH = window.innerHeight;
     } else if (document.documentElement && document.documentElement.clientHeight) {// IE 6 Strict Mode
@@ -213,11 +234,11 @@ function pageSize() {
         winW = document.body.clientWidth;
         winH = document.body.clientHeight;
     }  // for small pages with total size less then the viewport
-    return {WinW:winW, WinH:winH};
+    return {WinW: winW, WinH: winH};
 }
 
 //loading效果
-function initLoading(){
+function initLoading() {
     $("body").append("<!-- loading -->" +
         "<div class='modal fade' id='loading' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' data-backdrop='static'>" +
         "<div class='modal-dialog' role='document'>" +
@@ -235,10 +256,39 @@ function initLoading(){
     );
     $("#loading").modal("hide");
 }
-function showLoading(text){
+
+function showLoading(text) {
     $("#loadingText").html(text);
     $("#loading").modal("show");
 }
-function hideLoading(){
+
+function hideLoading() {
     $("#loading").modal("hide");
+}
+
+function openWindow(name)  {
+    var iWidth=1100; //弹出窗口的宽度;
+    var iHeight=550; //弹出窗口的高度;
+    var iTop = (window.screen.availHeight-30-iHeight)/2; //获得窗口的垂直位置;
+    var iLeft = (window.screen.availWidth-10-iWidth)/2; //获得窗口的水平位置;
+    window.open('about:blank',name,"height="+iHeight+", width="+iWidth+", top="+iTop+", left="+iLeft+",toolbar=no, menubar=no,  scrollbars=yes,resizable=yes,location=no, status=no");
+}
+
+function openPostWindow(url, data, name){
+    var tempForm = $("<form>");
+    tempForm.attr("id", "tempForm1");
+    tempForm.attr("style", "display:none");
+    tempForm.attr("target", name);
+    tempForm.attr("method", "post");
+    tempForm.attr("action", url);
+    var input1 = $("<input>");
+    input1.attr("type", "hidden");
+    input1.attr("name", "printData");
+    input1.attr("value", data);
+    tempForm.append(input1);
+    tempForm.on("submit", function(){openWindow(name);}); // 必须用name不能只用url，否则无法传值到新页面
+    tempForm.trigger("submit");
+    $("body").append(tempForm);//将表单放置在web中
+    tempForm.submit();
+    $("tempForm1").remove();
 }

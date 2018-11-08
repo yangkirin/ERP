@@ -311,8 +311,7 @@ public class OutportDetailController extends AbstractController {
 
 		List<OutportDetailEntity> outportDetailEntityList = new ArrayList<>();
 
-		if(params.get("orderId").toString().equals("0")){
-
+		if(params.get("orderId") == null || params.get("orderId").toString().equals("0")){
 			Query query = new Query(params);
 			outportDetailEntityList = outportDetailService.queryList(query);
 			PageUtils pageUtil = new PageUtils(outportDetailEntityList, 0, query.getLimit(), query.getPage());

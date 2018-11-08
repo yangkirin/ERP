@@ -127,7 +127,9 @@ public class MtrDataController extends AbstractController {
 		mtrDataService.update(mtrData);
 
 		//原料修改时，重新计算使用该原料的配方信息
-		recomputeBomInfo(mtrData.getId());
+//		recomputeBomInfo(mtrData.getId());
+		commonUtilService.updateCost(mtrData,"Mtr");
+//		commonUtilService.updatePrdPrice();
 		return R.ok();
 	}
 	

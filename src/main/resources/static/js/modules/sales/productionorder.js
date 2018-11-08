@@ -160,10 +160,12 @@ $(function () {
                 { label: '产品类型ID', name: 'prdTypeId', index: 'PRD_TYPE_ID', width: 80 ,hidden:true},
                 { label: '产品类型名称', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 80 },
                 { label: '需求数量', name: 'amount', index: 'AMOUNT', width: 80 },
+                { label: '实发数量', name: 'realCount', index: 'REAL_COUNT', width: 60 },
                 { label: '定价', name: 'price1', index: 'PRICE1', width: 80 },
                 { label: '售价', name: 'price2', index: 'PRICE2', width: 80 },
                 { label: '成本', name: 'cost', index: 'COST', width: 80 },
-                { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 80 }
+                { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 80 },
+                { label: '实际收入', name: 'realIncome', index: 'REAL_INCOME', width: 80 }
             ],
             rowNum : 20,
             height : '100%',
@@ -204,10 +206,12 @@ $(function () {
             { label: '产品类型ID', name: 'prdTypeId', index: 'PRD_TYPE_ID', width: 80 ,hidden:true},
             { label: '产品类型', name: 'prdTypeName', index: 'PRD_TYPE_NAME', width: 80 },
             { label: '需求数量', name: 'amount', index: 'AMOUNT', width: 60 },
+            { label: '实发数量', name: 'realCount', index: 'REAL_COUNT', width: 60 },
             { label: '定价', name: 'price1', index: 'PRICE1', width: 60 },
             { label: '售价', name: 'price2', index: 'PRICE2', width: 60 },
             { label: '成本', name: 'cost', index: 'COST', width: 60 },
             { label: '预估收入', name: 'revenue', index: 'REVENUE', width: 60 },
+            { label: '实际收入', name: 'realIncome', index: 'REAL_INCOME', width: 80 },
             { label: '操作', name: 'operation', index: 'operation', width: 200,formatter:function(value, options, row){
                 var operatorStr = "";
 
@@ -267,7 +271,69 @@ $(function () {
     });
 
 
+    // $("#input-b5").fileinput({showCaption: false, dropZoneEnabled: false});
+
+
+
 });
+
+//初始化fileinput
+var FileInput = function () {
+    var oFile = new Object();
+
+    //初始化fileinput控件（第一次初始化）
+    oFile.Init = function(ctrlName, uploadUrl,orderId) {
+        var control = $('#' + ctrlName);
+
+        //初始化上传控件的样式
+        control.fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: uploadUrl, //上传的地址
+            allowedFileExtensions: ['xlsx','xls'],//接收的文件后缀
+            showUpload: true, //是否显示上传按钮
+            showCaption: false,//是否显示标题
+            browseClass: "btn btn-primary", //按钮样式
+            dropZoneEnabled: false,//是否显示拖拽区域
+            showPreview:false,
+            //minImageWidth: 50, //图片的最小宽度
+            //minImageHeight: 50,//图片的最小高度
+            //maxImageWidth: 1000,//图片的最大宽度
+            //maxImageHeight: 1000,//图片的最大高度
+            //maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
+            //minFileCount: 0,
+            maxFileCount: 1, //表示允许同时上传的最大文件个数
+            enctype: 'multipart/form-data',
+            validateInitialCount:false,
+            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+            msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+            uploadExtraData: {
+                orderId: orderId
+            }
+        });
+
+        //导入文件上传完成之后的事件
+        $("#input-b5").on("fileuploaded", function (event, data, previewId, index) {
+            // $("#myModal").modal("hide");
+            console.log(data);
+            var code = data.response.code;
+            if (code == '01') {
+                alert('文件格式类型不正确');
+                // return;
+            }else if (code == '02') {
+                alert('客户不存在');
+                // return;
+            }else if (code == '00') {
+                alert('导入成功！');
+
+            }
+            $("#myModal2").modal("hide");
+            vm.search();
+            return;
+        });
+    };
+    return oFile;
+};
+
 
 /**
  * Grid操作列事件
@@ -303,6 +369,19 @@ function oper(rowId,type){
         case '2'://反确认
             //TODO 反确认后台逻辑校验
             var isBack = true;
+            $.ajax({
+                type: "POST",
+                async: false,
+                // contentType: "application/json",
+                url: baseURL + "sales/productionorder/back",
+                data: {orderId:rowId},
+                success: function (r) {
+                    isBack = r.isBack;
+                    console.log(r);
+                }
+            });
+            // return;
+
             if(isBack){
                 //修改订单状态
                 $.ajax({
@@ -320,19 +399,25 @@ function oper(rowId,type){
                 msg = "订单已做领料出库，无法进行反确认！";
             }
             break;
-        case '3'://
+        case '3'://完结操作，打开订单编辑，输入实际数量
+            vm.productionOrder = rowData;
+            configPrd(rowId);
+            vm.showRealCount = true;
+
+            return;
+
             //修改订单状态
-            $.ajax({
-                type: "POST",
-                async: false,
-                url: baseURL + "sales/productionorder/updateStatus",
-                data: {orderId:rowId,status:'4'},
-                success: function (r) {
-                    console.log(r);
-                    msg = "操作成功！";
-                    vm.reload();
-                }
-            });
+            // $.ajax({
+            //     type: "POST",
+            //     async: false,
+            //     url: baseURL + "sales/productionorder/updateStatus",
+            //     data: {orderId:rowId,status:'4'},
+            //     success: function (r) {
+            //         console.log(r);
+            //         msg = "操作成功！";
+            //         vm.reload();
+            //     }
+            // });
             break;
         case '4'://完结
             //TODO 打印
@@ -399,6 +484,7 @@ var vm = new Vue({
 		showList: true,
         showForm:false,
         addOrderForm:false,
+        showRealCount:false,
 		title: null,
 		productionOrder: {},
         productionOrderDetailEntity: {},
@@ -705,6 +791,24 @@ var vm = new Vue({
                 }
             });
 		},
+        confirmOut:function(){
+            var orderId = vm.productionOrder.id;
+            vm.showRealCount = true;
+
+            //修改订单状态
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: baseURL + "sales/productionorder/updateStatus",
+                data: {orderId:orderId,status:'4'},
+                success: function (r) {
+                    console.log(r);
+                    msg = "操作成功！";
+                    vm.showRealCount = false;
+                    vm.reload();
+                }
+            });
+        },
 		showPrdForm:function(title){
             //判断是否是客户端&服务端操作---如存在计划Id则为服务端操作，否则为客户端操作。
             var id = vm.productionOrder.id;
@@ -775,7 +879,12 @@ var vm = new Vue({
                     console.log(r);
                     vm.productionOrder.customerNo = r.customerInfo.customerNo;
                     vm.productionOrder.customerName = r.customerInfo.customerName;
+
+                    $('#cusotmerId-b5').val(vm.productionOrder.customerId);
                 });
+
+
+
             } else if (type == 'placeId' && vm.productionOrder.placeId != null) {
                 // i=3;
                 $.get(baseURL + "baseData/typeinfo/info/"+vm.productionOrder.placeId, function(r){
@@ -915,7 +1024,6 @@ var vm = new Vue({
             });
         },
         search:function(){
-            console.log(vm.orderInfo);
             var postData = {
                 productionNo: vm.q.productionNo,
                 orderTypeName: vm.q.orderTypeName==0?null:vm.q.orderTypeName,
@@ -946,6 +1054,21 @@ var vm = new Vue({
             }
             return flag;
         },
+        importOrder:function(){
+            var id = $("#jqGrid").jqGrid('getGridParam','selrow');//订单ID
+            if(!id){
+                alert('请选择订单导入产品！');
+                return;
+            }
+            var oFileInput = new FileInput();
+            //上传初始化
+            oFileInput.Init("input-b5", baseURL +"/sales/productionorder/upload",id);
+            $("#myModal2").modal("show");
+
+        },
+        modalCommit:function(){
+            alert('commit');
+        }
 	}
 });
 vm.orderTypeArr = vm.initTypeInfoArr(40);

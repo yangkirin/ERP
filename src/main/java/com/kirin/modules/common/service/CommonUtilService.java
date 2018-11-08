@@ -56,4 +56,8 @@ public interface CommonUtilService {
 
     String createBillNo(String billType);
 
+    void updateCost(Object object,String type);
+
+    void updatePrdPrice();
+
 }

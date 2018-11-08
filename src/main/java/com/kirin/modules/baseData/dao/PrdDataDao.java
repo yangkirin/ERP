@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
 /**
  * 产品基础信息
  * 
@@ -17,4 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Mapper
 public interface PrdDataDao extends BaseDao<PrdDataEntity> {
 	int queryByPrdName(String prdName);
+
+	PrdDataEntity queryObjectMap(Map<String,Object> params);
 }

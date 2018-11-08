@@ -48,6 +48,7 @@
 		p.PRD_PY,
 		p.PRD_CODE,
 		(Select type_name from tb_type_info where id=p.TYPE_ID) as PRD_TYPE_NAME,
+		(SELECT type_name FROM tb_type_info WHERE id = p.ORDER_TYPE ) AS ORDER_TYPE_NAME,
 		(Select type_name from tb_type_info where id=p.PDC_STN) as PDC_STN_NAME,
 		p.POT_WEIGHT,
 		p.BOX_WEIGHT,
@@ -60,6 +61,9 @@
 		</if>
 		<if test="prdTypeName != null">
 			and (p.TYPE_ID in (select id from tb_type_info where type_name like "%${prdTypeName}%"))
+		</if>
+		<if test="orderTypeName != null">
+			and (p.ORDER_TYPE in (select id from tb_type_info where type_name like "%${orderTypeName}%"))
 		</if>
 		<if test="prdCode != null">
 			and p.PRD_CODE like "%${prdCode}%"
@@ -103,7 +107,44 @@
 	</select>
 	
  	<select id="queryTotal" resultType="int">
-		select count(*) from bom_info 
+		select count(b.id)
+		from bom_info b
+		left join prd_data p on p.id=b.prd_id
+		where 1=1
+		<if test="prd_id_name != null">
+			and b.bom_name like "%${prd_id_name}%"
+		</if>
+		<if test="prdTypeName != null">
+			and (p.TYPE_ID in (select id from tb_type_info where type_name like "%${prdTypeName}%"))
+		</if>
+		<if test="orderTypeName != null">
+			and (p.ORDER_TYPE in (select id from tb_type_info where type_name like "%${orderTypeName}%"))
+		</if>
+		<if test="prdCode != null">
+			and p.PRD_CODE like "%${prdCode}%"
+		</if>
+		<if test="pdcStnName != null">
+			and (p.PDC_STN in (select id from tb_type_info where type_name like "%${pdcStnName}%"))
+		</if>
+		<if test="bom_py != null">
+			and b.bom_py like "%${bom_py}%"
+		</if>
+		<if test="status != null and status != '-1'">
+			and b.status = "${status}"
+		</if>
+		<!--<if test="bomName != null and bomPy != null">-->
+		<!--and(-->
+		<!--<if test="bomName != null">-->
+		<!--b.bom_name like "%${bomName}%"-->
+		<!--</if>-->
+		<!--<if test="bomPy != null">-->
+		<!--or b.bom_py like "%${bomPy}%"-->
+		<!--</if>-->
+		<!--)-->
+		<!--</if>-->
+		<if test="semifinished != null and semifinished!='-1'">
+			and p.SEMI_FINISHED = "${semifinished}"
+		</if>
 	</select>
 	 
 	<insert id="save" parameterType="com.kirin.modules.baseData.entity.BomInfoEntity" useGeneratedKeys="true" keyProperty="id">

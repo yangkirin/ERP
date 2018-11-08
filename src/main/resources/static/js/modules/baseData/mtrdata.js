@@ -642,6 +642,7 @@ var vm = new Vue({
 		},
 		saveOrUpdate: function (event) {
 			// var url = vm.mtrData.id == null ? "baseData/mtrdata/save" : "baseData/mtrdata/update";
+            showLoading();
 			var url = "baseData/mtrdata/update";
 			$.ajax({
 				type: "POST",
@@ -659,6 +660,7 @@ var vm = new Vue({
 					}
 				}
 			});
+            hideLoading();
 		},
 		del: function (event) {
 			var id = $("#jqGrid").jqGrid('getGridParam','selrow');

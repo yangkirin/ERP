@@ -270,6 +270,39 @@
 			</div>
 		</form>
 	</div>
+
+	<!-- 模态框（Modal） -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						产品配置复制
+					</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal" style="width:100%;">
+						<div class="form-group">
+							<div class="col-sm-2 control-label">选择客户</div>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" v-model="copyInfo.targetId" placeholder="选择客户" id="search_customer" @input="getFieldDataCustomer" data-provide="typeahead" autocomplete="off"/>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						关闭
+					</button>
+					<button type="button" class="btn btn-primary" @click="modalCommit">
+						提交
+					</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 </div>
 
 <script src="../../js/modules/sales/customerinfo.js"></script>
